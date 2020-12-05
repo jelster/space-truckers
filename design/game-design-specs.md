@@ -40,9 +40,9 @@ Purchases applied towards future phases:
 
 * Mass driver usage
   * number of pods
-  * max acceleration (&delta;V)
+  * max acceleration (&Delta;V)
 * (optional) Space-truck lease/rental. A space-truck can be given responsibility of a certain number of freight pods, which they are then able to take with them to arbitrary destinations after the initial mass driver launch.
-* (optional) Space-truck fuel. How much &delta;V to load into space-trucks guiding the cargo
+* (optional) Space-truck fuel. How much &Delta;V to load into space-trucks guiding the cargo
 
 ### Phase three: Launch and hit the road
 
@@ -70,6 +70,12 @@ Example of possible hostiles:
 * Space-police (for smuggling hauls)
 * Space-pirates - sailing the sky with solar sails flying the jolly roger!
 * Space-beasts
+
+Vigilant space-truckers can minimize risk or even avoid it entirely by maneuvering out of the way of obstacles, but care will need to be taken to return to the original trajectory, otherwise the space-truck might not arrive at its' destination!
+
+> If a space-truck runs out of &Delta;V it is left on a ballistic (unpowered) trajectory. If that trajectory doesn't intersect with a viable destination (e.g., not crashing into a planet and not flying off into the deep), the haul is lost. For players on shaky financial footing, this could be a game-ending condition.
+
+When/if the space-truck approaches a potential destination, the local space-traffic control takes over terminal guidance, ending the game phase. This applies to both powered and unpowered hauls - coasting into dock with dry tanks is better than not making it at all!
 
 ### Phase four: Results and consequences
 
