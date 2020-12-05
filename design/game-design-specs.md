@@ -4,6 +4,8 @@
 
 In _Space Trucker_, players are in charge of a cargo shipping installation out among the asteroids. Miners send out raw materials to orbital factories, which in turn send finished goods out to the miners. Gigantic mass drivers give outgoing pods the initial kick needed to get things moving in the right direction or perform the reverse to catch incoming freight in an intricate ballet of megatonnage in constant dynamic motion around the Sun. It's the Great Circle of life, some might say. Others say that's nonsense because things move in more than just 2-D directions, but it really doesn't matter because there are schedules to make and deadlines to keep! That asteroid ore isn't going to move itself. and the star wait for no one, after all...
 
+![space trucker concept art](/design/Space_Trucker_Concept_Art.jpg)
+
 Gameplay is divided into different phases. Taking place sequentially, the events in each phase provide the input for the phases following it.
 
 ### Phase one: cargo selection
@@ -77,45 +79,3 @@ This is the final game phase, and is where players view the results of their hau
 * Condition of cargo - hopefully, everything arrives in one piece. If not, damages are taken out of the player's earnings
 * Completion of delivery - at least one cargo pod arrived at its' destination. Ideally all of them will be credited with this factor.
 * Other TBD
-
-## Platform - tech specs
-
-* _Space Trucker_ should run in all modern web browsers that support WebGL2 and ECMA6
-* :question: Although access to the local IndexedDB, storage, and such will allow assets to be cached, it should not be required to run the game
-* If the game's assets have already been retrieved and cached locally, an internet connection should not be required to run the game
-
-## UI / UX Fundamentals
-
-### Output
-
-The primary platform being targeted is the web browser, with either a traditional computer monitor setup or a mobile or tablet screen form factor.
-
-### Input
-
-Multiple types of input devices will be supported:
-
-* Keyboard
-* Mouse
-* Gamepad
-* Touch screen
-
-## High-level game state
-
-### Game states
-
-### Application states
-
-* Loading state happens when assets or scenarios are being retrieved and compiled.
-  * Transitioning out of Loading occurs when all relevant assets have been retrieved and instantiated either from local storage cache or as the result of a remote web request
-  * Examples:
-    * First time running the game
-    * First run after a new release has been pushed out
-    * Player selects a level in the level select screen
-    * Game resumes from suspension
-* Initializing state is when game objects are allocated, hydrated, populated, etc. and the game is ready for rendering and interaction
-* Running is while gameplay is actively being processed. Can include menu dialogs. Has two sub-states:
-  * Paused
-  * Active
-* Terminating phase occurs when the player loses, completes, or exits a running game scenario
-  * State serialization and persistence to local storage
-  * Cleanup of resources
