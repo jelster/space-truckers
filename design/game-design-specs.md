@@ -32,17 +32,18 @@ Planning specials that players can spend space-bucks on are used immediately as 
 
 Purchases used during planning phase:
 
-* Space Guard survey data
-* Intel gathering
-* Set up haul as a smuggling run - an off-the-books operation
+* Space Guard survey data that displays known static hazards and obstacles along the haul's flight path
+* Intel gathering - a.k.a. drinking in a known pirate bar to pick up gossip - can potentially warn of - and ward off -  pirates hiding in ambush
+* Set up haul as a smuggling run - an off-the-books operation that renders pirates neutral towards the haul, but turns space-police instantly suspicious. When encountered, space-police may not fall for your deceptions and decide to impound some or all of your cargo!
 
 Purchases applied towards future phases:
 
-* Mass driver usage
+* Mass driver usage factor deends on
   * number of pods
-  * max acceleration (&Delta;V)
+  * max acceleration (&Delta;V) chosen
 * (optional) Space-truck lease/rental. A space-truck can be given responsibility of a certain number of freight pods, which they are then able to take with them to arbitrary destinations after the initial mass driver launch.
 * (optional) Space-truck fuel. How much &Delta;V to load into space-trucks guiding the cargo
+* (optional) Transit insurance that pays out a percentage of losses to the player. Requires a non-refundable deposit to secure, but can help reduce risk and lets a player hedge their bets
 
 ### Phase three: Launch and hit the road
 
