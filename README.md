@@ -18,3 +18,7 @@ Design docs and sketchs are located in the [/design/](/design) folder.
 ---
 
 ![cargo pod concept](/design/cargo-pod-concept.png)
+
+---
+
+![cabin chase concept](/design/cabin-chase-escape-concept.png)
