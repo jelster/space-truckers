@@ -30,6 +30,7 @@ Gameplay is divided into different phases. The initial phase is where players ca
 
 ### Phase one: trip planning
 
+![cargo-pod-concept](cargo-pod-concept.png)
 A suitably-zoomed view of the planetary system displays the player's current cargo contract details - the destination, types of goods etc. Importantly as well, the map shows Truck Stops along the route. Truck Stops are places along well-traveled space-roads that give passing space-truckers an opportunity to grab a bit and relieve themselves, a small but important bit of the interplanetary economy. Stopping at one of these can be critical to completing a contract, but isn't required.
 
 A key part of trip planning is the choice of launch speeds. In exchange for a lower score multiplier, players may choose to impart more (or the converse) velocity at launch. A higher launch velocity means a faster run, and potentially a lower overall trip time.  
@@ -44,6 +45,7 @@ Player choices made towards future phases:
 
 #### Launch
 
+![mass-driver-launch-concept](mass-driver-concept.png)
 Our perspective shifts to the mass driver installation, where players can do a countdown before hitting the Big Red Button, or they can simply PUSH THE BUTTON - it's a personal decision.
 
 We ride along with the cargo as it is slung at incredibly high accelerations and velocities out of the mass driver and on the trajectory specified in the planning phase.
@@ -63,6 +65,8 @@ Possible threats:
 * Space-beasts
 * Gravitational anomalies
 
+![cabin-view](cabin-chase-escape-concept.png)
+
 #### Time
 
 Riding empty space does funny things to a person's sense of time. When a driver is "in the pipe, 5x5" it's almost as if time and space bend and twist; things speeds up for the driver. It's also a Well Known-Established Fact that the same sense of time is directly proportional to both how full their bladder is along with the emptiness of the stomach. A full bladder and empty stomach is a bad combination! If the space-trucker's bladder ever reaches full capacity and the player has no emergency "relief bottles", they'll have to pull over and do the needful wherever possible. Hopefully that will be at a Truck Stop, because if it's not the player fails the scenario. A lack of food makes a person drowsy and less attentive - it can only take a moment's inattention to drift off-course and end up Lost in Space.
@@ -77,6 +81,8 @@ Players have two resources during this phase, represented by two values
 #### Truck Stops
 
 Players may encounter one or more Truck Stops during the course of delivering their cargo. Pulling into one of these stops drains the space-trucker's Bladder Bar while filling their Stomach Meter. The cost of this of course is a lower final score, but it can be worth it in longer hauls.
+
+![space-porta-potty-concept](space-porta-potty-concept.png)
 
 #### Completing the mission
 
