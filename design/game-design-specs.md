@@ -20,40 +20,10 @@ Detailed Specs [here](phase-one-spec.md).
 ### Phase two: Hitting the space-road
 
 ![mass-driver-launch-concept](mass-driver-concept.png)
-Our perspective shifts to the mass driver installation, where players enjoy a brief cutscene that ends with the player in the cabin of their rig, which is in the process of being launched (or "goosed" as operators call it) towards its' destination. ![launch-cutscene-storboard](launch-cutscene-storyboard.png)
 
-#### Maneuvering
-
-Players drive their space-rig along the previously defined space-route. To keep the player aware of where they are versus where they need to be, UI elements combine with space-highway road signs to provide contextually relevant information about the route.
-
-This can be important, because there are numerous hazards along the way. Some hazards are passive, like space-junk or space-rocks. Others are more aggressive in nature and will make attempts to hamper, impede, steal, or even destroy cargo!
-
-Possible threats:
-
-* Space-junk
-* Space-rocks / comet debris
-* Space-hulks
-* Solar storms
-* Space-beasts
-
-![cabin-view](cabin-ui-concept.jpg)
-
-#### Time
+Detailed specs [here](phase-two-spec.md)
 
 Riding empty space does funny things to a person's sense of time. When a driver is "in the pipe, 5x5" it's almost as if time and space bend and twist; things speeds up for the driver. It's also a Well Known-Established Fact that the same sense of time is directly proportional to both how full their bladder is along with the emptiness of the stomach. A full bladder and an empty stomach are a bad combination! If the space-trucker's bladder ever reaches full capacity and the player has no emergency "relief bottles", they'll have to pull over and do the needful wherever possible. Hopefully that will be at a Truck Stop, because if it's not the player fails the scenario. A lack of food makes a person drowsy and less attentive - it can only take a moment's inattention to drift off-course and end up Lost in Space.
-
-#### Hunger and Bladder Control
-
-Players have two resources during this phase, represented by two values
-
-* Stomach Meter - drains over time and due to player or hostile action. As it empties, players gradually experience more and more random control movements -- drifting -- that makes it difficult to control the vehicle
-* Bladder Bar - fills over time. May be affected by external factors, but is mostly an hourglass-type of measure. If it ever reaches full capacity the game is over.
-
-![space-porta-potty-concept](space-porta-potty-concept.png)
-
-#### Completing the mission
-
-When/if the space-truck approaches a potential destination, the local space-traffic control takes over terminal guidance, ending the game phase.
 
 ### Phase three: Results and scoring
 

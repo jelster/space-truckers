@@ -21,4 +21,4 @@ Design docs and sketchs are located in the [/design/](/design) folder.
 
 ---
 
-![cabin chase concept](/design/cabin-chase-escape-concept.png)
+![cabin chase concept](/design/cabin-ui-concept.jpg)
