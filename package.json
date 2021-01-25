@@ -1,0 +1,47 @@
+{
+  "name": "space-truckers",
+  "version": "0.0.1",
+  "description": "A game built in BabylonJS. Companion to book",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "npx webpack serve --mode development",
+    "build":"npx webpack --mode production",
+    "lint": "npx eslint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jelster/space-truckers.git"
+  },
+  "keywords": [
+    "BabylonJS",
+    "Game"
+  ],
+  "author": "Josh Elster",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/jelster/space-truckers/issues"
+  },
+  "homepage": "https://github.com/jelster/space-truckers#readme",
+  "dependencies": {},
+  "devDependencies": {
+    "@babylonjs/core": "^4.2.0",
+    "@babylonjs/gui": "^4.2.0",
+    "@babylonjs/inspector": "^4.2.0",
+    "@babylonjs/loaders": "^4.2.0",
+    "@babylonjs/materials": "^4.2.0",
+    "@babylonjs/post-processes": "^4.2.0",
+    "@babylonjs/procedural-textures": "^4.2.0",
+    "@babylonjs/serializers": "^4.2.0",
+    "clean-webpack-plugin": "^3.0.0",
+    "eslint": "^7.18.0",
+    "file-loader": "^6.2.0",
+    "html-webpack-plugin": "^4.5.1",
+    "source-map-loader": "^2.0.0",
+    "url-loader": "^4.1.1",
+    "webpack": "^5.17.0",
+    "webpack-cli": "^4.4.0",
+    "webpack-dev-server": "^3.11.2",
+    "webpack-merge": "^5.7.3"
+  }
+}
