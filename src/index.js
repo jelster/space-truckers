@@ -1,4 +1,4 @@
-import { Engine, Scene } from "@babylonjs/core";
+import { Engine } from "@babylonjs/core";
 import StartScene from "./startscene";
 const CanvasName = "index-canvas";
 

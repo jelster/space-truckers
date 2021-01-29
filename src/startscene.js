@@ -28,8 +28,8 @@ class StartScene {
             camBeta = 1.26,
             camDist = 350,
             camTarget = new Vector3(0, 0, 0);
-        let camera = that.camera = new ArcRotateCamera("camera1", camAlpha, camBeta, camDist, camTarget, scene);
-        let env = this.setupEnvironment(scene);
+        that.camera = that.camera = new ArcRotateCamera("camera1", camAlpha, camBeta, camDist, camTarget, scene);
+        that.env = this.setupEnvironment(scene);
         let star = that.star = this.createStar(scene);
         let planets = that.planets = this.populatePlanetarySystem(scene);
         //camera.attachControl(true);
