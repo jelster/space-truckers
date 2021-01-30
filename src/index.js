@@ -1,5 +1,5 @@
 import { Engine } from "@babylonjs/core";
-import StartScene from "./startscene";
+import createStartScene from "./startscene";
 const CanvasName = "index-canvas";
 
 let canvas = document.createElement("canvas");
@@ -9,7 +9,7 @@ canvas.style.height = "100%";
 document.body.appendChild(canvas);
 
 let eng = new Engine(canvas, true, null, true);
-let startScene = new StartScene(eng);
+let startScene = createStartScene(eng);
 eng.runRenderLoop(() => {
     startScene.scene.render();
 });
