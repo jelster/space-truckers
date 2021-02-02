@@ -4,8 +4,8 @@ const CanvasName = "index-canvas";
 
 let canvas = document.createElement("canvas");
 canvas.id = CanvasName;
-canvas.style.width = "100%";
-canvas.style.height = "100%";
+
+canvas.classList.add("background-canvas");
 document.body.appendChild(canvas);
 
 let eng = new Engine(canvas, true, null, true);
@@ -13,3 +13,5 @@ let startScene = createStartScene(eng);
 eng.runRenderLoop(() => {
     startScene.scene.render();
 });
+
+//canvas.classList.remove("background-canvas");
