@@ -1,25 +1,61 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <title>Space-Truckers: The Video Game!</title>
-    <style>
-      html,
-      body {
-        overflow: hidden;
-        width: 100%;
-        height: 100%;
-        margin: 0;
-        padding: 0;
-      }
+  <style>
+    html,
+    body {
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
 
-      canvas {
-        width: 100%;
-        height: 100%;
-        touch-action: none;
-      }
-    </style>
-  </head>
-  <body>
-  </body>
+    canvas {
+      width: 100%;
+      height: 100%;
+      touch-action: none;
+    }
+
+    #landingPageContainer {
+      position: absolute;
+      width: 100%;
+      height: 800px;
+      display: grid;
+      color: brown;
+      text-align: center;
+     
+     
+    }
+    #hero {
+      height: 600px;
+      background: url('space-truckers-landing-logo.jpg') center center transparent no-repeat;
+      background-size: contain;
+      opacity: 0.68;
+    }
+    #ctaRow, #footer {
+      height: 80px;
+      
+    }
+  </style>
+</head>
+
+<body>
+  <div id="landingPageContainer">
+    <div id="hero">
+      <h1>Space-Truckers: The Video Game</h1>
+      <noscript>Your web browser doesn't support javascript.</noscript>>
+    </div>
+<div id="ctaRow">
+<button>Start Space-Truckers!</button>
+</div>
+<div id="footer">
+Copyright Notice: See <a href="//github.com/jelster/space-truckers/LICENSE">here</a> for license and copyright info.
+</div>  
+</div>
+</body>
+
 </html>
