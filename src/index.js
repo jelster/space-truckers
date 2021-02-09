@@ -9,9 +9,17 @@ canvas.classList.add("background-canvas");
 document.body.appendChild(canvas);
 
 let eng = new Engine(canvas, true, null, true);
-let startScene = createStartScene(eng);
-eng.runRenderLoop(() => {
-    startScene.scene.render();
+
+eng.loadingScreen = new SpaceTruckerLoadingScreen(eng);
+
+
+// for testing
+
+const btnClickEvtHandle = launchButton.addEventListener("click", () => {
+    canvas.classList.remove("background-canvas");
+    pageLandingContent.style.display = "none";
+    eng.displayLoadingUI();
+    
+    setTimeout(() => eng.hideLoadingUI(), 15000);
 });
 
-//canvas.classList.remove("background-canvas");
