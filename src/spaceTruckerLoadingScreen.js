@@ -1,3 +1,5 @@
+import { AdvancedDynamicTexture, GUI, TextBlock, Container } from "@babylonjs/gui";
+
 import createStartScene from "./startscene";
 
 class SpaceTruckerLoadingScreen {
@@ -20,6 +22,16 @@ class SpaceTruckerLoadingScreen {
         this._currentAmountLoaded = 0.00;
         this._engine = engine;
         this._startScene = createStartScene(engine);
+        this._textContainer = AdvancedDynamicTexture.CreateFullscreenUI("loadingUI", true, this._startScene.scene);
+
+        const textBlock = new TextBlock("textBlock", this._loadingText);
+        textBlock.fontSize = "62pt";
+        textBlock.color = "antiquewhite";
+        textBlock.verticalAlignment = Container.VERTICAL_ALIGNMENT_BOTTOM;
+        textBlock.paddingTop = "15%";
+
+        this._textContainer.addControl(textBlock);
+
         engine.runRenderLoop(() => {
             if (this._startScene && this._active === true) {
                 this._startScene.scene.render();
