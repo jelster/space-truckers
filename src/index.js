@@ -9,7 +9,9 @@ canvas.classList.add("background-canvas");
 document.body.appendChild(canvas);
 
 let eng = new Engine(canvas, true, null, true);
-
+window.addEventListener('resize', () => {
+    eng.resize();
+});
 eng.loadingScreen = new SpaceTruckerLoadingScreen(eng);
 
 
@@ -18,6 +20,8 @@ eng.loadingScreen = new SpaceTruckerLoadingScreen(eng);
 const btnClickEvtHandle = launchButton.addEventListener("click", () => {
     canvas.classList.remove("background-canvas");
     pageLandingContent.style.display = "none";
+
+    eng.enterFullscreen(true);
     eng.displayLoadingUI();
     
     setTimeout(() => eng.hideLoadingUI(), 15000);
