@@ -1,18 +1,19 @@
-import {
-    MeshBuilder,
-    Color3,
-    Vector3,
-    Texture,
-    PointLight,
-    Scene,
-    StandardMaterial,
-    TrailMesh,
-    Scalar,
-    GlowLayer,
-    Animation,
-    ArcRotateCamera
-} from "@babylonjs/core";
-import { StarfieldProceduralTexture } from "@babylonjs/procedural-textures";
+import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder"
+import { Color3 } from "@babylonjs/core/Maths/math.color"
+import { Vector3 } from "@babylonjs/core/Maths/math.vector"
+import { Texture } from "@babylonjs/core/Materials/Textures/texture"
+import { PointLight } from "@babylonjs/core/Lights/pointLight"
+import { Scene } from "@babylonjs/core/scene"
+import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial"
+import { TrailMesh } from "@babylonjs/core/Meshes/trailMesh"
+import { Scalar } from "@babylonjs/core/Maths/math.scalar"
+import { GlowLayer } from "@babylonjs/core/Layers/glowLayer"
+import { Animation } from "@babylonjs/core/Animations/animation"
+import { ArcRotateCamera } from "@babylonjs/core/Cameras/arcRotateCamera";
+import { StarfieldProceduralTexture } from "@babylonjs/procedural-textures/starfield/starfieldProceduralTexture";
+
+// imported for side-effect only
+import "@babylonjs/core/Helpers/sceneHelpers"
 
 import distortTexture from "../assets/textures/distortion.png";
 import rockTextureN from "../assets/textures/rockn.png";
