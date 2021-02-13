@@ -52,6 +52,10 @@ class SpaceTruckerLoadingScreen {
         this._progressAvailable = evt.lengthComputable === true;
         this._currentAmountLoaded = evt.loaded || this.currentAmountLoaded;
         this._totalToLoad = evt.total || this.currentAmountLoaded;
+        if (this._progressAvailable) {
+            this._loadingText = "Loading Space-Truckers: The Video Game... " + ((this._currentAmountLoaded / this._totalToLoad) * 100).toFixed(2);
+        }
+        
     }
 }
 
