@@ -1,30 +1,31 @@
 import { Engine } from "@babylonjs/core/Engines/engine";
+import SpaceTruckerApplication from "./spaceTruckerApplication";
 import SpaceTruckerLoadingScreen from "./spaceTruckerLoadingScreen";
+
 const CanvasName = "index-canvas";
+const launchButton = document.getElementById("btnLaunch");
+const pageLandingContent = document.getElementById("pageContainer");
 
-let canvas = document.createElement("canvas");
+const canvas = document.createElement("canvas");
 canvas.id = CanvasName;
-
 canvas.classList.add("background-canvas");
 document.body.appendChild(canvas);
 
-let eng = new Engine(canvas, true, null, true);
-window.addEventListener('resize', () => {
-    eng.resize();
-});
+const eng = new Engine(canvas, true, null, true);
+
 eng.loadingScreen = new SpaceTruckerLoadingScreen(eng);
 
+const theApp = new SpaceTruckerApplication(eng);
 
-// for testing
-const launchButton = document.getElementById("btnLaunch");
-const pageLandingContent = document.getElementById("pageContainer");
 const btnClickEvtHandle = launchButton.addEventListener("click", () => {
     canvas.classList.remove("background-canvas");
     pageLandingContent.style.display = "none";
     launchButton.removeEventListener("click", btnClickEvtHandle);
-    eng.enterFullscreen(true);
-    eng.displayLoadingUI();
     
-    setTimeout(() => eng.hideLoadingUI(), 15000);
+    theApp.initializeApplication();
+    
 });
 
+window.addEventListener('resize', () => {
+    eng.resize();
+});
