@@ -4,6 +4,8 @@ import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial"
 import { Scalar } from "@babylonjs/core/Maths/math.scalar"
 import { Animation } from "@babylonjs/core/Animations/animation"
 
+import logger from "./logger";
+
 import distortTexture from "../assets/textures/distortion.png";
 import rockTextureN from "../assets/textures/rockn.png";
 import rockTexture from "../assets/textures/rock.png";
@@ -28,7 +30,7 @@ class AstroFactory {
         planet.position.z = opts.posRadius * Math.cos(opts.posRadians);
         planet.orbitOptions = opts;
         
-    
+        logger.logInfo("Created planet " + opts.name);
         return planet;
     }
 
@@ -51,6 +53,7 @@ class AstroFactory {
             planet.position.z = opts.posRadius * Math.cos(angPos);
             angPos = Scalar.Repeat(angPos + w, Scalar.TwoPi);
         });
+        logger.logInfo("Calculated and started orbital animation for " + planet.name);
         
         return planet;
     }
