@@ -165,16 +165,16 @@ function createAndStartOrbitAnimation(planet, scene) {
 }
 
 export default function createStartScene(engine) {
-    let that = {};
+    const that = {};
     const scene = that.scene = new Scene(engine);
     const camAlpha = 0,
         camBeta = 1.26,
         camDist = 350,
         camTarget = new Vector3(0, 0, 0);
-    const env = setupEnvironment(scene);
+    that.env = setupEnvironment(scene);
     const star = that.star = createStar(scene);
     const planets = that.planets = populatePlanetarySystem(scene);
-    const camera = that.camera = new ArcRotateCamera("camera1", camAlpha, camBeta, camDist, camTarget, scene);
+    that.camera = new ArcRotateCamera("camera1", camAlpha, camBeta, camDist, camTarget, scene);
     const spinAnim = createSpinAnimation();
     star.animations.push(spinAnim);
     scene.beginAnimation(star, 0, 60, true);

@@ -1,5 +1,5 @@
 import { Engine } from "@babylonjs/core/Engines/engine";
-import createStartScene from "./startscene";
+import SpaceTruckerLoadingScreen from "./spaceTruckerLoadingScreen";
 const CanvasName = "index-canvas";
 
 let canvas = document.createElement("canvas");
@@ -16,7 +16,8 @@ eng.loadingScreen = new SpaceTruckerLoadingScreen(eng);
 
 
 // for testing
-
+const launchButton = document.getElementById("btnLaunch");
+const pageLandingContent = document.getElementById("pageContainer");
 const btnClickEvtHandle = launchButton.addEventListener("click", () => {
     canvas.classList.remove("background-canvas");
     pageLandingContent.style.display = "none";
