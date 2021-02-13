@@ -1,72 +1,73 @@
-
+import StateMachine from "javascript-state-machine"
 import AppStates from "./appstates"
 import logger from "./logger"
 
-
 class SpaceTruckerApplication {
-    *appStateMachine() {
-        let previousState = AppStates.INDETERMINATE;
-        let currentState = AppStates.LAUNCHED;
-        const app = this;
-        function setState(newState) {
-            previousState = currentState;
-            currentState = newState;
-            logger.logInfo("App state changed. Previous state:" + previousState + " New state: " + newState);
-            return newState;
-        }
 
-        while (true) {
-            // initial state of application
-            yield setState(AppStates.LAUNCHED);  
-            
-            // resume here on the call to .next()               
-            yield setState(AppStates.INITIALIZING);
-            
-            yield setState(AppStates.RUNNING);
-        
-            yield setState(AppStates.EXITED);
-    
-        }
-    }
-        
     get currentState() {
-        return this._appState || AppStates.INDETERMINATE;
+        return this._appState || AppStates.Created;
     }
 
     get activeScene() {
         return this._currentScene;
     }
 
-    moveNextAppState() {
-        this._appState = this._stateMachine.next().value;
-    }
-
     constructor(engine) {
-        this._appState = AppStates.CREATED;
+        const that = this;
+        this._appState = AppStates.Created;
         this._engine = engine;
         this._currentScene = null;
-        this._stateMachine = this.appStateMachine();
 
-        this.moveNextAppState();
-    }
-    
-    initialize() {       
-        this._engine.displayLoadingUI();
+        function createStateMachine() {
+            return new StateMachine({
+                init: AppStates.Created,
+                transitions: [
+                    { name: "launch", from: AppStates.Created, to: AppStates.Initializing },
+                    { name: "initialized", from: AppStates.Initializing, to: AppStates.Running },
+                    { name: "exit", from: AppStates.Exiting, to: AppStates.Exited }
+                ],
+                methods: {
+                    onLaunch: () => logger.logInfo("onLaunch"),
+                    onInitialized: () => {
+                        logger.logInfo("onInitialized");
+                        that._engine.hideLoadingUI();
+                    },
+                    onExit: () => logger.logInfo("onExit"),
+                    onCreated: () => logger.logInfo("onCreated"),
+                    onInitializing: () => { 
+                        logger.logInfo("onInitializing"); 
+                        that.initialize();
+                    },
+                    onRunning: () => {
+                        logger.logInfo("onRunning");
+                        that.run();
+                    },
+                    onExited: () => logger.logInfo("onExited")
+                }
+            });
+        }
+        this._stateMachine = createStateMachine();
         
+        
+    }
+
+    initialize() {
+        this._engine.displayLoadingUI();
+
         this._engine.enterFullscreen(true);
         setTimeout(() => {
-            
-             
-            this._engine.hideLoadingUI();
-            this._appState = this._stateMachine.next();
+            this._stateMachine.initialized();
 
         }, 15000);
     }
-
     run() {
-        this.initialize(); 
+
+    }
+    start() {
+        this._stateMachine.launch();
+
         // this puts us into the initializing state
-        this.moveNextAppState();
+         
 
     }
     exit() {

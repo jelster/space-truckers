@@ -25,7 +25,7 @@ const btnClickEvtHandle = launchButton.addEventListener("click", () => {
     pageLandingContent.style.display = "none";
     launchButton.removeEventListener("click", btnClickEvtHandle);
     
-    theApp.run();
+    theApp.start();
 });
 
 window.addEventListener('resize', () => {
