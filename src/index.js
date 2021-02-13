@@ -21,7 +21,7 @@ const pageLandingContent = document.getElementById("pageContainer");
 const btnClickEvtHandle = launchButton.addEventListener("click", () => {
     canvas.classList.remove("background-canvas");
     pageLandingContent.style.display = "none";
-
+    launchButton.removeEventListener("click", btnClickEvtHandle);
     eng.enterFullscreen(true);
     eng.displayLoadingUI();
     
