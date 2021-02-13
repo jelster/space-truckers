@@ -17,7 +17,7 @@ logger.logInfo("Created BJS engine");
 
 eng.loadingScreen = new SpaceTruckerLoadingScreen(eng);
 
-const theApp = new SpaceTruckerApplication(eng);
+const theApp = new SpaceTruckerApplication(eng);    
 
 const btnClickEvtHandle = launchButton.addEventListener("click", () => {
     logger.logInfo("Launch button clicked. Initializing application.");
@@ -25,8 +25,7 @@ const btnClickEvtHandle = launchButton.addEventListener("click", () => {
     pageLandingContent.style.display = "none";
     launchButton.removeEventListener("click", btnClickEvtHandle);
     
-    theApp.initialize();
-    
+    theApp.run();
 });
 
 window.addEventListener('resize', () => {

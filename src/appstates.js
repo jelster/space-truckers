@@ -1,6 +1,7 @@
 export default Object.freeze({
-    INDETERMINATE: undefined,
-    INITIALIZING: 1,
-    RUNNING: 2,
-    EXITING: 3
+    CREATED: 1,
+    INITIALIZING: 2,
+    RUNNING: 3,
+    EXITING: 4,
+    EXITED: 5
 });

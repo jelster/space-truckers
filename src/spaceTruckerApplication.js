@@ -2,27 +2,75 @@
 import AppStates from "./appstates"
 import logger from "./logger"
 
+
 class SpaceTruckerApplication {
+    *appStateMachine() {
+        let previousState = AppStates.INDETERMINATE;
+        let currentState = AppStates.LAUNCHED;
+        const app = this;
+        function setState(newState) {
+            previousState = currentState;
+            currentState = newState;
+            logger.logInfo("App state changed. Previous state:" + previousState + " New state: " + newState);
+            return newState;
+        }
+
+        while (true) {
+            // initial state of application
+            yield setState(AppStates.LAUNCHED);  
+            
+            // resume here on the call to .next()               
+            yield setState(AppStates.INITIALIZING);
+            
+            yield setState(AppStates.RUNNING);
+        
+            yield setState(AppStates.EXITED);
+    
+        }
+    }
+        
     get currentState() {
         return this._appState || AppStates.INDETERMINATE;
     }
-    constructor(engine) {
-        this._engine = engine;
+
+    get activeScene() {
+        return this._currentScene;
     }
 
-    initialize() {
-        logger.logInfo("App state changing to " + AppStates.INITIALIZING);
+    moveNextAppState() {
+        this._appState = this._stateMachine.next().value;
+    }
 
-        this._appState = AppStates.INITIALIZING;
+    constructor(engine) {
+        this._appState = AppStates.CREATED;
+        this._engine = engine;
+        this._currentScene = null;
+        this._stateMachine = this.appStateMachine();
+
+        this.moveNextAppState();
+    }
+    
+    initialize() {       
         this._engine.displayLoadingUI();
-        logger.logInfo("Displayed loading UI");
-
+        
         this._engine.enterFullscreen(true);
         setTimeout(() => {
-            logger.logInfo("AppState Changing to " + AppStates.RUNNING);
-            this._appState = AppStates.RUNNING;
+            
+             
             this._engine.hideLoadingUI();
+            this._appState = this._stateMachine.next();
+
         }, 15000);
+    }
+
+    run() {
+        this.initialize(); 
+        // this puts us into the initializing state
+        this.moveNextAppState();
+
+    }
+    exit() {
+
     }
 }
 
