@@ -1,13 +1,13 @@
 
 import AppStates from "./appstates"
 import logger from "./logger"
+import MainMenuScene from "./mainMenuScene";
 
 
 class SpaceTruckerApplication {
     *appStateMachine() {
-        let previousState = AppStates.INDETERMINATE;
-        let currentState = AppStates.LAUNCHED;
-        const app = this;
+        let previousState = null;
+        let currentState = null;
         function setState(newState) {
             previousState = currentState;
             currentState = newState;
@@ -16,58 +16,93 @@ class SpaceTruckerApplication {
         }
 
         while (true) {
-            // initial state of application
-            yield setState(AppStates.LAUNCHED);  
-            
-            // resume here on the call to .next()               
-            yield setState(AppStates.INITIALIZING);
-            
-            yield setState(AppStates.RUNNING);
-        
-            yield setState(AppStates.EXITED);
-    
+            let nextState = yield;
+            if (nextState !== null && nextState !== undefined) {
+                setState(nextState);
+                if (nextState === AppStates.EXITING) {
+                    return currentState;
+                }
+            }
         }
     }
         
     get currentState() {
-        return this._appState || AppStates.INDETERMINATE;
+        return this._stateMachine.next();
     }
 
     get activeScene() {
         return this._currentScene;
     }
 
-    moveNextAppState() {
-        this._appState = this._stateMachine.next().value;
+
+    moveNextAppState(state) {
+        return this._stateMachine.next(state).value;
     }
 
     constructor(engine) {
-        this._appState = AppStates.CREATED;
         this._engine = engine;
         this._currentScene = null;
         this._stateMachine = this.appStateMachine();
+        this._mainMenu = null;
 
-        this.moveNextAppState();
+        this.moveNextAppState(AppStates.CREATED);
     }
     
-    initialize() {       
-        this._engine.displayLoadingUI();
-        
-        this._engine.enterFullscreen(true);
-        setTimeout(() => {
-            
-             
-            this._engine.hideLoadingUI();
-            this._appState = this._stateMachine.next();
+    async initialize() {       
+        this.moveNextAppState(AppStates.INITIALIZING);
+        this._engine.enterFullscreen(true);      
 
-        }, 15000);
+        // for simulating loading times   
     }
 
-    run() {
-        this.initialize(); 
-        // this puts us into the initializing state
-        this.moveNextAppState();
+    async run() {
+        await this.initialize(); 
+        await this.goToMainMenu();
 
+        this._engine.runRenderLoop(() => {
+                // update loop
+                let state = this.currentState;
+                switch (state) {
+                    case AppStates.CREATED:
+                    case AppStates.INITIALIZING: 
+                        break;
+                    case AppStates.CUTSCENE:
+                        logger.logInfo("App State: Cutscene");
+                        break;
+                    case AppStates.MENU:
+                        break;
+                    case AppStates.RUNNING:
+                        this.goToOpeningCutscene();
+                        break;
+                    case AppStates.EXITING:
+                        this.exit();
+                        break;
+                    default:
+           //             logger.logWarning("Unrecognized AppState value " + state);
+                        break;
+                }
+
+                // render
+                this._currentScene?.render();
+            
+        });
+    }
+    async goToOpeningCutscene() {
+        this._engine.displayLoadingUI();
+        this.moveNextAppState(AppStates.CUTSCENE);
+
+        return Promise.resolve()
+        .then(() => this._engine.hideLoadingUI()); 
+    }
+    
+    async goToMainMenu() {
+        this._engine.displayLoadingUI();
+        this._mainMenu = new MainMenuScene(this._engine);
+        this._currentScene = this._mainMenu.scene;
+        
+        this._engine.displayLoadingUI();
+        this.moveNextAppState(AppStates.MENU);
+        return Promise.resolve();
     }
     exit() {
 

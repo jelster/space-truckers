@@ -1,7 +1,8 @@
 export default Object.freeze({
-    CREATED: 1,
+    CREATED: 0,
     INITIALIZING: 2,
-    RUNNING: 3,
-    EXITING: 4,
-    EXITED: 5
+    CUTSCENE: 3,
+    MENU: 4,
+    RUNNING: 5,
+    EXITING: 6
 });
