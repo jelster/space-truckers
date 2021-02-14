@@ -25,7 +25,7 @@ class SpaceTruckerApplication {
             }
         }
     }
-        
+
     get currentState() {
         return this._stateMachine.next();
     }
@@ -47,44 +47,55 @@ class SpaceTruckerApplication {
 
         this.moveNextAppState(AppStates.CREATED);
     }
-    
-    async initialize() {       
-        this.moveNextAppState(AppStates.INITIALIZING);
-        this._engine.enterFullscreen(true);      
+
+    async initialize() {
+        this._engine.enterFullscreen(true);
+
+        // note: this will be replaced with the call done internally from AssetManager at some point
+        this._engine.displayLoadingUI();
+        this.moveNextAppState(AppStates.INITIALIZING)
+
+        const p = new Promise((res, rej) => {
+            setTimeout(() => res(), 5000);
+        });
+
+        await p;
+
+        this._engine.hideLoadingUI();
 
         // for simulating loading times   
     }
 
     async run() {
-        await this.initialize(); 
+        await this.initialize();
         await this.goToMainMenu();
 
         this._engine.runRenderLoop(() => {
-                // update loop
-                let state = this.currentState;
-                switch (state) {
-                    case AppStates.CREATED:
-                    case AppStates.INITIALIZING: 
-                        break;
-                    case AppStates.CUTSCENE:
-                        logger.logInfo("App State: Cutscene");
-                        break;
-                    case AppStates.MENU:
-                        break;
-                    case AppStates.RUNNING:
-                        this.goToOpeningCutscene();
-                        break;
-                    case AppStates.EXITING:
-                        this.exit();
-                        break;
-                    default:
-           //             logger.logWarning("Unrecognized AppState value " + state);
-                        break;
-                }
+            // update loop
+            let state = this.currentState;
+            switch (state) {
+                case AppStates.CREATED:
+                case AppStates.INITIALIZING:
+                    break;
+                case AppStates.CUTSCENE:
+                    logger.logInfo("App State: Cutscene");
+                    break;
+                case AppStates.MENU:
+                    break;
+                case AppStates.RUNNING:
+                    this.goToOpeningCutscene();
+                    break;
+                case AppStates.EXITING:
+                    this.exit();
+                    break;
+                default:
+                    //             logger.logWarning("Unrecognized AppState value " + state);
+                    break;
+            }
 
-                // render
-                this._currentScene?.render();
-            
+            // render
+            this._currentScene?.render();
+
         });
     }
     async goToOpeningCutscene() {
@@ -92,14 +103,14 @@ class SpaceTruckerApplication {
         this.moveNextAppState(AppStates.CUTSCENE);
 
         return Promise.resolve()
-        .then(() => this._engine.hideLoadingUI()); 
+            .then(() => this._engine.hideLoadingUI());
     }
-    
+
     async goToMainMenu() {
         this._engine.displayLoadingUI();
         this._mainMenu = new MainMenuScene(this._engine);
         this._currentScene = this._mainMenu.scene;
-        
+
         this._engine.displayLoadingUI();
         this.moveNextAppState(AppStates.MENU);
         return Promise.resolve();
