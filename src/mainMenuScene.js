@@ -1,9 +1,10 @@
 import { ArcRotateCamera } from "@babylonjs/core/Cameras/arcRotateCamera";
 import { Color4 } from "@babylonjs/core/Maths/math";
-import { Scene, Vector3 } from "@babylonjs/core";
+import { Scene, Vector3, Sound } from "@babylonjs/core";
 import { AdvancedDynamicTexture, Rectangle, Image } from "@babylonjs/gui";
 
 import menuBackground from "../assets/menuBackground.png";
+import titleMusic  from "../assets/sounds/space-trucker-title-theme.m4a";
 
 class MainMenuScene {
 
@@ -26,6 +27,10 @@ class MainMenuScene {
 
         const menuBg = new Image("menuBg", menuBackground);
         menuContainer.addControl(menuBg);
+
+        // TODO: Use asset manager instead of directly instantiating
+        let music = new Sound("titleMusic", titleMusic, scene, null, {autoplay: true, loop: true, volume: 0.4 });
+        this._music = music;
     }
 }
 export default MainMenuScene;
