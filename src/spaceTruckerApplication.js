@@ -111,7 +111,7 @@ class SpaceTruckerApplication {
         this._mainMenu = new MainMenuScene(this._engine);
         this._currentScene = this._mainMenu.scene;
 
-        this._engine.displayLoadingUI();
+        this._engine.hideLoadingUI();
         this.moveNextAppState(AppStates.MENU);
         return Promise.resolve();
     }

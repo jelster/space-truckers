@@ -16,7 +16,7 @@ class MainMenuScene {
         let scene = this._scene = new Scene(engine);
         scene.clearColor = new Color4(0, 0, 0, 1);
 
-        let camera = new ArcRotateCamera("menuCam", 0, 0, 1, Vector3.Zero(), scene, true);
+        const camera = new ArcRotateCamera("menuCam", 0, 0, 1, Vector3.Zero(), scene, true);
         const guiMenu = AdvancedDynamicTexture.CreateFullscreenUI("UI");
         guiMenu.idealHeight = 720;
 
@@ -29,8 +29,8 @@ class MainMenuScene {
         menuContainer.addControl(menuBg);
 
         // TODO: Use asset manager instead of directly instantiating
-        let music = new Sound("titleMusic", titleMusic, scene, null, {autoplay: true, loop: true, volume: 0.4 });
-        this._music = music;
+        this._music = new Sound("titleMusic", titleMusic, scene, null, {autoplay: true, loop: true, volume: 0.4 });
+        
     }
 }
 export default MainMenuScene;

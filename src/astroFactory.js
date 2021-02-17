@@ -1,4 +1,4 @@
-import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder"
+import { SphereBuilder } from "@babylonjs/core/Meshes/Builders/sphereBuilder"
 import { Texture } from "@babylonjs/core/Materials/Textures/texture"
 import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial"
 import { Scalar } from "@babylonjs/core/Maths/math.scalar"
@@ -12,7 +12,7 @@ import rockTexture from "../assets/textures/rock.png";
 
 class AstroFactory {
     static createPlanet(opts, scene) {
-        let planet = MeshBuilder.CreateSphere(opts.name, { diameter: 1 }, scene);
+        let planet = SphereBuilder.CreateSphere(opts.name, { diameter: 1 }, scene);
         let mat = new StandardMaterial(planet.name + "-mat", scene);
         mat.diffuseColor = mat.specularColor = mat.emissiveColor = opts.color;
         mat.specularPower = 0;

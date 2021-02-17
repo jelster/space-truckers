@@ -19,14 +19,15 @@ eng.loadingScreen = new SpaceTruckerLoadingScreen(eng);
 
 const theApp = new SpaceTruckerApplication(eng);    
 
-const btnClickEvtHandle = launchButton.addEventListener("click", () => {
+const btnClickEvtHandle = () => {
     logger.logInfo("Launch button clicked. Initializing application.");
     canvas.classList.remove("background-canvas");
     pageLandingContent.style.display = "none";
     launchButton.removeEventListener("click", btnClickEvtHandle);
     
     theApp.run();
-});
+};
+launchButton.addEventListener("click", btnClickEvtHandle);
 
 window.addEventListener('resize', () => {
     eng.resize();
