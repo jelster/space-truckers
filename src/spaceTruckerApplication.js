@@ -53,8 +53,10 @@ class SpaceTruckerApplication {
 
         // note: this will be replaced with the call done internally from AssetManager at some point
         this._engine.displayLoadingUI();
+        
         this.moveNextAppState(AppStates.INITIALIZING)
 
+        // for simulating loading times
         const p = new Promise((res, rej) => {
             setTimeout(() => res(), 5000);
         });
@@ -63,7 +65,7 @@ class SpaceTruckerApplication {
 
         this._engine.hideLoadingUI();
 
-        // for simulating loading times   
+       
     }
 
     async run() {
@@ -98,6 +100,8 @@ class SpaceTruckerApplication {
 
         });
     }
+
+    // State transition commands
     async goToOpeningCutscene() {
         this._engine.displayLoadingUI();
         this.moveNextAppState(AppStates.CUTSCENE);
@@ -113,8 +117,10 @@ class SpaceTruckerApplication {
 
         this._engine.hideLoadingUI();
         this.moveNextAppState(AppStates.MENU);
-        return Promise.resolve();
+        return Promise.resolve()
+            .then(() => this._engine.hideLoadingUI());
     }
+
     exit() {
 
     }
