@@ -1,11 +1,13 @@
+import { CylinderBuilder } from "@babylonjs/core/Meshes/Builders/cylinderBuilder";
 import { ArcRotateCamera } from "@babylonjs/core/Cameras/arcRotateCamera";
 import { Color4 } from "@babylonjs/core/Maths/math";
-import { Scene, Vector3, Sound } from "@babylonjs/core";
-import { AdvancedDynamicTexture, Rectangle, Image, Button, Style, StackPanel, Control, TextBlock } from "@babylonjs/gui";
-
+import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial";
+import { Texture } from "@babylonjs/core/Materials/Textures/texture"
+import { Scene, Vector3, Sound, HemisphericLight } from "@babylonjs/core";
+import { AdvancedDynamicTexture, Rectangle, Image, Button, StackPanel, Control, TextBlock } from "@babylonjs/gui";
+import { StarfieldProceduralTexture } from "@babylonjs/procedural-textures/starfield/starfieldProceduralTexture";
 import menuBackground from "../assets/menuBackground.png";
 import titleMusic from "../assets/sounds/space-trucker-title-theme.m4a";
-import roughRoadSign from "../assets/textures/W8-3a.png";
 
 class MainMenuScene {
 
@@ -19,7 +21,8 @@ class MainMenuScene {
         this._music = new Sound("titleMusic", titleMusic, scene, null, { autoplay: true, loop: true, volume: 0.4 });
         scene.clearColor = new Color4(0, 0, 0, 1);
 
-        const camera = new ArcRotateCamera("menuCam", 0, 0, 1, Vector3.Zero(), scene, true);
+        const camera = new ArcRotateCamera("menuCam", 0, 0, -30, Vector3.Zero(), scene, true);
+        this._setupBackgroundEnvironment();
         const guiMenu = AdvancedDynamicTexture.CreateFullscreenUI("UI");
         guiMenu.idealHeight = 720;
 
@@ -29,7 +32,7 @@ class MainMenuScene {
         guiMenu.addControl(menuContainer);
 
         // TODO: find/make a better background image!
-        const menuBg = new Image("menuBg", roughRoadSign);
+        const menuBg = new Image("menuBg", menuBackground);
         menuContainer.addControl(menuBg);
 
         const menuPanel = new StackPanel("menuPanel");
@@ -63,6 +66,21 @@ class MainMenuScene {
 
         playButton.verticalAlignment = Control.VERTICAL_ALIGNMENT_BOTTOM;
         menuPanel.addControl(playButton);
+    }
+
+    _setupBackgroundEnvironment() {
+        const light = new HemisphericLight("light", new Vector3(0,0.5, 0), this._scene);
+        const starfieldPT = new StarfieldProceduralTexture("starfieldPT", 512, this._scene);
+        const starfieldMat = new StandardMaterial("starfield", this._scene);
+        const space = CylinderBuilder.CreateCylinder("space", { height: 100, diameterTop: 0, diameterBottom: 60 }, this._scene);
+        starfieldMat.diffuseTexture = starfieldPT;
+        starfieldMat.diffuseTexture.coordinatesMode = Texture.SKYBOX_MODE;
+        starfieldMat.backFaceCulling = false;
+        starfieldPT.beta = 0.1;
+
+        space.material = starfieldMat;
+
+        this._starfieldAnimationHandle = this._scene.registerBeforeRender(() => starfieldPT.time += this._scene.getEngine().getDeltaTime() / 1000);
 
     }
 }
