@@ -6,9 +6,12 @@ import { Texture } from "@babylonjs/core/Materials/Textures/texture"
 import { Scene, Vector3, Scalar, Observable, Sound, HemisphericLight } from "@babylonjs/core";
 import { AdvancedDynamicTexture, Rectangle, Image, Button, Control, TextBlock, Grid, TextWrapping } from "@babylonjs/gui";
 import { StarfieldProceduralTexture } from "@babylonjs/procedural-textures/starfield/starfieldProceduralTexture";
+
+import logger from "./logger";
 import menuBackground from "../assets/menuBackground.png";
 import titleMusic from "../assets/sounds/space-trucker-title-theme.m4a";
 import selectionIcon from "../assets/ui-selection-icon.PNG";
+
 
 class MainMenuScene {
 
@@ -25,6 +28,7 @@ class MainMenuScene {
         this._selectedItemChanged.notifyObservers(newIdx);
     }
     constructor(engine) {
+        this._music = new Sound("titleMusic", titleMusic, scene, () => logger.logInfo("loaded title music"), { autoplay: true, loop: true, volume: 0.5 });
         this._engine = engine;
         let scene = this._scene = new Scene(engine);
         scene.clearColor = new Color4(0, 0, 0, 1);
@@ -126,7 +130,7 @@ class MainMenuScene {
             title: "Play",
             background: "red",
             color: "white",
-            onInvoked: () => console.log("Play button clicked")
+            onInvoked: () => logger.logInfo("Play button clicked")
         };
         const playButton = createMenuItem(pbOpts);
         this._menuGrid.addControl(playButton, this._menuGrid.children.length, 1);
@@ -137,7 +141,7 @@ class MainMenuScene {
             background: "white",
             color: "black",
             onInvoked: () => {
-                console.log("Exit button clicked");
+                logger.logInfo("Exit button clicked");
                 this._onMenuLeave(1000);
             }
         }
