@@ -136,7 +136,10 @@ class MainMenuScene {
             title: "Exit",
             background: "white",
             color: "black",
-            onInvoked: () => console.log("Exit button clicked")
+            onInvoked: () => {
+                console.log("Exit button clicked");
+                this._onMenuLeave(1000);
+            }
         }
         const exitButton = createMenuItem(ebOpts);
         this._menuGrid.addControl(exitButton, this._menuGrid.children.length, 1);
@@ -153,11 +156,9 @@ class MainMenuScene {
 
         selectorIcon.isVisible = false;
         this._menuGrid.addControl(selectorIcon, 1, 0);
-        this._selectorIcon = selectorIcon;        
+        this._selectorIcon = selectorIcon;
         this._selectorAnimationFrame = 0;
         this._selectorIconHoverAnimation = this._scene.onBeforeRenderObservable.add(() => this._selectorIconAnimation());
-   
-
     }
 
     _selectorIconAnimation() {
@@ -166,5 +167,49 @@ class MainMenuScene {
         this._selectorAnimationFrame = Scalar.Repeat(this._selectorAnimationFrame + dT * 5, animTimeSeconds * 10);
         this._selectorIcon.top = Math.sin(this._selectorAnimationFrame).toFixed(0) + "px";
     }
+
+    _onMenuEnter(duration) {
+        let fadeIn = 0;
+        const fadeTime = duration || 1500;
+        const timer = BABYLON.setAndStartTimer({
+            timeout: fadeTime,
+            contextObservable: this._scene.onBeforeRenderObservable,
+            onTick: () => {
+                const dT = this._scene.getEngine().getDeltaTime();
+                fadeIn += dT;
+                const currAmt = Scalar.SmoothStep(0, 1, fadeIn / fadeTime);
+                this._menuContainer.alpha = currAmt;
+            },
+            onEnded: () => {
+                this.selectedItemIndex = 0;
+            }
+        });
+        return timer;
+    }
+
+    _onMenuLeave(duration) {
+        let fadeOut = 0;
+        const fadeTime = duration || 1500;
+
+        this._menuContainer.isVisible = false;
+
+        const timer = BABYLON.setAndStartTimer({
+            timeout: fadeTime,
+            contextObservable: this._scene.onBeforeRenderObservable,
+            onTick: () => {
+                const dT = this._scene.getEngine().getDeltaTime();
+                fadeOut += dT;
+                const currAmt = Scalar.SmoothStep(1, 0, fadeOut / fadeTime);
+                this._menuContainer.alpha = currAmt;
+
+            },
+            onEnded: () => {
+                this._music.stop();
+
+            }
+        });
+        return timer;
+    }
+
 }
 export default MainMenuScene;
