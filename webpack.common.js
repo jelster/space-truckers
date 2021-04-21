@@ -30,15 +30,8 @@ module.exports = {
                 enforce: "pre",
             },
             {
-                test: /\.(png|jpg|gif|env|glb|stl)$/i,
-                use: [
-                    {
-                        loader: "url-loader",
-                        options: {
-                            limit: 8192,
-                        },
-                    },
-                ],
+                test: /\.(png|jpg|gif|env|glb|stl|m4a|mp3)$/i,
+                type: "asset/resource"
             },
         ],
     },

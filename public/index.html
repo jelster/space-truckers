@@ -8,6 +8,7 @@
     * {
       font-family: sans-serif;
     }
+
     html,
     body {
       overflow: hidden;
@@ -23,9 +24,9 @@
       touch-action: none;
     }
 
-    #pageContainer {      
-      position: relative;       
-      background-color: transparent;
+    #pageContainer {
+      position: relative;
+      background-color: black;
       margin: 10px;
       padding: 17px;
       border: solid white;
@@ -35,7 +36,7 @@
 
     }
 
-    #landingPageContainer {     
+    #landingPageContainer {
       width: 100%;
       height: 100%;
     }
@@ -50,7 +51,7 @@
     #ctaRow,
     #footer {
       margin-top: 10px;
-      padding-bottom:7px;
+      padding-bottom: 7px;
     }
 
     #ctaRow button {
@@ -69,17 +70,29 @@
       left: auto;
       z-index: -10;
     }
+
+    .disable-selection {
+      -moz-user-select: none;
+      -ms-user-select: none;
+      -khtml-user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      user-select: none;
+      outline: none;
+      -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+      /* mobile webkit */
+    }
   </style>
 </head>
 
-<body>
+<body class="disable-selection">
   <div id="pageContainer">
     <h1>Space-Truckers: The Video Game</h1>
     <div id="landingPageContainer">
       <div id="hero">
       </div>
       <div id="ctaRow">
-        <button>Launch</button>
+        <button id="btnLaunch">Launch</button>
       </div>
       <div id="footer">
         Copyright Notice: See <a href="//github.com/jelster/space-truckers/LICENSE">here</a> for license and copyright
