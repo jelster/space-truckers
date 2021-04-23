@@ -6,7 +6,7 @@ import { Texture } from "@babylonjs/core/Materials/Textures/texture"
 import { Scene, Vector3, Scalar, Observable, Sound, HemisphericLight } from "@babylonjs/core";
 import { AdvancedDynamicTexture, Rectangle, Image, Button, Control, TextBlock, Grid, TextWrapping } from "@babylonjs/gui";
 import { StarfieldProceduralTexture } from "@babylonjs/procedural-textures/starfield/starfieldProceduralTexture";
-
+import setAndStartTimer from "@babylonjs/core";
 import logger from "./logger";
 import menuBackground from "../assets/menuBackground.png";
 import titleMusic from "../assets/sounds/space-trucker-title-theme.m4a";
@@ -28,7 +28,6 @@ class MainMenuScene {
         this._selectedItemChanged.notifyObservers(newIdx);
     }
     constructor(engine) {
-        this._music = new Sound("titleMusic", titleMusic, scene, () => logger.logInfo("loaded title music"), { autoplay: true, loop: true, volume: 0.5 });
         this._engine = engine;
         let scene = this._scene = new Scene(engine);
         scene.clearColor = new Color4(0, 0, 0, 1);
@@ -175,7 +174,7 @@ class MainMenuScene {
     _onMenuEnter(duration) {
         let fadeIn = 0;
         const fadeTime = duration || 1500;
-        const timer = BABYLON.setAndStartTimer({
+        const timer = setAndStartTimer({
             timeout: fadeTime,
             contextObservable: this._scene.onBeforeRenderObservable,
             onTick: () => {
@@ -197,7 +196,7 @@ class MainMenuScene {
 
         this._menuContainer.isVisible = false;
 
-        const timer = BABYLON.setAndStartTimer({
+        const timer = setAndStartTimer({
             timeout: fadeTime,
             contextObservable: this._scene.onBeforeRenderObservable,
             onTick: () => {
