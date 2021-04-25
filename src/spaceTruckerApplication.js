@@ -3,7 +3,7 @@ import AppStates from "./appstates"
 import logger from "./logger"
 import MainMenuScene from "./mainMenuScene";
 import SplashScene from "./splashScene";
-
+import SpaceTruckerInputManager from "./spaceTruckerInput";
 
 class SpaceTruckerApplication {
     *appStateMachine() {
@@ -17,7 +17,7 @@ class SpaceTruckerApplication {
         }
 
         while (true) {
-            let nextState = yield;
+            let nextState = yield currentState;
             if (nextState !== null && nextState !== undefined) {
                 setState(nextState);
                 if (nextState === AppStates.EXITING) {
@@ -28,7 +28,7 @@ class SpaceTruckerApplication {
     }
 
     get currentState() {
-        return this._stateMachine.next();
+        return this._stateMachine.next().value;
     }
 
     get activeScene() {
@@ -53,60 +53,65 @@ class SpaceTruckerApplication {
         const engine = this._engine;
         engine.enterFullscreen(true);
 
-        // note: this will be replaced with the call done internally from AssetManager at some point
         engine.displayLoadingUI();
 
-        this.moveNextAppState(AppStates.INITIALIZING)
+        this.moveNextAppState(AppStates.INITIALIZING);
+        this.inputManager = new SpaceTruckerInputManager(engine);
+
         this._splashScreen = new SplashScene(this._engine);
+
         this._mainMenu = new MainMenuScene(this._engine);
-        this.goToOpeningCutscene();
-        //  this._engine.hideLoadingUI();       
+
+
+        this.goToOpeningCutscene();   
     }
+
+
 
     run() {
         this.initialize();
+        this._engine.runRenderLoop(() => this.onRender());
+    }
 
-        this._engine.runRenderLoop(() => {
-            // update loop
-            let state = this.currentState;
-            switch (state) {
-                case AppStates.CREATED:
-                case AppStates.INITIALIZING:
-                    break;
-                case AppStates.CUTSCENE:
-                     
-                    if (this._splashScreen.skipRequested) {
-                        this.goToMainMenu();
-                    }
+    onRender() {
+        // update loop
+        let state = this.currentState;
 
-                    break;
-                case AppStates.MENU:
-                   
-                    break;
-                case AppStates.RUNNING:
+        switch (state) {
+            case AppStates.CREATED:
+            case AppStates.INITIALIZING:
+                break;
+            case AppStates.CUTSCENE:
+                this._splashScreen.updateInputs(this.inputManager);
+                if (this._splashScreen.skipRequested) {
+                    this.goToMainMenu();
+                }
+                break;
+            case AppStates.MENU:
 
-                    break;
-                case AppStates.EXITING:
-                   
-                    break;
-                default:
-                    //             logger.logWarning("Unrecognized AppState value " + state);
-                    break;
-            }
+                break;
+            case AppStates.RUNNING:
 
-            // render
+                break;
+            case AppStates.EXITING:
 
-            this._currentScene?.render();
+                break;
+            default:
+                break;
+        }
+
+        // render
+
+        this.activeScene?.scene?.render();
 
 
-        });
     }
 
     // State transition commands
     goToOpeningCutscene() {
         this._splashScreen.onReadyObservable.add(() => {
             this.moveNextAppState(AppStates.CUTSCENE);
-            this._currentScene = this._splashScreen.scene;
+            this._currentScene = this._splashScreen;
             this._engine.hideLoadingUI();
             this._splashScreen.run();
         });
@@ -115,12 +120,12 @@ class SpaceTruckerApplication {
     goToMainMenu() {
 
         this.moveNextAppState(AppStates.MENU);
-        this._currentScene = this._mainMenu.scene;
+        this._currentScene = this._mainMenu;
 
     }
 
     exit() {
-
+        this._engine.exitFullScreen();
     }
 }
 

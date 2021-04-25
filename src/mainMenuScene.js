@@ -6,7 +6,7 @@ import { Texture } from "@babylonjs/core/Materials/Textures/texture"
 import { Scene, Vector3, Scalar, Observable, Sound, HemisphericLight } from "@babylonjs/core";
 import { AdvancedDynamicTexture, Rectangle, Image, Button, Control, TextBlock, Grid, TextWrapping } from "@babylonjs/gui";
 import { StarfieldProceduralTexture } from "@babylonjs/procedural-textures/starfield/starfieldProceduralTexture";
-import setAndStartTimer from "@babylonjs/core";
+import {setAndStartTimer} from "@babylonjs/core/Misc/timer";
 import logger from "./logger";
 import menuBackground from "../assets/menuBackground.png";
 import titleMusic from "../assets/sounds/space-trucker-title-theme.m4a";

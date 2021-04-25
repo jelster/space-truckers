@@ -15,6 +15,7 @@ import { TextBlock } from "@babylonjs/gui/2D/controls/textBlock";
 import { TextWrapping } from "@babylonjs/gui/index";
 
 import CutSceneSegment from "./cutSceneSegment";
+import logger from "./logger";
 
 import titleSongUrl from "../assets/sounds/space-trucker-title-theme.m4a";
 import poweredByUrl from "../assets/powered-by.png";
@@ -39,7 +40,7 @@ class SplashScene {
     // onReadyObservable = new Observable();
     get scene() {
         return this._scene;
-    } 
+    }
     constructor(engine) {
         this.skipRequested = false;
         this.onReadyObservable = new Observable();
@@ -59,7 +60,6 @@ class SplashScene {
         const billMat = new StandardMaterial("stdMat", scene);
         billboard.material = billMat;
 
-        
         const poweredTexture = new Texture(poweredByUrl, scene);
         billMat.diffuseTexture = poweredTexture;
 
@@ -122,6 +122,8 @@ class SplashScene {
                 this.onReadyObservable.notifyObservers();
             },
             { autoplay: false, loop: false, volume: .01 });
+
+
     }
 
     run() {
@@ -143,6 +145,14 @@ class SplashScene {
             }
 
         });
+    }
+
+    updateInputs(inputManager) {
+        if (!this.skipRequested && Object.keys(inputManager.inputMap).length > 0) {
+            logger.logInfo("Key press detected. Skipping cut scene.");
+            this.skipRequested = true;
+
+        }
     }
 
     buildcallToActionAnimation() {
