@@ -12,7 +12,7 @@ import menuBackground from "../assets/menuBackground.png";
 import titleMusic from "../assets/sounds/space-trucker-title-theme.m4a";
 import selectionIcon from "../assets/ui-selection-icon.PNG";
 
-const HANDLED_COMMANDS = ['MOVE_UP', 'MOVE_DOWN', 'MOVE_LEFT', 'MOVE_RIGHT', 'ACTIVATE', 'GO_BACK'];
+const HANDLED_COMMANDS = ['MOVE_UP', 'MOVE_DOWN', 'ACTIVATE', 'GO_BACK'];
  
 class MainMenuScene {
 
@@ -62,18 +62,19 @@ class MainMenuScene {
             const input = inputsToHandle.pop();
             this[input.command]();
         }
-
     }
 
     MOVE_UP() {
-        console.log("MOVING UP!");
-    }
-    
-    _handleActivateInput() {
-
+        this.selectedItemIndex = this.selectedItemIndex - 1;
     }
 
-    _handleGoBackInput() {
+    MOVE_DOWN() {
+        this.selectedItemIndex = this.selectedItemIndex + 1;
+    }
+
+    ACTIVATE() {}
+
+    GO_BACK() {
 
     }
 

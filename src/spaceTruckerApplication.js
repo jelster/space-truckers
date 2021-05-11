@@ -99,7 +99,7 @@ class SpaceTruckerApplication {
             default:
                 break;
         }
-
+        
         // render
 
         this.activeScene?.scene?.render();
@@ -111,6 +111,7 @@ class SpaceTruckerApplication {
     goToOpeningCutscene() {
         this._splashScreen.onReadyObservable.add(() => {
             this.moveNextAppState(AppStates.CUTSCENE);
+            this._currentScene?.scene?.detachControl();
             this._currentScene = this._splashScreen;
             this._engine.hideLoadingUI();
             this._splashScreen.run();
@@ -118,9 +119,10 @@ class SpaceTruckerApplication {
     }
 
     goToMainMenu() {
-
+        this._currentScene?.scene?.detachControl();
         this.moveNextAppState(AppStates.MENU);
         this._currentScene = this._mainMenu;
+        this._currentScene.scene.attachControl();
 
     }
 
