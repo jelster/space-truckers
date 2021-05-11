@@ -74,7 +74,7 @@ class SpaceTruckerApplication {
     }
 
     onRender() {
-        // update loop
+        // update loop. Inputs are routed to the active state's scene.
         let state = this.currentState;
 
         switch (state) {
@@ -88,7 +88,7 @@ class SpaceTruckerApplication {
                 }
                 break;
             case AppStates.MENU:
-
+                this._mainMenu.updateInputs(this.inputManager);
                 break;
             case AppStates.RUNNING:
 

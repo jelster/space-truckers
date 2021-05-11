@@ -148,10 +148,9 @@ class SplashScene {
     }
 
     updateInputs(inputManager) {
-        if (!this.skipRequested && Object.keys(inputManager.inputMap).length > 0) {
+        if (!this.skipRequested && inputManager.hasInput) {
             logger.logInfo("Key press detected. Skipping cut scene.");
             this.skipRequested = true;
-
         }
     }
 

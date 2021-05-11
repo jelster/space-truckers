@@ -12,7 +12,8 @@ import menuBackground from "../assets/menuBackground.png";
 import titleMusic from "../assets/sounds/space-trucker-title-theme.m4a";
 import selectionIcon from "../assets/ui-selection-icon.PNG";
 
-
+const HANDLED_COMMANDS = ['MOVE_UP', 'MOVE_DOWN', 'MOVE_LEFT', 'MOVE_RIGHT', 'ACTIVATE', 'GO_BACK'];
+ 
 class MainMenuScene {
 
     get scene() {
@@ -51,6 +52,29 @@ class MainMenuScene {
         });
 
         scene.whenReadyAsync().then(() => this.selectedItemIndex = 0);
+    }
+
+    updateInputs(inputManager) {
+        if (!inputManager.hasInput) return;
+
+        let inputsToHandle = inputManager.getMatchingInputs(HANDLED_COMMANDS);
+        while (inputsToHandle.length > 0) {
+            const input = inputsToHandle.pop();
+            this[input.command]();
+        }
+
+    }
+
+    MOVE_UP() {
+        console.log("MOVING UP!");
+    }
+    
+    _handleActivateInput() {
+
+    }
+
+    _handleGoBackInput() {
+
     }
 
     _setupBackgroundEnvironment() {
