@@ -1,39 +1,8 @@
-import { DeviceSourceManager } from "@babylonjs/core/DeviceInput/InputDevices/deviceSourceManager";
-import { DeviceType } from "@babylonjs/core/DeviceInput/InputDevices/deviceEnums";
-import { KeyboardEventTypes } from "@babylonjs/core/Events/keyboardEvents";
-
-import { Observable } from "@babylonjs/core/Misc/observable";
-
+import deviceTypeRegistrationHandlers from "./deviceTypeRegistrationHandlers";
 import kbControlMap from "./keyboardControlMap";
-import { PointerEventTypes } from "@babylonjs/core";
-
+ 
 const controlMapKeys = Object.keys(kbControlMap);
-const deviceTypeRegistrationHandlers = {
-/* generic */   0: { onRegister: function (scene) { } },
-/* keyboard */  1: {
-        onRegister: function (scene, inputMap) {
-            return scene.onKeyboardObservable.add((kbInfo) => {
-                inputMap[kbInfo.event.key] = kbInfo.event.type === KeyboardEventTypes.KEYDOWN;
-            });
-        }
-    },
-/* mouse */     2: {
-        onRegister: function (scene, inputMap) {
-            scene.onPointerObservable.add((pointerInfo) => {
-                inputMap['Return'] = pointerInfo.type === PointerEventTypes.POINTERDOWN;
 
-            });
-        }
-    },
-/* touch */     3: { onRegister: function (scene) { 
-
-} },
-/* dualshock */ 4: { onRegister: function (scene) { } },
-/* xbox */      5: { onRegister: function (scene) { 
-
-} },
-/* switch */    6: { onRegister: function (scene) { } }
-}
 class SpaceTruckerInputManager {
     // inputQueue = [];
     // deviceSourceManager;
@@ -48,18 +17,20 @@ class SpaceTruckerInputManager {
         }
         return this._inputMap;
     }
-    constructor(engine) {
+    constructor(engine, enabledInputTypes) {
         this._inputMap = {};
-        
+
         this._engine = engine;
+        this.inputDevices = enabledInputTypes;
     }
 
-    registerInputForScene(sceneToRegister, handledActions) {
+    registerInputForScene(sceneToRegister) {
         const observers = [];
-        handledActions.forEach(action => {
+        this.inputDevices.forEach(action => {
             const fn = deviceTypeRegistrationHandlers[action.deviceType];
             observers.push(fn(sceneToRegister, this.inputMap));
         });
+        return observers;
     }
 
     getMatchingInputs(actionList) {

@@ -40,8 +40,10 @@ class SpaceTruckerApplication {
         return this._stateMachine.next(state).value;
     }
 
-    constructor(engine) {
+    constructor(engine, enabledInputMethods) {
         this._engine = engine;
+        this.enabledInputDevices = enabledInputMethods ||
+            [{ deviceType: 1 }, { deviceType: 2 }, { deviceType: 3 }];
         this._currentScene = null;
         this._stateMachine = this.appStateMachine();
         this._mainMenu = null;
@@ -62,11 +64,12 @@ class SpaceTruckerApplication {
 
         this._mainMenu = new MainMenuScene(this._engine);
 
-
-        this.goToOpeningCutscene();   
+        const splashObserver = this.inputManager.registerInputForScene(this._splashScreen.scene,this.enabledInputDevices);
+        const menuObserver = this.inputManager.registerInputForScene(this._mainMenu.scene, this.enabledInputDevices);
+        this._splashScreen.onReadyObservable.addOnce(() => {
+            this.goToOpeningCutscene();
+        });
     }
-
-
 
     run() {
         this.initialize();
@@ -99,31 +102,26 @@ class SpaceTruckerApplication {
             default:
                 break;
         }
-        
+
         // render
-
         this.activeScene?.scene?.render();
-
-
     }
 
     // State transition commands
     goToOpeningCutscene() {
-        this._splashScreen.onReadyObservable.add(() => {
-            this.moveNextAppState(AppStates.CUTSCENE);
-            this._currentScene?.scene?.detachControl();
-            this._currentScene = this._splashScreen;
-            this._engine.hideLoadingUI();
-            this._splashScreen.run();
-        });
+        this.moveNextAppState(AppStates.CUTSCENE);
+        this._currentScene?.scene?.detachControl();
+        this._engine.hideLoadingUI();
+        this._splashScreen.scene.attachControl();
+        this._currentScene = this._splashScreen;
+        this._splashScreen.run();
     }
 
     goToMainMenu() {
         this._currentScene?.scene?.detachControl();
         this.moveNextAppState(AppStates.MENU);
+        this._mainMenu.scene.attachControl();
         this._currentScene = this._mainMenu;
-        this._currentScene.scene.attachControl();
-
     }
 
     exit() {

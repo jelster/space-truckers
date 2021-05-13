@@ -23,15 +23,4 @@ const kbControlMap = {
     ArrowLeft: 'MOVE_LEFT',
     ArrowRight: 'MOVE_RIGHT'
 };
-
-// {  
-// MOVE_UP: ['w', 'ArrowUp', 38 ],
-//     MOVE_DOWN: ['s', 'ArrowDown', 40],
-//     MOVE_LEFT: ['a', 'ArrowLeft', 37],
-//     MOVE_RIGHT: ['d', 'ArrowRight', 39],
-//     ACTIVATE: ['Enter', 'Return', 13],
-//     GO_BACK: ['Backspace', 'Delete', 8, 46]
-// };
- 
-
 export default kbControlMap;
