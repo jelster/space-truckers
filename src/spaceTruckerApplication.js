@@ -4,6 +4,7 @@ import logger from "./logger"
 import MainMenuScene from "./mainMenuScene";
 import SplashScene from "./splashScene";
 import SpaceTruckerInputManager from "./spaceTruckerInput";
+import SpaceTruckerInputProcessor from "./spaceTruckerInputProcessor";
 
 class SpaceTruckerApplication {
     *appStateMachine() {
@@ -60,12 +61,9 @@ class SpaceTruckerApplication {
         this.moveNextAppState(AppStates.INITIALIZING);
         this.inputManager = new SpaceTruckerInputManager(engine);
 
-        this._splashScreen = new SplashScene(this._engine);
-
-        this._mainMenu = new MainMenuScene(this._engine);
-
-        const splashObserver = this.inputManager.registerInputForScene(this._splashScreen.scene,this.enabledInputDevices);
-        const menuObserver = this.inputManager.registerInputForScene(this._mainMenu.scene, this.enabledInputDevices);
+        this._splashScreen = new SplashScene(this._engine, this.inputManager);
+        this._mainMenu = new MainMenuScene(this._engine, this.inputManager);
+        this._mainMenu.actionProcessor = new SpaceTruckerInputProcessor(this._mainMenu, this.inputManager);
         this._splashScreen.onReadyObservable.addOnce(() => {
             this.goToOpeningCutscene();
         });
@@ -85,13 +83,15 @@ class SpaceTruckerApplication {
             case AppStates.INITIALIZING:
                 break;
             case AppStates.CUTSCENE:
-                this._splashScreen.updateInputs(this.inputManager);
+                this._splashScreen.update();
+
                 if (this._splashScreen.skipRequested) {
                     this.goToMainMenu();
                 }
                 break;
             case AppStates.MENU:
-                this._mainMenu.updateInputs(this.inputManager);
+                this._mainMenu.update();
+
                 break;
             case AppStates.RUNNING:
 
@@ -110,7 +110,7 @@ class SpaceTruckerApplication {
     // State transition commands
     goToOpeningCutscene() {
         this.moveNextAppState(AppStates.CUTSCENE);
-        this._currentScene?.scene?.detachControl();
+
         this._engine.hideLoadingUI();
         this._splashScreen.scene.attachControl();
         this._currentScene = this._splashScreen;
@@ -118,9 +118,9 @@ class SpaceTruckerApplication {
     }
 
     goToMainMenu() {
-        this._currentScene?.scene?.detachControl();
+        this._splashScreen.scene.detachControl();
         this.moveNextAppState(AppStates.MENU);
-        this._mainMenu.scene.attachControl();
+        // this._mainMenu.scene.attachControl();
         this._currentScene = this._mainMenu;
     }
 

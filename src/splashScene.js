@@ -16,7 +16,7 @@ import { TextWrapping } from "@babylonjs/gui/index";
 
 import CutSceneSegment from "./cutSceneSegment";
 import logger from "./logger";
-
+import SpaceTruckerInputProcessor from "./spaceTruckerInputProcessor";
 import titleSongUrl from "../assets/sounds/space-trucker-title-theme.m4a";
 import poweredByUrl from "../assets/powered-by.png";
 import communityUrl from "../assets/splash-screen-community.png";
@@ -41,7 +41,7 @@ class SplashScene {
     get scene() {
         return this._scene;
     }
-    constructor(engine) {
+    constructor(engine, inputManager) {
         this.skipRequested = false;
         this.onReadyObservable = new Observable();
         let scene = this._scene = new Scene(engine);
@@ -123,6 +123,7 @@ class SplashScene {
             },
             { autoplay: false, loop: false, volume: .01 });
 
+        this.actionProcessor = new SpaceTruckerInputProcessor(this, inputManager);
 
     }
 
@@ -147,11 +148,18 @@ class SplashScene {
         });
     }
 
-    updateInputs(inputManager) {
-        if (!this.skipRequested && inputManager.hasInput) {
+    update() {
+        this.actionProcessor?.update();
+    }
+
+    ACTIVATE(state) {
+        const lastState = state.currentState;
+        const currentState = state.priorState;
+        if (!this.skipRequested && !lastState && !currentState) {
             logger.logInfo("Key press detected. Skipping cut scene.");
             this.skipRequested = true;
         }
+        return true;
     }
 
     buildcallToActionAnimation() {
