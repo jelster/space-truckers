@@ -63,7 +63,6 @@ class SpaceTruckerApplication {
 
         this._splashScreen = new SplashScene(this._engine, this.inputManager);
         this._mainMenu = new MainMenuScene(this._engine, this.inputManager);
-        this._mainMenu.actionProcessor = new SpaceTruckerInputProcessor(this._mainMenu, this.inputManager);
         this._splashScreen.onReadyObservable.addOnce(() => {
             this.goToOpeningCutscene();
         });

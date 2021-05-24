@@ -47,6 +47,8 @@ class MainMenuScene {
     }
     constructor(engine, inputManager) {
         this._engine = engine;
+        this.actionProcessor = new SpaceTruckerInputProcessor(this, inputManager);
+
         
         let scene = this._scene = new Scene(engine);
         scene.clearColor = new Color4(0, 0, 0, 1);
