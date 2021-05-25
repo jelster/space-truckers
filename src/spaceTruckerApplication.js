@@ -41,7 +41,7 @@ class SpaceTruckerApplication {
         return this._stateMachine.next(state).value;
     }
 
-    constructor(engine, enabledInputMethods) {
+    constructor(engine) {
         this._engine = engine;
         this._currentScene = null;
         this._stateMachine = this.appStateMachine();
