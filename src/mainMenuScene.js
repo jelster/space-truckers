@@ -4,7 +4,7 @@ import { Color4 } from "@babylonjs/core/Maths/math";
 import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial";
 import { Texture } from "@babylonjs/core/Materials/Textures/texture"
 import { Scene, Vector3, Scalar, Sound, HemisphericLight } from "@babylonjs/core";
-import {Observable} from "@babylonjs/core/Misc/observable";
+import { Observable } from "@babylonjs/core/Misc/observable";
 import { AdvancedDynamicTexture, Rectangle, Image, Button, Control, TextBlock, Grid, TextWrapping } from "@babylonjs/gui";
 import { StarfieldProceduralTexture } from "@babylonjs/procedural-textures/starfield/starfieldProceduralTexture";
 import { setAndStartTimer } from "@babylonjs/core/Misc/timer";
@@ -36,7 +36,7 @@ class MainMenuScene {
     }
 
     get selectedItemIndex() {
-        return this._selectedItemIndex || -1;
+        return this._selectedItemIndex;
     }
 
     set selectedItemIndex(idx) {
@@ -47,10 +47,9 @@ class MainMenuScene {
     }
     constructor(engine, inputManager) {
         this._engine = engine;
-        this.actionProcessor = new SpaceTruckerInputProcessor(this, inputManager);
-
-        
+        this._selectedItemIndex = -1;
         let scene = this._scene = new Scene(engine);
+
         scene.clearColor = new Color4(0, 0, 0, 1);
 
         this.camera = new ArcRotateCamera("menuCam", 0, 0, -30, Vector3.Zero(), scene, true);
@@ -63,14 +62,12 @@ class MainMenuScene {
 
             const menuGrid = this._menuGrid;
             const selectedItem = this.selectedItem;
-            if (selectedItem?.isEnabled !== true) {
-                this.selectedItemIndex = 1 + idx;
-            }
+
             this._selectorIcon.isVisible = true;
             menuGrid.removeControl(this._selectorIcon);
             menuGrid.addControl(this._selectorIcon, idx);
         });
-        this.selectedItemIndex = 0;
+
         this.actionProcessor = new SpaceTruckerInputProcessor(this, inputManager);
     }
 
@@ -78,23 +75,40 @@ class MainMenuScene {
         // update and reset state variables to prepare for the update cycle
         this.actionProcessor?.update();
     }
-    
 
-    MOVE_UP() {
-        this.selectedItemIndex = this.selectedItemIndex - 1;
+
+    MOVE_UP(state) {
+        logger.logInfo("MOVE_UP");
+        const lastState = state.priorState;
+
+        if (!lastState) {
+            const oldIdx = this.selectedItemIndex;
+            const newIdx = oldIdx - 1;
+            this.selectedItemIndex = newIdx;
+            return true;
+        }
+
+
     }
 
-    MOVE_DOWN() {
-        this.selectedItemIndex = this.selectedItemIndex + 1;
+    MOVE_DOWN(state) {
+        const lastState = state.priorState;
+        if (!lastState) {
+            const oldIdx = this.selectedItemIndex;
+            const newIdx = oldIdx + 1;
+            logger.logInfo("MOVE_DOWN " + newIdx);
+            this.selectedItemIndex = newIdx;
+        }
+        return lastState;
+        
     }
 
     ACTIVATE(state) {
-        const lastState = state.currentState;
-        const currentState = state.priorState;
+        const lastState = state.priorState;
 
-        if (!lastState && !currentState) {
+        if (!lastState) {
             // this is the first time through this action handler for this button press sequence
-            
+            console.log("ACIVATE - " + this.selectedItemIndex);
             const selectedItem = this.selectedItem;
             if (selectedItem) {
                 selectedItem.onPointerClickObservable.notifyObservers();
@@ -102,7 +116,7 @@ class MainMenuScene {
             
         }
         // indicate interest in maintaining state by returning anything other than 0, null, undefined, or false
-        return true; 
+        return true;
     }
 
     GO_BACK() {

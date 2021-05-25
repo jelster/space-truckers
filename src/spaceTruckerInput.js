@@ -1,8 +1,9 @@
-import { Gamepad, KeyboardEventTypes, PointerEventTypes } from "@babylonjs/core";
+import { Gamepad, KeyboardEventTypes, Logger, PointerEventTypes } from "@babylonjs/core";
 import {Observable} from "@babylonjs/core/Misc/observable";
-
+import logger from "./logger";
 
 import SpaceTruckerControls from "./keyboardControlMap";
+
 
 const controlsMap = SpaceTruckerControls.inputControlsMap;
 class SpaceTruckerInputManager {
@@ -37,6 +38,7 @@ class SpaceTruckerInputManager {
     }
 
     registerInputForScene(sceneToRegister) {
+        logger.logInfo("registering input for scene", sceneToRegister);
         const inputSubscriptions = this.inputSubscriptions;
         const registration = {
             scene: sceneToRegister, subscriptions: [
@@ -48,14 +50,18 @@ class SpaceTruckerInputManager {
 
         sceneToRegister.onDisposeObservable.add(() => this.unregisterInputForScene(sceneToRegister));
         inputSubscriptions.push(registration);
+        sceneToRegister.attachControl();
     }
 
     unregisterInputForScene(sceneToUnregister) {
+        logger.logInfo("unregistering input controls for scene", sceneToUnregister);
         const subs = this.inputSubscriptions.find(s => s.scene === sceneToUnregister);
         if (!subs) {
+            logger.logWarning("didn't find any subscriptions to unregister...", this.inputSubscriptions);
             return;
         }
         subs.subscriptions.forEach(sub => sub.dispose());
+        sceneToUnregister.detachControl();
     }
 
     getInputs(scene) {

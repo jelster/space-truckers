@@ -43,8 +43,6 @@ class SpaceTruckerApplication {
 
     constructor(engine, enabledInputMethods) {
         this._engine = engine;
-        this.enabledInputDevices = enabledInputMethods ||
-            [{ deviceType: 1 }, { deviceType: 2 }, { deviceType: 3 }];
         this._currentScene = null;
         this._stateMachine = this.appStateMachine();
         this._mainMenu = null;
@@ -82,11 +80,12 @@ class SpaceTruckerApplication {
             case AppStates.INITIALIZING:
                 break;
             case AppStates.CUTSCENE:
-                this._splashScreen.update();
-
                 if (this._splashScreen.skipRequested) {
                     this.goToMainMenu();
+                    logger.logInfo("in application onRender - skipping splash screen message");
                 }
+                this._splashScreen.update();
+
                 break;
             case AppStates.MENU:
                 this._mainMenu.update();
@@ -111,16 +110,17 @@ class SpaceTruckerApplication {
         this.moveNextAppState(AppStates.CUTSCENE);
 
         this._engine.hideLoadingUI();
-        this._splashScreen.scene.attachControl();
+        this._splashScreen.actionProcessor.attachControl();
         this._currentScene = this._splashScreen;
         this._splashScreen.run();
     }
 
     goToMainMenu() {
-        this._splashScreen.scene.detachControl();
-        this.moveNextAppState(AppStates.MENU);
-        // this._mainMenu.scene.attachControl();
+        this._splashScreen.actionProcessor.detachControl();
         this._currentScene = this._mainMenu;
+        this.moveNextAppState(AppStates.MENU);
+        this._mainMenu.actionProcessor.attachControl();
+        
     }
 
     exit() {

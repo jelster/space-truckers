@@ -132,34 +132,34 @@ class SplashScene {
         this.music.play();
         this.music.setVolume(0.998, 400);
         this.currentSegment.start();
-
-        let prior, curr = this.currentSegment;
-        this.onUpdate = this.scene.onBeforeRenderObservable.add(() => {
-            if (this.skipRequested) {
-                this?.currentSegment.stop();
-                this.currentSegment = null;
-                return;
-            }
-            curr = this.currentSegment;
-            if (prior !== curr) {
-                this.currentSegment?.start();
-            }
-
-        });
+        // this.scene.onBeforeRenderObservable.add(() => {
+        //     this.update
+        // });
     }
 
     update() {
+        let prior, curr = this.currentSegment;
         this.actionProcessor?.update();
+        if (this.skipRequested) {
+            this?.currentSegment?.stop();
+            this.currentSegment = null;
+            return;
+        }
+        curr = this.currentSegment;
+        if (prior !== curr) {
+            this.currentSegment?.start();
+        }
     }
 
     ACTIVATE(state) {
-        const lastState = state.currentState;
-        const currentState = state.priorState;
-        if (!this.skipRequested && !lastState && !currentState) {
+        const lastState = state.priorState;
+
+        if (!this.skipRequested && !lastState) {
             logger.logInfo("Key press detected. Skipping cut scene.");
             this.skipRequested = true;
+            return true;
         }
-        return true;
+        return false;
     }
 
     buildcallToActionAnimation() {
