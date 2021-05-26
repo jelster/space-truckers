@@ -4,7 +4,6 @@ import logger from "./logger"
 import MainMenuScene from "./mainMenuScene";
 import SplashScene from "./splashScene";
 import SpaceTruckerInputManager from "./spaceTruckerInput";
-import SpaceTruckerInputProcessor from "./spaceTruckerInputProcessor";
 
 class SpaceTruckerApplication {
     *appStateMachine() {

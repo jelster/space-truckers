@@ -29,6 +29,7 @@ const flipAnimation = new Animation("flip", "rotation.x", animationFps, Animatio
 const fadeAnimation = new Animation("entranceAndExitFade", "visibility", animationFps, Animation.ANIMATIONTYPE_FLOAT, 0, true);
 const scaleAnimation = new Animation("scaleTarget", "scaling", animationFps, Animation.ANIMATIONTYPE_VECTOR3, Animation.ANIMATIONLOOPMODE_CYCLE, true);
 
+const actionList = [{ action: "ACTIVATE", shouldBounce: () => true }];
 class SplashScene {
     // currentSegment;
     // poweredBy;
@@ -123,7 +124,7 @@ class SplashScene {
             },
             { autoplay: false, loop: false, volume: .01 });
 
-        this.actionProcessor = new SpaceTruckerInputProcessor(this, inputManager);
+        this.actionProcessor = new SpaceTruckerInputProcessor(this, inputManager, actionList);
 
     }
 

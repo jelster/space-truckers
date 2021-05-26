@@ -16,6 +16,15 @@ import menuBackground from "../assets/menuBackground.png";
 import titleMusic from "../assets/sounds/space-trucker-title-theme.m4a";
 import selectionIcon from "../assets/ui-selection-icon.PNG";
 
+const menuActionList = [
+    { action: 'ACTIVATE', shouldBounce: () => true },
+    { action: 'MOVE_UP', shouldBounce: () => true },
+    { action: 'MOVE_DOWN', shouldBounce: () => true },
+    { action: 'MOVE_RIGHT', shouldBounce: () => true },
+    { action: 'MOVE_LEFT', shouldBounce: () => true },
+    { action: 'GO_BACK', shouldBounce: () => true }
+];
+
 class MainMenuScene {
     inputManager;
     camera;
@@ -68,7 +77,7 @@ class MainMenuScene {
             menuGrid.addControl(this._selectorIcon, idx);
         });
 
-        this.actionProcessor = new SpaceTruckerInputProcessor(this, inputManager);
+        this.actionProcessor = new SpaceTruckerInputProcessor(this, inputManager, menuActionList);
     }
 
     update() {
@@ -85,9 +94,9 @@ class MainMenuScene {
             const oldIdx = this.selectedItemIndex;
             const newIdx = oldIdx - 1;
             this.selectedItemIndex = newIdx;
-            return true;
-        }
 
+        }
+        return true;
 
     }
 
@@ -100,7 +109,7 @@ class MainMenuScene {
             this.selectedItemIndex = newIdx;
         }
         return lastState;
-        
+
     }
 
     ACTIVATE(state) {
@@ -113,14 +122,14 @@ class MainMenuScene {
             if (selectedItem) {
                 selectedItem.onPointerClickObservable.notifyObservers();
             }
-            
+
         }
         // indicate interest in maintaining state by returning anything other than 0, null, undefined, or false
         return true;
     }
 
     GO_BACK() {
-
+        return false;
     }
 
     _setupBackgroundEnvironment() {
