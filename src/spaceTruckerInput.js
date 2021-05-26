@@ -2,7 +2,7 @@ import { Gamepad, KeyboardEventTypes, Logger, PointerEventTypes } from "@babylon
 import {Observable} from "@babylonjs/core/Misc/observable";
 import logger from "./logger";
 
-import SpaceTruckerControls from "./keyboardControlMap";
+import SpaceTruckerControls from "./inputActionMaps";
 
 
 const controlsMap = SpaceTruckerControls.inputControlsMap;
