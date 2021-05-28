@@ -32,6 +32,7 @@ const inputControlsMap = {
     rStickRight: 'ROTATE_RIGHT',
     rStickLeft: 'ROTATE_LEFT'
 };
+
 const gamePadControlMap = {
     /* deviceType */
     2: [
@@ -41,7 +42,22 @@ const gamePadControlMap = {
         { 3: 'button4' }
     ]
 };
-
+function normalizeJoystickInputs(stick) {
+    const stickAngularSensitivity = 400;
+    const stickMoveSensitivity = 40; // see above link
+    const stickValues = {};
+    if (stick) {
+        const normalizedLX = stick.x / stickMoveSensitivity;
+        const normalizedLY = stick.y / stickMoveSensitivity;
+        stickValues.x = Math.abs(normalizedLX) > 0.005 ? 0 + normalizedLX : 0;
+        stickValues.y = Math.abs(normalizedLY) > 0.005 ? 0 + normalizedLY : 0;
+    }
+    else {
+        stick.x = 0;
+        stick.y = 0;
+    }
+    return stickValues;
+}
 function mapRotationInputToActions(stickInput, inputMap) {
     // NOTE: I have no idea if this is a reasonable threshold value, test with 5.0.0-alpha23+
     if (stickInput.x >= 0.05) {
@@ -102,9 +118,10 @@ function mapStickTranslationInputToActions(stickInput, inputMap) {
 
 }
 
-export default { 
-    inputControlsMap, 
-    gamePadControlMap, 
-    mapStickTranslationInputToActions, 
-    mapRotationInputToActions 
+export default {
+    inputControlsMap,
+    gamePadControlMap,
+    mapStickTranslationInputToActions,
+    mapRotationInputToActions,
+    normalizeJoystickInputs
 };
