@@ -9,7 +9,6 @@ function bounce(funcToBounce, bounceInMilliseconds, inputProcessor) {
         if (isBounced) {
             return false;
         }
-        console.log("taking action!", args);
         isBounced = true;
         setAndStartTimer({ 
             timeout: bounceInMilliseconds, 

@@ -154,7 +154,6 @@ class SplashScene {
 
     ACTIVATE(state) {
         const lastState = state.priorState;
-
         if (!this.skipRequested && !lastState) {
             logger.logInfo("Key press detected. Skipping cut scene.");
             this.skipRequested = true;
