@@ -73,8 +73,8 @@
             return scene;
 
             function createEnvironment(scene) {                
-                let texA = "//assets/textures/milkyway-pbr-hdr.env";
-                let skyTexture = new BABYLON.CubeTexture(texB, scene);
+                let texA = "environment/milkyway-pbr-hdr.env";
+                let skyTexture = new BABYLON.CubeTexture(texA, scene);
                 skyTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
 
                 let sb = scene.createDefaultSkybox(skyTexture, true, 4096, 0.065, true);
@@ -113,14 +113,14 @@
 
             this.star = BABYLON.MeshBuilder.CreateSphere("star", { diameter: 24 }, this._scene);
             this.starMat = new BABYLON.StandardMaterial("starMat", this._scene);
-            this.starMat.emissiveTexture = new BABYLON.Texture("//assets/textures/2k_sun.jpg", this._scene);
+            this.starMat.emissiveTexture = new BABYLON.Texture("textures/2k_sun.jpg", this._scene);
             this.starMat.diffuseTexture = this.starMat.emissiveTexture;
             this.star.material = this.starMat;
             this.innerPlanet = BABYLON.MeshBuilder.CreateSphere("innerPlanet", { diameter: 4 }, this._scene);
             this.outerPlanet = BABYLON.MeshBuilder.CreateSphere("outerPlanet", { diameter: 8 }, this._scene);
             this.jupiMat = new BABYLON.StandardMaterial("jupMat", this._scene);
             this.jupiMat.specularColor = BABYLON.Color3.Black();
-            this.jupiText = new BABYLON.Texture("//assets/textures/jupiter-globalmap.jpg", this._scene);
+            this.jupiText = new BABYLON.Texture("textures/jupiter-globalmap.jpg", this._scene);
             this.jupiMat.diffuseTexture = this.jupiText;
             this.outerPlanet.material = this.jupiMat;
 
@@ -303,8 +303,8 @@
             };
 
             this.createAsteroids = function () {
-                this._rockTexture = new BABYLON.Texture("//assets/textures/rock.png", this._scene);
-                this._rockNormals = new BABYLON.Texture("//assets/textures/rockn.png", this._scene);
+                this._rockTexture = new BABYLON.Texture("textures/rock.png", this._scene);
+                this._rockNormals = new BABYLON.Texture("textures/rockn.png", this._scene);
                 this._rockMat = new BABYLON.PBRMaterial("rockMat", this._scene);
                 this._rockMat.metallic = 0.1;
                 this._rockMat.roughness = 0.88;
