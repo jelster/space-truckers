@@ -1,3 +1,8 @@
+import { PBRMaterial } from "@babylonjs/core/Materials/PBR/pbrMaterial";
+import { Texture } from "@babylonjs/core/Materials/Textures/texture";
+import { Color3 } from "@babylonjs/core/Maths/math.color";
+import { MeshBuilder} from "@babylonjs/core/Meshes/meshBuilder";
+
 class Planet extends OrbitingGameObject {
     planetData;
     diameter;
@@ -14,7 +19,7 @@ class Planet extends OrbitingGameObject {
         this.diameter = planData.scale;
 
         planet.rotation.x = Math.PI;
-        let planetMat = new BABYLON.PBRMaterial(planData.name + "-mat", this.scene);
+        let planetMat = new PBRMaterial(planData.name + "-mat", this.scene);
         planetMat.roughness = 0.988;
         planetMat.metallic = 0.001;
 

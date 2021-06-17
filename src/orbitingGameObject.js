@@ -1,3 +1,7 @@
+import { Scalar } from "@babylonjs/core/Maths/math.scalar";
+
+import BaseGameObject from "./baseGameObject";
+
 class OrbitingGameObject extends BaseGameObject {
     angularPosition = 0.0;
     angularVelocity = 0.0;

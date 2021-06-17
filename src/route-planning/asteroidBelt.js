@@ -1,6 +1,8 @@
-import { Material } from "@babylonjs/core/Materials/material";
+import { PBRMaterial } from "@babylonjs/core/Materials/PBR/pbrMaterial";
 import { Texture } from "@babylonjs/core/Materials/Textures/texture";
 import { SolidParticleSystem } from "@babylonjs/core/Particles/solidParticleSystem";
+import { MeshBuilder} from "@babylonjs/core/Meshes/meshBuilder";
+import { Scalar } from "@babylonjs/core/Maths/math.scalar";
 import OrbitingGameObject from "../orbitingGameObject";
 
 class AsteroidBelt extends OrbitingGameObject {

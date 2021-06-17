@@ -1,3 +1,8 @@
+import { Color3 } from "@babylonjs/core/Maths/math.color";
+import { Scalar } from "@babylonjs/core/Maths/math.scalar";
+import { Vector3 } from "@babylonjs/core/Maths/math.vector";
+
+
 const planetData = [
     {
         name: "hermes",
