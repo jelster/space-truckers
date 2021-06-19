@@ -31,6 +31,8 @@ class MainMenuScene {
     selectedItemChanged = new Observable();
     actionState = {};
     lastActionState = null;
+    onPlayActionObservable = new Observable();
+    onExitActionObservable = new Observable();
 
     get scene() {
         return this._scene;
@@ -169,10 +171,10 @@ class MainMenuScene {
         menuContainer.addControl(menuGrid);
         this._menuGrid = menuGrid;
 
-        const titleText = new TextBlock("title", "Space-Truckers");
+        const titleText = new TextBlock("title", "Space-Truckers: The Main Menu");
         titleText.resizeToFit = true;
         titleText.textWrapping = TextWrapping.WordWrap;
-        titleText.fontSize = "72pt";
+        titleText.fontSize = "96pt";
         titleText.color = "white";
         titleText.width = 0.9;
         titleText.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
@@ -208,7 +210,10 @@ class MainMenuScene {
             title: "Play",
             background: "red",
             color: "white",
-            onInvoked: () => logger.logInfo("Play button clicked")
+            onInvoked: () => {
+                logger.logInfo("Play button clicked");
+                this._onMenuLeave(1000, () => this.onPlayActionObservable.notifyObservers())
+            }
         };
         const playButton = createMenuItem(pbOpts);
         this._menuGrid.addControl(playButton, this._menuGrid.children.length, 1);
@@ -220,7 +225,8 @@ class MainMenuScene {
             color: "black",
             onInvoked: () => {
                 logger.logInfo("Exit button clicked");
-                this._onMenuLeave(1000);
+                this._onMenuLeave(1000,() => this.onExitActionObservable.notifyObservers());
+                
             }
         }
         const exitButton = createMenuItem(ebOpts);
@@ -269,7 +275,7 @@ class MainMenuScene {
         return timer;
     }
 
-    _onMenuLeave(duration) {
+    _onMenuLeave(duration, onEndedAction) {
         let fadeOut = 0;
         const fadeTime = duration || 1500;
 
@@ -286,6 +292,10 @@ class MainMenuScene {
 
             },
             onEnded: () => {
+                if (onEndedAction && typeof onEndedAction === 'function') {
+                    onEndedAction();
+                }
+                
                 //this._music.stop();
 
             }

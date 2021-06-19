@@ -63,6 +63,9 @@ class SpaceTruckerApplication {
         this._splashScreen.onReadyObservable.addOnce(() => {
             this.goToOpeningCutscene();
         });
+
+        this._mainMenu.onExitActionObservable.addOnce(() => this.exit());
+        this._mainMenu.onPlayActionObservable.add(() => this.goToRunningState());
     }
 
     run() {
@@ -119,11 +122,21 @@ class SpaceTruckerApplication {
         this._currentScene = this._mainMenu;
         this.moveNextAppState(AppStates.MENU);
         this._mainMenu.actionProcessor.attachControl();
+    }
+
+    goToRunningState() {
         
+        this._mainMenu.actionProcessor.detachControl();
+        this.moveNextAppState(AppStates.RUNNING);
     }
 
     exit() {
-        this._engine.exitFullScreen();
+        this._engine.exitFullscreen();
+        this.moveNextAppState(AppStates.EXITING);
+        if (window) {
+            this._engine.dispose();
+            window.location?.reload();
+        }
     }
 }
 
