@@ -3,55 +3,135 @@ import { ArcRotateCamera } from "@babylonjs/core/Cameras/arcRotateCamera";
 import { Color4 } from "@babylonjs/core/Maths/math";
 import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial";
 import { Texture } from "@babylonjs/core/Materials/Textures/texture"
-import { Scene, Vector3, Scalar, Observable, Sound, HemisphericLight } from "@babylonjs/core";
+import { Scene, Vector3, Scalar, Sound, HemisphericLight } from "@babylonjs/core";
+import { Observable } from "@babylonjs/core/Misc/observable";
 import { AdvancedDynamicTexture, Rectangle, Image, Button, Control, TextBlock, Grid, TextWrapping } from "@babylonjs/gui";
 import { StarfieldProceduralTexture } from "@babylonjs/procedural-textures/starfield/starfieldProceduralTexture";
-
+import { setAndStartTimer } from "@babylonjs/core/Misc/timer";
 import logger from "./logger";
+import SpaceTruckerInputProcessor from "./spaceTruckerInputProcessor";
+
+
 import menuBackground from "../assets/menuBackground.png";
 import titleMusic from "../assets/sounds/space-trucker-title-theme.m4a";
 import selectionIcon from "../assets/ui-selection-icon.PNG";
 
+const menuActionList = [
+    { action: 'ACTIVATE', shouldBounce: () => true },
+    { action: 'MOVE_UP', shouldBounce: () => true },
+    { action: 'MOVE_DOWN', shouldBounce: () => true },
+    { action: 'MOVE_RIGHT', shouldBounce: () => true },
+    { action: 'MOVE_LEFT', shouldBounce: () => true },
+    { action: 'GO_BACK', shouldBounce: () => true }
+];
 
 class MainMenuScene {
+    inputManager;
+    camera;
+    selectedItemChanged = new Observable();
+    actionState = {};
+    lastActionState = null;
+    onPlayActionObservable = new Observable();
+    onExitActionObservable = new Observable();
 
     get scene() {
         return this._scene;
     }
-    get selectedItemIndex() {
-        return this._selectedItemIndex || -1;
+
+    get selectedItem() {
+        const row = this._menuGrid.getChildrenAt(this.selectedItemIndex, 1);
+        if (row && row.length) {
+            return row[0];
+        }
+        return null;
     }
+
+    get selectedItemIndex() {
+        return this._selectedItemIndex;
+    }
+
     set selectedItemIndex(idx) {
         const itemCount = this._menuGrid.rowCount;
         const newIdx = Scalar.Repeat(idx, itemCount);
         this._selectedItemIndex = newIdx;
-        this._selectedItemChanged.notifyObservers(newIdx);
+        this.selectedItemChanged.notifyObservers(newIdx);
     }
-    constructor(engine) {
-        this._music = new Sound("titleMusic", titleMusic, scene, () => logger.logInfo("loaded title music"), { autoplay: true, loop: true, volume: 0.5 });
+    constructor(engine, inputManager) {
         this._engine = engine;
+        this._selectedItemIndex = -1;
         let scene = this._scene = new Scene(engine);
+
         scene.clearColor = new Color4(0, 0, 0, 1);
 
-        const camera = new ArcRotateCamera("menuCam", 0, 0, -30, Vector3.Zero(), scene, true);
+        this.camera = new ArcRotateCamera("menuCam", 0, 0, -30, Vector3.Zero(), scene, true);
         this._setupBackgroundEnvironment();
         this._setupUi();
         this._addMenuItems();
         this._createSelectorIcon();
-        this._selectedItemChanged = new Observable();
-        this._selectedItemChanged.add((idx) => {
+
+        this.selectedItemChanged.add((idx) => {
 
             const menuGrid = this._menuGrid;
-            const selectedItem = menuGrid.getChildrenAt(idx, 1);
-            if (selectedItem[0].isEnabled !== true) {
-                this.selectedItemIndex = 1 + idx;
-            }
+            const selectedItem = this.selectedItem;
+
             this._selectorIcon.isVisible = true;
             menuGrid.removeControl(this._selectorIcon);
             menuGrid.addControl(this._selectorIcon, idx);
         });
 
-        scene.whenReadyAsync().then(() => this.selectedItemIndex = 0);
+        this.actionProcessor = new SpaceTruckerInputProcessor(this, inputManager, menuActionList);
+    }
+
+    update() {
+        // update and reset state variables to prepare for the update cycle
+        this.actionProcessor?.update();
+    }
+
+
+    MOVE_UP(state) {
+        logger.logInfo("MOVE_UP");
+        const lastState = state.priorState;
+
+        if (!lastState) {
+            const oldIdx = this.selectedItemIndex;
+            const newIdx = oldIdx - 1;
+            this.selectedItemIndex = newIdx;
+
+        }
+        return true;
+
+    }
+
+    MOVE_DOWN(state) {
+        const lastState = state.priorState;
+        if (!lastState) {
+            const oldIdx = this.selectedItemIndex;
+            const newIdx = oldIdx + 1;
+            logger.logInfo("MOVE_DOWN " + newIdx);
+            this.selectedItemIndex = newIdx;
+        }
+        return lastState;
+
+    }
+
+    ACTIVATE(state) {
+        const lastState = state.priorState;
+
+        if (!lastState) {
+            // this is the first time through this action handler for this button press sequence
+            console.log("ACIVATE - " + this.selectedItemIndex);
+            const selectedItem = this.selectedItem;
+            if (selectedItem) {
+                selectedItem.onPointerClickObservable.notifyObservers();
+            }
+
+        }
+        // indicate interest in maintaining state by returning anything other than 0, null, undefined, or false
+        return true;
+    }
+
+    GO_BACK() {
+        return false;
     }
 
     _setupBackgroundEnvironment() {
@@ -91,10 +171,10 @@ class MainMenuScene {
         menuContainer.addControl(menuGrid);
         this._menuGrid = menuGrid;
 
-        const titleText = new TextBlock("title", "Space-Truckers");
+        const titleText = new TextBlock("title", "Space-Truckers: The Main Menu");
         titleText.resizeToFit = true;
         titleText.textWrapping = TextWrapping.WordWrap;
-        titleText.fontSize = "72pt";
+        titleText.fontSize = "96pt";
         titleText.color = "white";
         titleText.width = 0.9;
         titleText.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
@@ -130,7 +210,10 @@ class MainMenuScene {
             title: "Play",
             background: "red",
             color: "white",
-            onInvoked: () => logger.logInfo("Play button clicked")
+            onInvoked: () => {
+                logger.logInfo("Play button clicked");
+                this._onMenuLeave(1000, () => this.onPlayActionObservable.notifyObservers())
+            }
         };
         const playButton = createMenuItem(pbOpts);
         this._menuGrid.addControl(playButton, this._menuGrid.children.length, 1);
@@ -142,7 +225,8 @@ class MainMenuScene {
             color: "black",
             onInvoked: () => {
                 logger.logInfo("Exit button clicked");
-                this._onMenuLeave(1000);
+                this._onMenuLeave(1000,() => this.onExitActionObservable.notifyObservers());
+                
             }
         }
         const exitButton = createMenuItem(ebOpts);
@@ -175,7 +259,7 @@ class MainMenuScene {
     _onMenuEnter(duration) {
         let fadeIn = 0;
         const fadeTime = duration || 1500;
-        const timer = BABYLON.setAndStartTimer({
+        const timer = setAndStartTimer({
             timeout: fadeTime,
             contextObservable: this._scene.onBeforeRenderObservable,
             onTick: () => {
@@ -191,13 +275,13 @@ class MainMenuScene {
         return timer;
     }
 
-    _onMenuLeave(duration) {
+    _onMenuLeave(duration, onEndedAction) {
         let fadeOut = 0;
         const fadeTime = duration || 1500;
 
         this._menuContainer.isVisible = false;
 
-        const timer = BABYLON.setAndStartTimer({
+        const timer = setAndStartTimer({
             timeout: fadeTime,
             contextObservable: this._scene.onBeforeRenderObservable,
             onTick: () => {
@@ -208,7 +292,11 @@ class MainMenuScene {
 
             },
             onEnded: () => {
-                this._music.stop();
+                if (onEndedAction && typeof onEndedAction === 'function') {
+                    onEndedAction();
+                }
+                
+                //this._music.stop();
 
             }
         });

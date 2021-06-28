@@ -2,7 +2,8 @@
 import AppStates from "./appstates"
 import logger from "./logger"
 import MainMenuScene from "./mainMenuScene";
-
+import SplashScene from "./splashScene";
+import SpaceTruckerInputManager from "./spaceTruckerInput";
 
 class SpaceTruckerApplication {
     *appStateMachine() {
@@ -16,7 +17,7 @@ class SpaceTruckerApplication {
         }
 
         while (true) {
-            let nextState = yield;
+            let nextState = yield currentState;
             if (nextState !== null && nextState !== undefined) {
                 setState(nextState);
                 if (nextState === AppStates.EXITING) {
@@ -27,7 +28,7 @@ class SpaceTruckerApplication {
     }
 
     get currentState() {
-        return this._stateMachine.next();
+        return this._stateMachine.next().value;
     }
 
     get activeScene() {
@@ -48,81 +49,94 @@ class SpaceTruckerApplication {
         this.moveNextAppState(AppStates.CREATED);
     }
 
-    async initialize() {
-        this._engine.enterFullscreen(true);
+    initialize() {
+        const engine = this._engine;
+        engine.enterFullscreen(true);
 
-        // note: this will be replaced with the call done internally from AssetManager at some point
-        this._engine.displayLoadingUI();
-        
-        this.moveNextAppState(AppStates.INITIALIZING)
+        engine.displayLoadingUI();
 
-        // for simulating loading times
-        const p = new Promise((res, rej) => {
-            setTimeout(() => res(), 5000);
+        this.moveNextAppState(AppStates.INITIALIZING);
+        this.inputManager = new SpaceTruckerInputManager(engine);
+
+        this._splashScreen = new SplashScene(this._engine, this.inputManager);
+        this._mainMenu = new MainMenuScene(this._engine, this.inputManager);
+        this._splashScreen.onReadyObservable.addOnce(() => {
+            this.goToOpeningCutscene();
         });
 
-        await p;
-
-        this._engine.hideLoadingUI();
-
-       
+        this._mainMenu.onExitActionObservable.addOnce(() => this.exit());
+        this._mainMenu.onPlayActionObservable.add(() => this.goToRunningState());
     }
 
-    async run() {
-        await this.initialize();
-        await this.goToMainMenu();
+    run() {
+        this.initialize();
+        this._engine.runRenderLoop(() => this.onRender());
+    }
 
-        this._engine.runRenderLoop(() => {
-            // update loop
-            let state = this.currentState;
-            switch (state) {
-                case AppStates.CREATED:
-                case AppStates.INITIALIZING:
-                    break;
-                case AppStates.CUTSCENE:
-                    logger.logInfo("App State: Cutscene");
-                    break;
-                case AppStates.MENU:
-                    break;
-                case AppStates.RUNNING:
-                    this.goToOpeningCutscene();
-                    break;
-                case AppStates.EXITING:
-                    this.exit();
-                    break;
-                default:
-                    //             logger.logWarning("Unrecognized AppState value " + state);
-                    break;
-            }
+    onRender() {
+        // update loop. Inputs are routed to the active state's scene.
+        let state = this.currentState;
 
-            // render
-            this._currentScene?.render();
+        switch (state) {
+            case AppStates.CREATED:
+            case AppStates.INITIALIZING:
+                break;
+            case AppStates.CUTSCENE:
+                if (this._splashScreen.skipRequested) {
+                    this.goToMainMenu();
+                    logger.logInfo("in application onRender - skipping splash screen message");
+                }
+                this._splashScreen.update();
 
-        });
+                break;
+            case AppStates.MENU:
+                this._mainMenu.update();
+
+                break;
+            case AppStates.RUNNING:
+
+                break;
+            case AppStates.EXITING:
+
+                break;
+            default:
+                break;
+        }
+
+        // render
+        this.activeScene?.scene?.render();
     }
 
     // State transition commands
-    async goToOpeningCutscene() {
-        this._engine.displayLoadingUI();
+    goToOpeningCutscene() {
         this.moveNextAppState(AppStates.CUTSCENE);
 
-        return Promise.resolve()
-            .then(() => this._engine.hideLoadingUI());
+        this._engine.hideLoadingUI();
+        this._splashScreen.actionProcessor.attachControl();
+        this._currentScene = this._splashScreen;
+        this._splashScreen.run();
     }
 
-    async goToMainMenu() {
-        this._engine.displayLoadingUI();
-        this._mainMenu = new MainMenuScene(this._engine);
-        this._currentScene = this._mainMenu.scene;
-
-        this._engine.hideLoadingUI();
+    goToMainMenu() {
+        this._splashScreen.actionProcessor.detachControl();
+        this._currentScene = this._mainMenu;
         this.moveNextAppState(AppStates.MENU);
-        return Promise.resolve()
-            .then(() => this._engine.hideLoadingUI());
+        this._mainMenu.actionProcessor.attachControl();
+    }
+
+    goToRunningState() {
+        
+        this._mainMenu.actionProcessor.detachControl();
+        this.moveNextAppState(AppStates.RUNNING);
     }
 
     exit() {
-
+        this._engine.exitFullscreen();
+        this.moveNextAppState(AppStates.EXITING);
+        if (window) {
+            this._engine.dispose();
+            window.location?.reload();
+        }
     }
 }
 
