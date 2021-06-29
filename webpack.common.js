@@ -7,7 +7,8 @@ module.exports = {
     entry: "./src/index.js",
     output: {
         filename: "js/babylonBundle.js",
-        path: path.resolve(appDirectory, "dist")
+        path: path.resolve(appDirectory, "dist"),
+        assetModuleFilename: 'assets/[name][ext][query]'
     },
     resolve: {
         extensions: [".ts", ".js"],
@@ -30,7 +31,7 @@ module.exports = {
                 enforce: "pre",
             },
             {
-                test: /\.(png|jpg|gif|env|glb|stl|m4a|mp3|css)$/i,
+                test: /\.(png|jpg|gif|env|glb|gltf|env|stl|m4a|mp3|css)$/i,
                 type: "asset/resource"
             },
         ],

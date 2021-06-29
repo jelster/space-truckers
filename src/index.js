@@ -2,6 +2,8 @@ import { Engine } from "@babylonjs/core/Engines/engine";
 import SpaceTruckerApplication from "./spaceTruckerApplication";
 import SpaceTruckerLoadingScreen from "./spaceTruckerLoadingScreen";
 import logger from "./logger";
+import styleSheet from "../public/assets/index.css";
+import landingPageBackground from "../public/assets/space-truckers-landing-logo.jpg";
 
 const CanvasName = "index-canvas";
 const launchButton = document.getElementById("btnLaunch");
