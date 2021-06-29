@@ -62,9 +62,7 @@ class SpaceTruckerPlanningScreen {
         this.actionProcessor = new SpaceTruckerInputProcessor(this, inputManager, []);
         this.config = config;
 
-        engine.displayLoadingUI();
-
-        engine.loadingUIText = 'Loading route planning...';
+        
 
         this.scene.clearColor = new Color3(0.1, 0.1, 0.1);
 
@@ -105,7 +103,7 @@ class SpaceTruckerPlanningScreen {
 
         this.scene.onReadyObservable.add(() => {
             console.log("ready scene");
-            engine.hideLoadingUI();
+            
 
             this.setReadyToLaunchState();
         });
@@ -129,7 +127,7 @@ class SpaceTruckerPlanningScreen {
         this.cargo = new CargoUnit(this.scene, { origin: this.origin });
         this.camera.useAutoRotationBehavior = true;
         this.camera.useFramingBehavior = true;
-
+        this.camera.attachControl();
 
         // this.camera.radius = 500;
 

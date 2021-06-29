@@ -79,7 +79,7 @@ class SpaceTruckerApplication {
     onRender() {
         // update loop. Inputs are routed to the active state's scene.
         let state = this.currentState;
-
+        const gameTime = this._engine.getDeltaTime() / 1000
         switch (state) {
             case AppStates.CREATED:
             case AppStates.INITIALIZING:
@@ -97,7 +97,7 @@ class SpaceTruckerApplication {
 
                 break;
             case AppStates.RUNNING:
-                this?._routePlanningScene.update();
+                this?._routePlanningScene.update(gameTime);
 
                 break;
             case AppStates.EXITING:

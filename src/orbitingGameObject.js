@@ -1,5 +1,7 @@
 import { Scalar } from "@babylonjs/core/Maths/math.scalar";
-import {gravConstant, primaryReferenceMass} from "./route-planning/gameData"
+import gameData from "./route-planning/gameData";
+
+
 import BaseGameObject from "./baseGameObject";
 
 class OrbitingGameObject extends BaseGameObject {
@@ -18,7 +20,7 @@ class OrbitingGameObject extends BaseGameObject {
     }
 
     setOrbitalParameters() {
-        const Gm = gravConstant * primaryReferenceMass;
+        const Gm = gameData.gravConstant * gameData.primaryReferenceMass;
         const rCubed = Math.pow(this.orbitalRadius, 3);
         const period = Scalar.TwoPi * Math.sqrt(rCubed / Gm);
         const v = Math.sqrt(Gm / this.orbitalRadius);
@@ -28,7 +30,6 @@ class OrbitingGameObject extends BaseGameObject {
         this.orbitalVelocity = v;
         this.angularVelocity = w;
         this.orbitalCircumfrence = Math.pow(Math.PI * this.orbitalRadius, 2);
-        //  logger.logInfo("Calculated and started orbital animation for " + planet.name);
     }
 
     update(deltaTime) {
