@@ -1,5 +1,5 @@
 import { Scalar } from "@babylonjs/core/Maths/math.scalar";
-
+import {gravConstant, primaryReferenceMass} from "./route-planning/gameData"
 import BaseGameObject from "./baseGameObject";
 
 class OrbitingGameObject extends BaseGameObject {

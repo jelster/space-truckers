@@ -3,7 +3,7 @@ import { Observable } from "@babylonjs/core/Misc/observable";
 import { Scene } from "@babylonjs/core/scene";
 import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
 import { CubeTexture } from "@babylonjs/core/Materials/Textures/cubeTexture";
-import { ArcRotateCamera } from "@babylonjs/core/cameras/arcRotateCamera";
+import { ArcRotateCamera } from "@babylonjs/core/Cameras/arcRotateCamera";
 import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial";
 import { Sound } from "@babylonjs/core/Audio/sound";
 import { PointLight } from "@babylonjs/core/Lights/pointLight";
@@ -14,6 +14,9 @@ import { Color3 } from "@babylonjs/core/Maths/math.color";
 import AsteroidBelt from "./route-planning/asteroidBelt";
 import Planet from "./route-planning/planet";
 import CargoUnit from "./route-planning/cargoUnit";
+import SpaceTruckerInputProcessor from "./spaceTruckerInputProcessor";
+
+import backgroundMusicUrl from "../assets/music/Space-Truckers overworld theme.m4a";
 
 const PLANNING_STATE = Object.freeze({
     Created: 0,
@@ -38,6 +41,7 @@ class SpaceTruckerPlanningScreen {
     destinationMesh;
     asteroidBelt;
     muzak;
+    actionProcessor;
     onStateChangeObservable = new Observable();
 
     get state() {
@@ -53,8 +57,9 @@ class SpaceTruckerPlanningScreen {
 
     _state = PLANNING_STATE.Created;
 
-    constructor(engine, config) {
+    constructor(engine, inputManager, config) {
         this.scene = new Scene(engine);
+        this.actionProcessor = new SpaceTruckerInputProcessor(this, inputManager, []);
         this.config = config;
 
         engine.displayLoadingUI();
@@ -78,7 +83,7 @@ class SpaceTruckerPlanningScreen {
         this.asteroidBelt = new AsteroidBelt(this.scene, config.asteroidBeltOptions);
 
         //let skyTexture = CubeTexture.CreateFromImages(skyBoxfiles, this.scene);
-        const skyTexture = new CubeTexture(environmentTextureUrl, this.scene);
+        const skyTexture = new CubeTexture(config.environment.environmentTexture, this.scene);
         skyTexture.coordinatesMode = Texture.SKYBOX_MODE;
         this.scene.reflectionTexture = skyTexture;
         let sb = this.scene.createDefaultSkybox(skyTexture, false, 20000);
@@ -97,6 +102,7 @@ class SpaceTruckerPlanningScreen {
             console.log("muzak ready");
             this.muzak.play();
         }, muzakOptions);
+
         this.scene.onReadyObservable.add(() => {
             console.log("ready scene");
             engine.hideLoadingUI();
@@ -127,7 +133,7 @@ class SpaceTruckerPlanningScreen {
 
         // this.camera.radius = 500;
 
-        this.camera.attachControl(canvas, true);
+         
         this.state = PLANNING_STATE.ReadyToLaunch;
     }
 

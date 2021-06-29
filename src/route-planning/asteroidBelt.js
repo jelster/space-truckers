@@ -5,6 +5,9 @@ import { MeshBuilder} from "@babylonjs/core/Meshes/meshBuilder";
 import { Scalar } from "@babylonjs/core/Maths/math.scalar";
 import OrbitingGameObject from "../orbitingGameObject";
 
+import rockTextureUrl from "../../assets/textures/rock.png";
+import rockNormalUrl from "../../assets/textures/rockn.png";
+
 class AsteroidBelt extends OrbitingGameObject {
     asteroidData;
     rockMat;

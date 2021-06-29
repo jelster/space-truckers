@@ -1,7 +1,9 @@
 import { PBRMaterial } from "@babylonjs/core/Materials/PBR/pbrMaterial";
 import { Texture } from "@babylonjs/core/Materials/Textures/texture";
 import { Color3 } from "@babylonjs/core/Maths/math.color";
+import { Scalar } from "@babylonjs/core/Maths/math.scalar";
 import { MeshBuilder} from "@babylonjs/core/Meshes/meshBuilder";
+import OrbitingGameObject from "../orbitingGameObject";
 
 class Planet extends OrbitingGameObject {
     planetData;

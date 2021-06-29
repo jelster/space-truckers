@@ -2,6 +2,22 @@ import { Color3 } from "@babylonjs/core/Maths/math.color";
 import { Scalar } from "@babylonjs/core/Maths/math.scalar";
 import { Vector3 } from "@babylonjs/core/Maths/math.vector";
 
+import ceresDiffuseUrl from "../../assets/textures/2k_ceres_fictional.jpg";
+import ceresBumpUrl from "../../assets/textures/2k_ceres_fictional.dds";
+
+import earthDiffuseUrl from "../../assets/textures/2k_earth_daymap.jpg";
+import earthNormalUrl from "../../assets/textures/2k_earth_normal_map.png";
+import earthSpecularUrl from "../../assets/textures/2k_earth_specular_map.png";
+import earthCloudsUrl from "../../assets/textures/2k_earth_clouds.jpg";
+
+import jupiterTextureUrl from "../../assets/textures/jupiter-globalmap.jpg";
+
+import neptuneUrl from "../../assets/textures/nep0fds1.jpg";
+
+import sunTextureUrl from "../../assets/textures/2k_sun.jpg";
+
+import environmentTextureUrl from "../../assets/environment/milkyway-pbr-hdr.env";
+
 
 const planetData = [
     {
@@ -10,7 +26,7 @@ const planetData = [
         posRadius: 450,
         scale: 10,
         color: new Color3(0.45, 0.33, 0.18),
-        diffuseTexture: ceresDiffuseURl,
+        diffuseTexture: ceresDiffuseUrl,
         normalTexture: ceresBumpUrl,
         specularTexture: null,
         lightMapUrl: null,
@@ -33,7 +49,7 @@ const planetData = [
         posRadius: 2500,
         scale: 200,
         color: new Color3(0.17, 0.63, 0.05),
-        diffuseTexture: juperTextureUrl,
+        diffuseTexture: jupiterTextureUrl,
         normalTexture: null,
         specularTexture: null,
         lightMapUrl: null
@@ -44,7 +60,7 @@ const planetData = [
         posRadius: 4000,
         scale: 110,
         color: new Color3(0.55, 0, 0),
-        diffuseTexture: saturnUrl,
+        diffuseTexture: neptuneUrl,
         normalTexture: null,
         specularTexture: null,
         lightMapUrl: null
@@ -66,10 +82,13 @@ const gameData = {
     starData: {
         scale: 500,
         diffuseTexture: sunTextureUrl
+    },
+    environment: {
+        environmentTexture: environmentTextureUrl
     }
 };
 
 const primaryReferenceMass = 4e15;
 const gravConstant = 6.67259e-11;
 
-export default { planetData, gameData, primaryReferenceMass, gravConstant };
+export default { gameData, primaryReferenceMass, gravConstant };

@@ -1,5 +1,7 @@
 import { Vector3 } from "@babylonjs/core/Maths/math.vector";
 import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
+import BaseGameObject from "../baseGameObject";
+ 
 class CargoUnit extends BaseGameObject {
     distanceTraveled = 0.0;
     timeInTransit = 0.0;
