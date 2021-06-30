@@ -11,10 +11,10 @@ import { Texture } from "@babylonjs/core/Materials/Textures/texture";
 import { Color3 } from "@babylonjs/core/Maths/math.color";
 
 
-import AsteroidBelt from "./route-planning/asteroidBelt";
-import Planet from "./route-planning/planet";
-import CargoUnit from "./route-planning/cargoUnit";
-import SpaceTruckerInputProcessor from "./spaceTruckerInputProcessor";
+import AsteroidBelt from "./asteroidBelt";
+import Planet from "./planet";
+import CargoUnit from "./cargoUnit";
+import SpaceTruckerInputProcessor from "../spaceTruckerInputProcessor";
 
 import backgroundMusicUrl from "../assets/music/Space-Truckers overworld theme.m4a";
 

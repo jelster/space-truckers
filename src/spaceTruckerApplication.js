@@ -3,9 +3,8 @@ import AppStates from "./appstates"
 import logger from "./logger"
 import MainMenuScene from "./mainMenuScene";
 import SplashScene from "./splashScene";
-import RoutePlanningScene from "./spaceTruckerPlanningScreen";
+import SpaceTruckerPlanningScreen from "./route-planning/spaceTruckerPlanningScreen";
 import SpaceTruckerInputManager from "./spaceTruckerInput";
-import SpaceTruckerPlanningScreen from "./spaceTruckerPlanningScreen";
 
 import appData from "./route-planning/gameData";
 class SpaceTruckerApplication {
