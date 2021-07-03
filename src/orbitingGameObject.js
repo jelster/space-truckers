@@ -11,16 +11,18 @@ class OrbitingGameObject extends BaseGameObject {
     orbitalRadius = 0.0;
     orbitalVelocity = 0.0;
     orbitalCircumfrence = 0.0;
+
     constructor(scene, orbitalData) {
         super(scene);
 
         this.angularPosition = orbitalData?.posRadians;
         this.orbitalRadius = orbitalData?.posRadius;
-        this.setOrbitalParameters();
+
+        this.setOrbitalParameters(gameData.gravConstant, gameData.primaryReferenceMass);
     }
 
-    setOrbitalParameters() {
-        const Gm = gameData.gravConstant * gameData.primaryReferenceMass;
+    setOrbitalParameters(gravConstant, primaryReferenceMass) {
+        const Gm = gravConstant * primaryReferenceMass;
         const rCubed = Math.pow(this.orbitalRadius, 3);
         const period = Scalar.TwoPi * Math.sqrt(rCubed / Gm);
         const v = Math.sqrt(Gm / this.orbitalRadius);
