@@ -16,7 +16,7 @@ import Planet from "./planet";
 import CargoUnit from "./cargoUnit";
 import SpaceTruckerInputProcessor from "../spaceTruckerInputProcessor";
 
-import backgroundMusicUrl from "../assets/music/Space-Truckers overworld theme.m4a";
+import backgroundMusicUrl from "../../assets/music/space-truckers-overworld-theme.m4a";
 
 const PLANNING_STATE = Object.freeze({
     Created: 0,

@@ -17,7 +17,7 @@ import { TextWrapping } from "@babylonjs/gui/index";
 import CutSceneSegment from "./cutSceneSegment";
 import logger from "./logger";
 import SpaceTruckerInputProcessor from "./spaceTruckerInputProcessor";
-import titleSongUrl from "../assets/sounds/space-trucker-title-theme.m4a";
+import titleSongUrl from "../assets/music/space-trucker-title-theme.m4a";
 import poweredByUrl from "../assets/powered-by.png";
 import communityUrl from "../assets/splash-screen-community.png";
 import spaceTruckerRigUrl from "../assets/space-trucker-and-rig.png";
