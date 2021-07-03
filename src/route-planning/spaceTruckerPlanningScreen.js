@@ -15,8 +15,8 @@ import AsteroidBelt from "./asteroidBelt";
 import Planet from "./planet";
 import CargoUnit from "./cargoUnit";
 import SpaceTruckerInputProcessor from "../spaceTruckerInputProcessor";
-
-import backgroundMusicUrl from "../../assets/music/space-truckers-overworld-theme.m4a";
+import SpaceTruckerSoundManager from "../spaceTruckerSoundManager";
+ 
 
 const PLANNING_STATE = Object.freeze({
     Created: 0,
@@ -28,6 +28,7 @@ const PLANNING_STATE = Object.freeze({
 });
 
 
+const overworldMusic = "overworld";
 class SpaceTruckerPlanningScreen {
     scene;
     config;
@@ -40,9 +41,10 @@ class SpaceTruckerPlanningScreen {
     launchArrow;
     destinationMesh;
     asteroidBelt;
-    muzak;
+    soundManager;
     actionProcessor;
     onStateChangeObservable = new Observable();
+
 
     get state() {
         return this._state;
@@ -62,7 +64,7 @@ class SpaceTruckerPlanningScreen {
         this.actionProcessor = new SpaceTruckerInputProcessor(this, inputManager, []);
         this.config = config;
 
-        
+        this.soundManager = new SpaceTruckerSoundManager(this.scene, overworldMusic)
 
         this.scene.clearColor = new Color3(0.1, 0.1, 0.1);
 
@@ -95,22 +97,14 @@ class SpaceTruckerPlanningScreen {
         this.light = new PointLight("starLight", new Vector3(), this.scene);
         this.light.intensity = 10000000;
 
-        const muzakOptions = { autoplay: false, loop: true, volume: 0.87 };
-        this.muzak = new Sound("overworld-music", backgroundMusicUrl, this.scene, () => {
-            console.log("muzak ready");
-            this.muzak.play();
-        }, muzakOptions);
-
-        this.scene.onReadyObservable.add(() => {
-            console.log("ready scene");
-            
-
-            this.setReadyToLaunchState();
-        });
-
     }
 
     setReadyToLaunchState() {
+        const muzak = this.soundManager.sound(overworldMusic);
+        if (muzak && !(muzak.isPlaying || muzak.isPaused)) {
+            muzak.play();
+        }
+
         if (this.trailMesh) {
             this.trailMesh.dispose();
             this.trailMesh = null;

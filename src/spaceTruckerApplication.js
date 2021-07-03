@@ -58,16 +58,22 @@ class SpaceTruckerApplication {
         engine.displayLoadingUI();
 
         this.moveNextAppState(AppStates.INITIALIZING);
+        this._engine.loadingUIText = "Initializing Input...";
         this.inputManager = new SpaceTruckerInputManager(engine);
 
+        this._engine.loadingUIText = "Loading Splash Scene...";
         this._splashScreen = new SplashScene(this._engine, this.inputManager);
+
+        this._engine.loadingUIText = "Loading Main Menu...";
         this._mainMenu = new MainMenuScene(this._engine, this.inputManager);
         this._splashScreen.onReadyObservable.addOnce(() => {
             this.goToOpeningCutscene();
         });
-
         this._mainMenu.onExitActionObservable.addOnce(() => this.exit());
         this._mainMenu.onPlayActionObservable.add(() => this.goToRunningState());
+        
+        this._engine.loadingUIText = "Loading Route Planning...";
+        this._routePlanningScene = new SpaceTruckerPlanningScreen(this._engine, this.inputManager, appData.gameData);
     }
 
     run() {
@@ -128,16 +134,11 @@ class SpaceTruckerApplication {
     }
 
     goToRunningState() {
-        
         this._currentScene.actionProcessor.detachControl();
-        if (!this._routePlanningScene) {
-            this._engine.displayLoadingUI();
-            this._engine.loadingUIText = "Loading Route Planning...";
-            this._routePlanningScene = new SpaceTruckerPlanningScreen(this._engine, this.inputManager, appData.gameData);
-            this._routePlanningScene.scene.onReadyObservable.addOnce(() => this._engine.hideLoadingUI());
-        }
+        
         this._currentScene = this._routePlanningScene;
-        this.moveNextAppState(AppStates.RUNNING);
+        this._routePlanningScene.setReadyToLaunchState();
+        this.moveNextAppState(AppStates.RUNNING);        
         this._currentScene.actionProcessor.attachControl();
 
         
