@@ -114,28 +114,31 @@ class SpaceTruckerApplication {
     goToOpeningCutscene() {
         this.moveNextAppState(AppStates.CUTSCENE);
 
-        this._engine.hideLoadingUI();
+        this._splashScreen.onReadyObservable.addOnce(() => this._engine.hideLoadingUI());
         this._splashScreen.actionProcessor.attachControl();
         this._currentScene = this._splashScreen;
         this._splashScreen.run();
     }
 
     goToMainMenu() {
-        this._splashScreen.actionProcessor.detachControl();
+        this._currentScene.actionProcessor.detachControl();
         this._currentScene = this._mainMenu;
         this.moveNextAppState(AppStates.MENU);
-        this._mainMenu.actionProcessor.attachControl();
+        this._currentScene.actionProcessor.attachControl();
     }
 
     goToRunningState() {
         
-        this._mainMenu.actionProcessor.detachControl();
+        this._currentScene.actionProcessor.detachControl();
         if (!this._routePlanningScene) {
+            this._engine.displayLoadingUI();
+            this._engine.loadingUIText = "Loading Route Planning...";
             this._routePlanningScene = new SpaceTruckerPlanningScreen(this._engine, this.inputManager, appData.gameData);
+            this._routePlanningScene.scene.onReadyObservable.addOnce(() => this._engine.hideLoadingUI());
         }
         this._currentScene = this._routePlanningScene;
-        this._routePlanningScene.actionProcessor.attachControl();
         this.moveNextAppState(AppStates.RUNNING);
+        this._currentScene.actionProcessor.attachControl();
 
         
     }

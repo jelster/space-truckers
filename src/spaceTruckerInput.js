@@ -174,7 +174,7 @@ class SpaceTruckerInputManager {
             SpaceTruckerControls.mapStickTranslationInputToActions(LSValues, iMap);
 
             let RSValues = SpaceTruckerControls.normalizeJoystickInputs(this.gamepad.rightStick);
-            SpaceTruckerControls.mapStickRotationInputToActions(RSValues, iMap);
+            SpaceTruckerControls.mapRotationInputToActions(RSValues, iMap);
 
         };
 
