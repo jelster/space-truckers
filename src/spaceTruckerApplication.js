@@ -3,10 +3,11 @@ import AppStates from "./appstates"
 import logger from "./logger"
 import MainMenuScene from "./mainMenuScene";
 import SplashScene from "./splashScene";
-import SpaceTruckerPlanningScreen from "./route-planning/spaceTruckerPlanningScreen";
-import SpaceTruckerInputManager from "./spaceTruckerInput";
+ import SpaceTruckerInputManager from "./spaceTruckerInput";
 
 import appData from "./route-planning/gameData";
+import SpaceTruckerPlanningScreen from "./route-planning/spaceTruckerPlanningScreen"; 
+
 class SpaceTruckerApplication {
     *appStateMachine() {
         let previousState = null;
@@ -73,7 +74,7 @@ class SpaceTruckerApplication {
         this._mainMenu.onPlayActionObservable.add(() => this.goToRunningState());
         
         this._engine.loadingUIText = "Loading Route Planning...";
-        this._routePlanningScene = new SpaceTruckerPlanningScreen(this._engine, this.inputManager, appData.gameData);
+        this._routePlanningScene = new SpaceTruckerPlanningScreen(this._engine, this.inputManager, appData.gameData);    
     }
 
     run() {
@@ -137,9 +138,10 @@ class SpaceTruckerApplication {
         this._currentScene.actionProcessor.detachControl();
         
         this._currentScene = this._routePlanningScene;
-        this._routePlanningScene.setReadyToLaunchState();
+
         this.moveNextAppState(AppStates.RUNNING);        
         this._currentScene.actionProcessor.attachControl();
+        this._routePlanningScene.setReadyToLaunchState();
 
         
     }

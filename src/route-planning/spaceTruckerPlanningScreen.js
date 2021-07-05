@@ -16,16 +16,10 @@ import Planet from "./planet";
 import CargoUnit from "./cargoUnit";
 import SpaceTruckerInputProcessor from "../spaceTruckerInputProcessor";
 import SpaceTruckerSoundManager from "../spaceTruckerSoundManager";
- 
+import PlanningScreenGui from "./route-plan-gui";
 
-const PLANNING_STATE = Object.freeze({
-    Created: 0,
-    ReadyToLaunch: 1,
-    InFlight: 2,
-    CargoArrived: 3,
-    RouteAccepted: 4,
-    GeneratingCourse: 5
-});
+
+
 
 
 const overworldMusic = "overworld";
@@ -45,19 +39,28 @@ class SpaceTruckerPlanningScreen {
     actionProcessor;
     onStateChangeObservable = new Observable();
 
+    static PLANNING_STATE = Object.freeze({
+        Created: 0,
+        Initialized: 1,
+        ReadyToLaunch: 2,
+        InFlight: 3,
+        CargoArrived: 4,
+        RouteAccepted: 5,
+        GeneratingCourse: 6
+    });
 
     get state() {
         return this._state;
     }
     set state(value) {
-        const currValue = this.state;
-        if (currValue !== value) {
+        if (this._previousState != value) {
+            this._previousState = this._state;
             this._state = value;
-            this.onStateChangeObservable.notifyObservers({ priorState: currValue, currentState: value });
+            this.onStateChangeObservable.notifyObservers({ priorState: this._previousState, currentState: value });
         }
     }
-
-    _state = PLANNING_STATE.Created;
+    _previousState = SpaceTruckerPlanningScreen.PLANNING_STATE.Created;
+    _state = SpaceTruckerPlanningScreen.PLANNING_STATE.Created;
 
     constructor(engine, inputManager, config) {
         this.scene = new Scene(engine);
@@ -86,7 +89,7 @@ class SpaceTruckerPlanningScreen {
         const skyTexture = new CubeTexture(config.environment.environmentTexture, this.scene);
         skyTexture.coordinatesMode = Texture.SKYBOX_MODE;
         this.scene.reflectionTexture = skyTexture;
-        let sb = this.scene.createDefaultSkybox(skyTexture, false, 20000);
+        this.skybox = this.scene.createDefaultSkybox(skyTexture, false, 20000);
 
         this.camera = new ArcRotateCamera("cam", 0, 1.35, 3000, Vector3.Zero(), this.scene);
 
@@ -97,6 +100,20 @@ class SpaceTruckerPlanningScreen {
         this.light = new PointLight("starLight", new Vector3(), this.scene);
         this.light.intensity = 10000000;
 
+
+        this.origin = this.planets.filter(p => p.name ===
+            this.config.startingPlanet)[0];
+
+        this.destination = this.planets.filter(p =>
+            p.name === this.config.endingPlanet)[0];
+
+        this.cargo = new CargoUnit(this.scene, { origin: this.origin });
+
+        this.scene.onReadyObservable.add(() => {
+            this.state = SpaceTruckerPlanningScreen.PLANNING_STATE.Initialized;
+            this.ui = new PlanningScreenGui(this);
+            this.ui.bindToScreen();
+        });
     }
 
     setReadyToLaunchState() {
@@ -105,45 +122,29 @@ class SpaceTruckerPlanningScreen {
             muzak.play();
         }
 
-        if (this.trailMesh) {
-            this.trailMesh.dispose();
-            this.trailMesh = null;
-        }
+        this.cargo.reset();
 
-        this.origin = this.planets.filter(p => p.name ===
-            this.config.startingPlanet)[0];
-
-
-        this.destination = this.planets.filter(p =>
-            p.name === this.config.endingPlanet)[0];
-
-        //  this?.cargo?.dispose();
-        this.cargo = new CargoUnit(this.scene, { origin: this.origin });
         this.camera.useAutoRotationBehavior = true;
         this.camera.useFramingBehavior = true;
-        this.camera.attachControl();
-
-        // this.camera.radius = 500;
-
-         
-        this.state = PLANNING_STATE.ReadyToLaunch;
+        this.camera.attachControl(true);
+        this.state = SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch;
     }
 
     update(deltaTime) {
         const dT = deltaTime ?? (this.scene.getEngine().getDeltaTime() / 1000);
 
         switch (this.state) {
-            case PLANNING_STATE.Created:
+            case SpaceTruckerPlanningScreen.PLANNING_STATE.Created:
                 break;
-            case PLANNING_STATE.ReadyToLaunch:
-            case PLANNING_STATE.InFlight:
+            case SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch:
+            case SpaceTruckerPlanningScreen.PLANNING_STATE.InFlight:
                 this.planets.forEach(p => p.update(dT));
                 this.asteroidBelt.update(dT);
                 this.cargo.update(dT);
                 break;
-            case PLANNING_STATE.CargoArrived:
+            case SpaceTruckerPlanningScreen.PLANNING_STATE.CargoArrived:
                 break;
-            case PLANNING_STATE.RouteAccepted:
+            case SpaceTruckerPlanningScreen.PLANNING_STATE.RouteAccepted:
                 break;
             default:
                 break;
