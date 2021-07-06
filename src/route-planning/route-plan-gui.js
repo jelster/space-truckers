@@ -1,9 +1,10 @@
-import {Rectangle}  from "@babylonjs/gui/2D/controls/rectangle";
- 
-import { AdvancedDynamicTexture} from "@babylonjs/gui/2D/advancedDynamicTexture";
-import {TextBlock} from "@babylonjs/gui/2D/controls/textBlock";
-import {Control} from "@babylonjs/gui/2D/controls/control";
+import { Rectangle } from "@babylonjs/gui/2D/controls/rectangle";
+
+import { AdvancedDynamicTexture } from "@babylonjs/gui/2D/advancedDynamicTexture";
+import { TextBlock } from "@babylonjs/gui/2D/controls/textBlock";
+import { Control } from "@babylonjs/gui/2D/controls/control";
 import SpaceTruckerPlanningScreen from "./spaceTruckerPlanningScreen";
+import { StackPanel } from "@babylonjs/gui";
 
 class PlanningScreenGui {
     gui;
@@ -36,28 +37,53 @@ class PlanningScreenGui {
 
     bindToScreen() {
         console.log("initializing route planning UI");
-        const cargoDisplay = this.createDisplayCageUi(this.planningScreen.cargo.mesh);
-        cargoDisplay.color = "green";
+        const cargo = this.planningScreen.cargo;
         const planets = this.planningScreen.planets;
-        planets.forEach(p => this.createDisplayCageUi(p.mesh));
+
+        const cargoDisplay = this.createDisplayCageUi(cargo.mesh.name);
+        cargoDisplay.color = "green";
+        cargoDisplay.linkWithMesh(cargo.mesh);
+        
+        planets.forEach(p => {
+            let marker = this.createDisplayCageUi(p.mesh.name);
+            
+            let planetRec = marker.children[0];
+          
+            if (this.planningScreen.origin === p) {
+                planetRec.color = "blue";
+            }
+            else if (this.planningScreen.destination === p) {
+                planetRec.color = "yellow";
+            }
+            marker.linkWithMesh(p.mesh);
+            marker.linkOffsetY = "6px";
+        });
+
     }
 
-    createDisplayCageUi(mesh) {
-        let startRectangle = new Rectangle("startRec");
-        startRectangle.width = "90px";
-        startRectangle.height = "90px";
-        startRectangle.thickness = 0.768;
+    createDisplayCageUi(name) {
+        name = name || "unknown";
+        let markerContainer = new StackPanel("panel-" + name);
+         
+        let startRectangle = new Rectangle("marker-" + name);
+        startRectangle.height = "100px";
+        startRectangle.width = "100px";
+        startRectangle.thickness = 0.868;
         startRectangle.cornerRadius = 3;
-        let startMarker = new TextBlock("startTextBlock", mesh.name);
-        startMarker.fontSize = "18pt";
+        markerContainer.addControl(startRectangle);
+
+        let startMarker = new TextBlock("title-" + name, name.toLocaleUpperCase());
+        startMarker.paddingTop = "2px";
+        startMarker.fontSize = "14pt";
         startMarker.color = "lightblue";
-
+        startMarker.resizeToFit = true;
         startMarker.textVerticalAlignment = Control.VERTICAL_ALIGNMENT_BOTTOM;
-        startRectangle.addControl(startMarker);
+        markerContainer.addControl(startMarker);
 
-        this.gui.addControl(startRectangle);
-        startRectangle.linkWithMesh(mesh);
-        return startRectangle;
+        this.gui.addControl(markerContainer);
+
+
+        return markerContainer;
     }
 }
 
