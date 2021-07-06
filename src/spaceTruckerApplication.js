@@ -54,7 +54,7 @@ class SpaceTruckerApplication {
 
     initialize() {
         const engine = this._engine;
-        engine.enterFullscreen(true);
+        engine.enterFullscreen(false);
 
         engine.displayLoadingUI();
 
