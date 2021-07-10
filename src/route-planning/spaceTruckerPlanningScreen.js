@@ -10,16 +10,17 @@ import { Texture } from "@babylonjs/core/Materials/Textures/texture";
 import { Color3 } from "@babylonjs/core/Maths/math.color";
 import { PhysicsHelper } from "@babylonjs/core/Physics/physicsHelper";
 import { PhysicsImpostor } from "@babylonjs/core/Physics/physicsImpostor";
-import { PhysicsEngineSceneComponent } from "@babylonjs/core";
-import { CannonJSPlugin } from "@babylonjs/core/Physics/Plugins/cannonJSPlugin";
+
 import AsteroidBelt from "./asteroidBelt";
 import Planet from "./planet";
 import CargoUnit from "./cargoUnit";
 import SpaceTruckerInputProcessor from "../spaceTruckerInputProcessor";
 import SpaceTruckerSoundManager from "../spaceTruckerSoundManager";
 import PlanningScreenGui from "./route-plan-gui";
-
-
+import { AmmoJSPlugin } from "@babylonjs/core";
+import "@babylonjs/core/Physics/physicsEngineComponent";
+import { ammoModule, ammoReadyPromise } from "../externals/ammoWrapper";
+ 
 const overworldMusic = "overworld";
 class SpaceTruckerPlanningScreen {
     scene;
@@ -61,6 +62,9 @@ class SpaceTruckerPlanningScreen {
     _state = SpaceTruckerPlanningScreen.PLANNING_STATE.Created;
 
     constructor(engine, inputManager, config) {
+        
+        engine.loadingUIText = 'Loading Route Planning Simulation...';
+
         this.scene = new Scene(engine);
         this.actionProcessor = new SpaceTruckerInputProcessor(this, inputManager, []);
         this.config = config;
@@ -108,12 +112,15 @@ class SpaceTruckerPlanningScreen {
         this.cargo = new CargoUnit(this.scene, { origin: this.origin });
 
         this.scene.onReadyObservable.add(() => {
-            this.state = SpaceTruckerPlanningScreen.PLANNING_STATE.Initialized;
             this.ui = new PlanningScreenGui(this);
             this.ui.bindToScreen();
+            ammoReadyPromise.then(res => console.log("ammo ready"));
+            
         });
+        this.state = SpaceTruckerPlanningScreen.PLANNING_STATE.Initialized;
     }
 
+     
     launchCargo(impulse) {
 
         if (this.state !== PLANNING_STATE.ReadyToLaunch) {
@@ -123,17 +130,16 @@ class SpaceTruckerPlanningScreen {
 
         this.cargo.physicsImpostor.applyImpulse(impulse, this.cargo.position);
         this.state = PLANNING_STATE.InFlight;
-
     }
 
     setReadyToLaunchState() {
+        console.log('setting state to ReadyToLaunch');
         const muzak = this.soundManager.sound(overworldMusic);
         if (muzak && !(muzak.isPlaying || muzak.isPaused)) {
             muzak.play();
-        }
-
+        }        
+       // this.initializePhysics();
         this.cargo.reset();
-        this.initializePhysics();
         this.camera.useAutoRotationBehavior = true;
         this.camera.useFramingBehavior = true;
         this.camera.attachControl(true);
@@ -148,10 +154,11 @@ class SpaceTruckerPlanningScreen {
                 .forEach(i => { i.dispose(); });
             this.scene.disablePhysicsEngine();
         }
-        this.scene.enablePhysics(new Vector3(0, 0, 0));
+        let plugin = new AmmoJSPlugin(true, ammoModule);
+        this.scene.enablePhysics(new Vector3(0, 0, 0), plugin);
         this.physicsHelper = new PhysicsHelper(this.scene);
 
-        this.star.physicsImpostor = new PhysicsImpostor(this.star.mesh, PhysicsImpostor.SphereImpostor, { mass: this.config.starData.mass }, this.scene);
+        this.star.physicsImpostor = new PhysicsImpostor(this.star, PhysicsImpostor.SphereImpostor, { mass: this.config.starData.mass }, this.scene);
         this.planets.forEach(x => x.physicsImpostor = new PhysicsImpostor(x.mesh, PhysicsImpostor.SphereImpostor, { mass: x.planetData.mass }, this.scene));
         this.cargo.physicsImpostor = new PhysicsImpostor(this.cargo.mesh, PhysicsImpostor.BoxImpostor, { mass: 0 }, this.scene);
 
