@@ -1,3 +1,4 @@
+
 class BaseGameObject {
     mesh;
     scene;
@@ -11,9 +12,12 @@ class BaseGameObject {
 
     get material() { return this.mesh?.material; }
     set material(value) { this.mesh.material = value; }
-
+    get physicsImpostor() { return this.mesh?.physicsImpostor; }
+    set physicsImpostor(value) { this.mesh.physicsImpostor = value; }
     constructor(scene) {
         this.scene = scene;
+
+        this.scene.onDisposeObservable.add(() => this.dispose());
     }
 
     update(deltaTime) {

@@ -30,7 +30,8 @@ const planetData = [
         normalTexture: ceresBumpUrl,
         specularTexture: null,
         lightMapUrl: null,
-        directIntensity: 0.25
+        directIntensity: 0.25,
+        mass: 1e11
     },
     {
         name: "tellus",
@@ -41,7 +42,8 @@ const planetData = [
         diffuseTexture: earthDiffuseUrl,
         normalTexture: earthNormalUrl,
         specularTexture: earthSpecularUrl,
-        lightMapUrl: earthCloudsUrl
+        lightMapUrl: earthCloudsUrl,
+        mass: 1e12
     },
     {
         name: "zeus",
@@ -52,7 +54,8 @@ const planetData = [
         diffuseTexture: jupiterTextureUrl,
         normalTexture: null,
         specularTexture: null,
-        lightMapUrl: null
+        lightMapUrl: null,
+        mass: 7e13
     },
     {
         name: "janus",
@@ -63,7 +66,8 @@ const planetData = [
         diffuseTexture: neptuneUrl,
         normalTexture: null,
         specularTexture: null,
-        lightMapUrl: null
+        lightMapUrl: null,
+        mass: 1.4e13
     }
 ];
 const gameData = {
@@ -81,7 +85,8 @@ const gameData = {
     endingPlanet: "zeus",
     starData: {
         scale: 500,
-        diffuseTexture: sunTextureUrl
+        diffuseTexture: sunTextureUrl,
+        mass: 4e15
     },
     environment: {
         environmentTexture: environmentTextureUrl

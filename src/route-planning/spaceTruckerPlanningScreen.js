@@ -5,21 +5,19 @@ import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
 import { CubeTexture } from "@babylonjs/core/Materials/Textures/cubeTexture";
 import { ArcRotateCamera } from "@babylonjs/core/Cameras/arcRotateCamera";
 import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial";
-import { Sound } from "@babylonjs/core/Audio/sound";
 import { PointLight } from "@babylonjs/core/Lights/pointLight";
 import { Texture } from "@babylonjs/core/Materials/Textures/texture";
 import { Color3 } from "@babylonjs/core/Maths/math.color";
-
-
+import { PhysicsHelper } from "@babylonjs/core/Physics/physicsHelper";
+import { PhysicsImpostor } from "@babylonjs/core/Physics/physicsImpostor";
+import { PhysicsEngineSceneComponent } from "@babylonjs/core";
+import { CannonJSPlugin } from "@babylonjs/core/Physics/Plugins/cannonJSPlugin";
 import AsteroidBelt from "./asteroidBelt";
 import Planet from "./planet";
 import CargoUnit from "./cargoUnit";
 import SpaceTruckerInputProcessor from "../spaceTruckerInputProcessor";
 import SpaceTruckerSoundManager from "../spaceTruckerSoundManager";
 import PlanningScreenGui from "./route-plan-gui";
-
-
-
 
 
 const overworldMusic = "overworld";
@@ -116,6 +114,18 @@ class SpaceTruckerPlanningScreen {
         });
     }
 
+    launchCargo(impulse) {
+
+        if (this.state !== PLANNING_STATE.ReadyToLaunch) {
+            console.log('Invalid attempt to launch before ready');
+            return;
+        }
+
+        this.cargo.physicsImpostor.applyImpulse(impulse, this.cargo.position);
+        this.state = PLANNING_STATE.InFlight;
+
+    }
+
     setReadyToLaunchState() {
         const muzak = this.soundManager.sound(overworldMusic);
         if (muzak && !(muzak.isPlaying || muzak.isPaused)) {
@@ -123,11 +133,30 @@ class SpaceTruckerPlanningScreen {
         }
 
         this.cargo.reset();
-
+        this.initializePhysics();
         this.camera.useAutoRotationBehavior = true;
         this.camera.useFramingBehavior = true;
         this.camera.attachControl(true);
         this.state = SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch;
+    }
+
+    initializePhysics() {
+        this.scene.gravity = Vector3.Zero();
+        if (this.scene.isPhysicsEnabled()) {
+            console.log("resetting physics engine");
+            this.scene.getPhysicsEngine().getImpostors()
+                .forEach(i => { i.dispose(); });
+            this.scene.disablePhysicsEngine();
+        }
+        this.scene.enablePhysics(new Vector3(0, 0, 0));
+        this.physicsHelper = new PhysicsHelper(this.scene);
+
+        this.star.physicsImpostor = new PhysicsImpostor(this.star.mesh, PhysicsImpostor.SphereImpostor, { mass: this.config.starData.mass }, this.scene);
+        this.planets.forEach(x => x.physicsImpostor = new PhysicsImpostor(x.mesh, PhysicsImpostor.SphereImpostor, { mass: x.planetData.mass }, this.scene));
+        this.cargo.physicsImpostor = new PhysicsImpostor(this.cargo.mesh, PhysicsImpostor.BoxImpostor, { mass: 0 }, this.scene);
+
+        const collisionImpostors = this.planets.map(p => p.physicsImpostor);
+        collisionImpostors.push(this.star.physicsImpostor);
     }
 
     update(deltaTime) {
