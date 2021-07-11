@@ -10,6 +10,10 @@ import { Texture } from "@babylonjs/core/Materials/Textures/texture";
 import { Color3 } from "@babylonjs/core/Maths/math.color";
 import { PhysicsHelper } from "@babylonjs/core/Physics/physicsHelper";
 import { PhysicsImpostor } from "@babylonjs/core/Physics/physicsImpostor";
+import { AmmoJSPlugin } from "@babylonjs/core/Physics/Plugins/ammoJSPlugin";
+import "@babylonjs/core/Physics/physicsEngineComponent";
+import { setAndStartTimer } from "@babylonjs/core/Misc/timer";
+import { ammoModule, ammoReadyPromise } from "../externals/ammoWrapper";
 
 import AsteroidBelt from "./asteroidBelt";
 import Planet from "./planet";
@@ -17,10 +21,7 @@ import CargoUnit from "./cargoUnit";
 import SpaceTruckerInputProcessor from "../spaceTruckerInputProcessor";
 import SpaceTruckerSoundManager from "../spaceTruckerSoundManager";
 import PlanningScreenGui from "./route-plan-gui";
-import { AmmoJSPlugin } from "@babylonjs/core";
-import "@babylonjs/core/Physics/physicsEngineComponent";
-import { ammoModule, ammoReadyPromise } from "../externals/ammoWrapper";
- 
+
 const overworldMusic = "overworld";
 class SpaceTruckerPlanningScreen {
     scene;
@@ -62,14 +63,23 @@ class SpaceTruckerPlanningScreen {
     _state = SpaceTruckerPlanningScreen.PLANNING_STATE.Created;
 
     constructor(engine, inputManager, config) {
-        
+
         engine.loadingUIText = 'Loading Route Planning Simulation...';
 
         this.scene = new Scene(engine);
         this.actionProcessor = new SpaceTruckerInputProcessor(this, inputManager, []);
         this.config = config;
 
-        this.soundManager = new SpaceTruckerSoundManager(this.scene, overworldMusic)
+        this.soundManager = new SpaceTruckerSoundManager(this.scene, overworldMusic);
+        this.soundManager.onSoundPlaybackEnded.add(soundId => {
+            if (soundId === overworldMusic) {
+                setAndStartTimer({
+                    contextObservable: this.scene.onBeforeRenderObservable,
+                    timeout: 10000,
+                    onEnded: () => this.soundManager.sound(soundId).play()
+                });
+            }
+        });
 
         this.scene.clearColor = new Color3(0.1, 0.1, 0.1);
 
@@ -115,12 +125,11 @@ class SpaceTruckerPlanningScreen {
             this.ui = new PlanningScreenGui(this);
             this.ui.bindToScreen();
             ammoReadyPromise.then(res => console.log("ammo ready"));
-            
         });
         this.state = SpaceTruckerPlanningScreen.PLANNING_STATE.Initialized;
     }
 
-     
+
     launchCargo(impulse) {
 
         if (this.state !== PLANNING_STATE.ReadyToLaunch) {
@@ -137,8 +146,8 @@ class SpaceTruckerPlanningScreen {
         const muzak = this.soundManager.sound(overworldMusic);
         if (muzak && !(muzak.isPlaying || muzak.isPaused)) {
             muzak.play();
-        }        
-       // this.initializePhysics();
+        }
+        this.initializePhysics();
         this.cargo.reset();
         this.camera.useAutoRotationBehavior = true;
         this.camera.useFramingBehavior = true;

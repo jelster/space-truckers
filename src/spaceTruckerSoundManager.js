@@ -6,8 +6,8 @@ import titleSongUrl from "../assets/music/space-trucker-title-theme.m4a";
 
 
 const soundFileMap = {
-    "title": { url: titleSongUrl, channel: 'music' },
-    "overworld": { url: backgroundMusicUrl, channel: 'music' }
+    "title": { url: titleSongUrl, channel: 'music', loop: true },
+    "overworld": { url: backgroundMusicUrl, channel: 'music', loop: false }
 };
 
 class SpaceTruckerSoundManager {
@@ -18,6 +18,8 @@ class SpaceTruckerSoundManager {
         ui: null
     };
     registeredSounds = {};
+
+    onSoundPlaybackEnded = new Observable();
 
     sound(id) {
         return this.registeredSounds[id];
@@ -36,14 +38,18 @@ class SpaceTruckerSoundManager {
                 return;
             }
             const prom = new Promise((resolve, reject) => {
-                this.registeredSounds[soundId] = new Sound(soundId, mapped.url, scene, () => {
+                const sound = new Sound(soundId, mapped.url, scene, () => {
                     chan.addSound(this.registeredSounds[soundId]);
                     resolve(soundId);
                 }, {
                     autoplay: false,
-                    loop: mapped.channel === 'music',
+                    loop: mapped.loop,
                     spatialSound: mapped.channel === 'sfx'
                 });
+                sound.onEndedObservable.add((endedSound, state) => {
+                    this.onSoundPlaybackEnded.notifyObservers(endedSound.name);
+                });
+                this.registeredSounds[soundId] = sound;
             });
             onReadyPromises.push(prom);
 
