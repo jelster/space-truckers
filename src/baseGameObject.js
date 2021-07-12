@@ -10,6 +10,8 @@ class BaseGameObject {
     get position() { return this.mesh?.position; }
     set position(value) { this.mesh.position = value; }
 
+    get forward() { return this.mesh?.forward; }
+
     get material() { return this.mesh?.material; }
     set material(value) { this.mesh.material = value; }
     get physicsImpostor() { return this.mesh?.physicsImpostor; }

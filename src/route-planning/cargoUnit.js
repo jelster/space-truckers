@@ -1,32 +1,48 @@
-import { Vector3 } from "@babylonjs/core/Maths/math.vector";
+import { Quaternion, Vector3 } from "@babylonjs/core/Maths/math.vector";
 import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
-import BaseGameObject from "../baseGameObject";
+
+import OrbitingGameObject from "../orbitingGameObject";
  
-class CargoUnit extends BaseGameObject {
+class CargoUnit extends OrbitingGameObject {
     distanceTraveled = 0.0;
     timeInTransit = 0.0;
     originPlanet;
     options;
     trailMesh;
-    constructor(scene, options) {
-        super(scene);
+    mass = 0;
+    constructor(scene, origin, options) {
+        super(scene, options);
+        this.autoUpdatePosition = false;
         this.options = options;
-        this.originPlanet = this.options.origin;
+        this.originPlanet = origin;
+        this.mass = this.options.cargoMass;
         this.mesh = MeshBuilder.CreateBox("cargo", { width: 1, height: 1, depth: 2 }, this.scene);
 
     }
 
+    get originPosition() {
+        return this.originPlanet.position.clone().scaleInPlace(this.originPlanet.diameter * 1.1, 0, 0);
+    }
     reset() {
-        this.mesh.parent = this.originPlanet.mesh;
-        this.position = new Vector3(this.originPlanet.diameter * 1.1, 0, 0);
+        this.position = this.originPosition
         if (this.trailMesh) {
             this.trailMesh.dispose();
             this.trailMesh = null;
         }
+        this.orbitalRadius = this.position.length();
+        
+        this.setOrbitalParameters(this.position.length());
     }
+ 
     update(deltaTime) {
 
-        super.update(deltaTime);
+        // const up = this.mesh.up;
+        // const linVel = this.physicsImpostor.getLinearVelocity().normalize();
+        
+        // this.rotation = Vector3.Cross(up, linVel);
+
+       
+        //super.update(deltaTime);
     }
 }
 

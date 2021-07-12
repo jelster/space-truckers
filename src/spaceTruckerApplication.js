@@ -74,7 +74,7 @@ class SpaceTruckerApplication {
         this._mainMenu.onPlayActionObservable.add(() => this.goToRunningState());
         
         this._engine.loadingUIText = "Loading Route Planning...";
-        this._routePlanningScene = new SpaceTruckerPlanningScreen(this._engine, this.inputManager, appData.gameData);    
+        this._routePlanningScene = new SpaceTruckerPlanningScreen(this._engine, this.inputManager, appData);    
     }
 
     run() {

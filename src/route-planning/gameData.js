@@ -31,7 +31,7 @@ const planetData = [
         specularTexture: null,
         lightMapUrl: null,
         directIntensity: 0.25,
-        mass: 1e11
+        mass: 1e13
     },
     {
         name: "tellus",
@@ -43,7 +43,7 @@ const planetData = [
         normalTexture: earthNormalUrl,
         specularTexture: earthSpecularUrl,
         lightMapUrl: earthCloudsUrl,
-        mass: 1e12
+        mass: 3e13
     },
     {
         name: "zeus",
@@ -55,7 +55,7 @@ const planetData = [
         normalTexture: null,
         specularTexture: null,
         lightMapUrl: null,
-        mass: 7e13
+        mass: 7e14
     },
     {
         name: "janus",
@@ -67,7 +67,7 @@ const planetData = [
         normalTexture: null,
         specularTexture: null,
         lightMapUrl: null,
-        mass: 1.4e13
+        mass: 1.4e14
     }
 ];
 const gameData = {
@@ -83,6 +83,7 @@ const gameData = {
     },
     startingPlanet: "hermes",
     endingPlanet: "zeus",
+    cargoMass: 1,
     starData: {
         scale: 500,
         diffuseTexture: sunTextureUrl,
@@ -96,4 +97,6 @@ const gameData = {
 const primaryReferenceMass = 4e15;
 const gravConstant = 6.67259e-11;
 
-export default { gameData, primaryReferenceMass, gravConstant };
+export default gameData;
+export {primaryReferenceMass};
+export {gravConstant};
