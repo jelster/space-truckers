@@ -68,7 +68,7 @@ class AsteroidBelt extends OrbitingGameObject {
 
     update(deltaTime) {
         this.rotation.y = Scalar.Repeat(this.rotation.y + 0.0005, Scalar.TwoPi);
-        super.update(deltaTime);
+   //     super.update(deltaTime);
     }
 }
 

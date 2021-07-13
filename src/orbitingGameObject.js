@@ -53,16 +53,20 @@ class OrbitingGameObject extends BaseGameObject {
     update(deltaTime) {
 
         if (this.autoUpdatePosition) {
-            const angPos = this.angularPosition;
-            const w = this.angularVelocity * (deltaTime ?? 0.016);
-            const posRadius = this.orbitalRadius;
-
-            this.angularPosition = Scalar.Repeat(angPos + w, Scalar.TwoPi);
-            // TODO: support inclined orbits by calculating the z-coordinate using the correct trig fn
-            this.position.x = posRadius * Math.sin(this.angularPosition);
-            this.position.z = posRadius * Math.cos(this.angularPosition);
+            this.updateOrbitalPosition(deltaTime);
         }
         super.update(deltaTime);
+    }
+
+    updateOrbitalPosition(deltaTime) {
+        const angPos = this.angularPosition;
+        const w = this.angularVelocity * (deltaTime ?? 0.016);
+        const posRadius = this.orbitalRadius;
+
+        this.angularPosition = Scalar.Repeat(angPos + w, Scalar.TwoPi);
+        // TODO: support inclined orbits by calculating the z-coordinate using the correct trig fn
+        this.position.x = posRadius * Math.sin(this.angularPosition);
+        this.position.z = posRadius * Math.cos(this.angularPosition);
     }
 
     calculateGravitationalForce(position) {

@@ -20,18 +20,16 @@ class CargoUnit extends OrbitingGameObject {
 
     }
 
-    get originPosition() {
-        return this.originPlanet.position.clone().scaleInPlace(this.originPlanet.diameter * 1.1, 0, 0);
-    }
+    
     reset() {
-        this.position = this.originPosition
+        this.position = this.originPlanet.position.clone().scaleInPlace(1.1, 1, 1);
         if (this.trailMesh) {
             this.trailMesh.dispose();
             this.trailMesh = null;
-        }
-        this.orbitalRadius = this.position.length();
-        
-        this.setOrbitalParameters(this.position.length());
+        }    
+        this.physicsImpostor?.setLinearVelocity(Vector3.Zero());
+        this.physicsImpostor?.setAngularVelocity(Vector3.Zero());
+        this.mesh.computeWorldMatrix(true);
     }
  
     update(deltaTime) {
