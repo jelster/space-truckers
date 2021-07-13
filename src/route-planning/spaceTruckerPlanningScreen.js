@@ -61,7 +61,7 @@ class SpaceTruckerPlanningScreen {
         return this._state;
     }
     set gameState(value) {
-        if (this._previousState != value) {
+        if (this._state != value) {
             this._previousState = this._state;
             this._state = value;
             this.onStateChangeObservable.notifyObservers({ priorState: this._previousState, currentState: value });
@@ -71,7 +71,7 @@ class SpaceTruckerPlanningScreen {
     _state = SpaceTruckerPlanningScreen.PLANNING_STATE.Created;
 
     constructor(engine, inputManager, config) {
-
+        this.onStateChangeObservable.add(s => console.log(`${s.currentState} is new state. Prev was ${s.priorState}`));
         engine.loadingUIText = 'Loading Route Planning Simulation...';
 
         this.scene = new Scene(engine);
@@ -142,6 +142,8 @@ class SpaceTruckerPlanningScreen {
         });
         this.actionProcessor = new SpaceTruckerInputProcessor(this, inputManager, preFlightActionList);
         this.gameState = SpaceTruckerPlanningScreen.PLANNING_STATE.Initialized;
+        this.camera.useFramingBehavior = true;
+        this.camera.attachControl(true);
     }
 
     MOVE_OUT(state) {
@@ -177,11 +179,7 @@ class SpaceTruckerPlanningScreen {
             muzak.play();
         }
         this.cargo.reset();
-        
 
-
-        this.camera.useFramingBehavior = true;
-        this.camera.attachControl(true);
         this.gameState = SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch;
     }
 

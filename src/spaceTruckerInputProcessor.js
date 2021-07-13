@@ -3,20 +3,24 @@ import logger from "./logger";
 import { setAndStartTimer } from "@babylonjs/core/Misc/timer";
 
 function bounce(funcToBounce, bounceInMilliseconds, inputProcessor) {
-    var isBounced = false;
-    const observableContext = inputProcessor.screen.scene.onBeforeRenderObservable;
-    return (...args) => {
-        if (isBounced) {
-            return false;
-        }
-        isBounced = true;
-        setAndStartTimer({ 
-            timeout: bounceInMilliseconds, 
-            onEnded: () => isBounced = false,
-            contextObservable: observableContext
-        });
-        return funcToBounce.call(inputProcessor.screen, args);
-    };
+    let composer = () => {
+        var isBounced = false;
+        const observableContext = inputProcessor.screen.scene.onBeforeRenderObservable;
+        return (...args) => {
+            if (isBounced) {
+                return false;
+            }
+            isBounced = true;
+            setAndStartTimer({ 
+                timeout: bounceInMilliseconds, 
+                onEnded: () => isBounced = false,
+                contextObservable: observableContext
+            });
+            return funcToBounce.call(inputProcessor.screen, args);
+        };
+    }
+    return composer();
+    
 }
 
 class SpaceTruckerInputProcessor {
@@ -98,7 +102,7 @@ class SpaceTruckerInputProcessor {
             if (!actionFn) {
                 return;
             }
-            this.actionMap[action] = actionDef.shouldBounce() ? bounce(actionFn, 250, this) : actionFn;
+            this.actionMap[action] = actionDef.shouldBounce() ? bounce(actionFn, 250, this) : actionFn.bind(this.screen, ...args);
         });
     }
 
