@@ -129,7 +129,7 @@ class SpaceTruckerPlanningScreen {
         });
         ammoReadyPromise.then(res => {
             console.log("ammo ready");
-            this.initializePhysics();
+           // this.initializePhysics();
         });
         this.actionProcessor = new SpaceTruckerInputProcessor(this, inputManager, preFlightActionList);
         this.gameState = SpaceTruckerPlanningScreen.PLANNING_STATE.Initialized;
@@ -170,6 +170,7 @@ class SpaceTruckerPlanningScreen {
             muzak.play();
         }
         this.cargo.reset();
+        this.initializePhysics();
 
         this.gameState = SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch;
     }
@@ -218,8 +219,9 @@ class SpaceTruckerPlanningScreen {
                 this.star.update(dT);
                 this.planets.forEach(p => p.update(dT));
                 this.asteroidBelt.update(dT);
-                this.cargo.position = this.origin.position.clone().scaleInPlace(1.1, 1, 1);
                 this.cargo.update(dT);
+                this.cargo.position = this.origin.position.clone().scaleInPlace(1.1, 1, 1);
+
                 break;
             case SpaceTruckerPlanningScreen.PLANNING_STATE.InFlight:
                 this.star.update(dT);
