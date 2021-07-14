@@ -1,3 +1,4 @@
+import { TrailMesh } from "@babylonjs/core";
 import { Quaternion, Vector3 } from "@babylonjs/core/Maths/math.vector";
 import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
 
@@ -20,6 +21,11 @@ class CargoUnit extends OrbitingGameObject {
 
     }
 
+    launch(impulse) {
+        this.trailMesh = new TrailMesh("cargoTrail", this.mesh, this.scene, 3, 1000);
+        this.physicsImpostor.applyImpulse(impulse, this.mesh.getAbsolutePosition());
+
+    }
     
     reset() {
         this.position = this.originPlanet.position.clone().scaleInPlace(1.1, 1, 1);

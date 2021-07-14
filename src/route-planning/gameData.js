@@ -31,7 +31,7 @@ const planetData = [
         specularTexture: null,
         lightMapUrl: null,
         directIntensity: 0.25,
-        mass: 1e13
+        mass: 8e13
     },
     {
         name: "tellus",
@@ -43,7 +43,7 @@ const planetData = [
         normalTexture: earthNormalUrl,
         specularTexture: earthSpecularUrl,
         lightMapUrl: earthCloudsUrl,
-        mass: 3e13
+        mass: 1e14
     },
     {
         name: "zeus",
@@ -67,7 +67,7 @@ const planetData = [
         normalTexture: null,
         specularTexture: null,
         lightMapUrl: null,
-        mass: 1.4e14
+        mass: 3.4e14
     }
 ];
 const gameData = {
@@ -87,7 +87,7 @@ const gameData = {
     starData: {
         scale: 500,
         diffuseTexture: sunTextureUrl,
-        mass: 4e15
+        mass: 3e15
     },
     environment: {
         environmentTexture: environmentTextureUrl

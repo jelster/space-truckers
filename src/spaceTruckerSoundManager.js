@@ -7,7 +7,7 @@ import titleSongUrl from "../assets/music/space-trucker-title-theme.m4a";
 
 const soundFileMap = {
     "title": { url: titleSongUrl, channel: 'music', loop: true },
-    "overworld": { url: backgroundMusicUrl, channel: 'music', loop: false }
+    "overworld": { url: backgroundMusicUrl, channel: 'music', loop: true }
 };
 
 class SpaceTruckerSoundManager {

@@ -14,7 +14,7 @@ class Star extends OrbitingGameObject {
     }
 
     update(deltaTime) {
-        this.rotation.y += deltaTime * 0.0135;
+        this.rotation.y += deltaTime * 0.0735;
          
     }
 }

@@ -79,15 +79,6 @@ class SpaceTruckerPlanningScreen {
         this.config = config;
 
         this.soundManager = new SpaceTruckerSoundManager(this.scene, overworldMusic);
-        this.soundManager.onSoundPlaybackEnded.add(soundId => {
-            if (soundId === overworldMusic) {
-                setAndStartTimer({
-                    contextObservable: this.scene.onBeforeRenderObservable,
-                    timeout: 10000,
-                    onEnded: () => this.soundManager.sound(soundId).play()
-                });
-            }
-        });
 
         this.scene.clearColor = new Color3(0.1, 0.1, 0.1);
 
@@ -166,9 +157,9 @@ class SpaceTruckerPlanningScreen {
             console.log('Invalid attempt to launch before ready');
             return;
         }
+        this.cargo.launch(impulse);
         console.log("launching cargo!");
          
-        this.cargo.physicsImpostor.applyImpulse(impulse, this.cargo.mesh.getAbsolutePosition());
         this.gameState = SpaceTruckerPlanningScreen.PLANNING_STATE.InFlight;
     }
 
@@ -237,7 +228,7 @@ class SpaceTruckerPlanningScreen {
                 this.cargo.update(dT);
 
                 let grav = this.updateGravitationalForcesForBox(dT);
-                this.cargo.physicsImpostor.applyForce(grav, this.cargo.mesh.getAbsolutePosition());
+                this.cargo.physicsImpostor.applyImpulse(grav, this.cargo.mesh.getAbsolutePosition());
                 break;
             case SpaceTruckerPlanningScreen.PLANNING_STATE.CargoArrived:
                 break;
