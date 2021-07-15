@@ -23,6 +23,7 @@ import SpaceTruckerSoundManager from "../spaceTruckerSoundManager";
 import PlanningScreenGui from "./route-plan-gui";
 import Star from "./star";
 import gameData from "./gameData";
+import { MeshBuilder } from "@babylonjs/core";
 
 const preFlightActionList = [
     { action: 'ACTIVATE', shouldBounce: () => true },
@@ -115,6 +116,14 @@ class SpaceTruckerPlanningScreen {
 
         this.destination = this.planets.filter(p =>
             p.name === this.config.endingPlanet)[0];
+        
+        this.destinationMesh = MeshBuilder.CreateIcoSphere("destination", {
+            radius: this.destination.diameter * 1.5,
+            subdivisions: 6,
+            flat: false
+        }, this.scene);
+        this.destinationMesh.visibility = 0.38;
+        this.destinationMesh.parent = this.destination.mesh;
 
         this.cargo = new CargoUnit(this.scene,
             this.origin, {
