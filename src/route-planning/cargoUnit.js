@@ -37,7 +37,7 @@ class CargoUnit extends OrbitingGameObject {
         this.physicsImpostor?.setLinearVelocity(Vector3.Zero());
         this.physicsImpostor?.setAngularVelocity(Vector3.Zero());
         this.position = this.originPlanet.position.clone().scaleInPlace(1.1, 1, 1);
-
+        this.rotation = Vector3.Zero();
         this.mesh.computeWorldMatrix(true);
         this.isInFlight = false;
     }

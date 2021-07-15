@@ -17,15 +17,14 @@ class PlanningScreenGui {
         this.planningScreen = planningScreen;
         this.gui = AdvancedDynamicTexture.CreateFullscreenUI("ui", true, this.planningScreen.scene);
 
-
-
         this.planningScreen.onStateChangeObservable.add(state => {
             const currentState = state.currentState;
             switch (currentState) {
-                case SpaceTruckerPlanningScreen.PLANNING_STATE.CREATED:
-
+                case SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch:
                     break;
-                case SpaceTruckerPlanningScreen.PLANNING_STATE.INITIALIZED:
+                case SpaceTruckerPlanningScreen.PLANNING_STATE.InFlight:
+                    break;
+                case SpaceTruckerPlanningScreen.PLANNING_STATE.CargoDestroyed:
                     break;
                 default:
                     break;

@@ -12,7 +12,6 @@ import { PhysicsHelper } from "@babylonjs/core/Physics/physicsHelper";
 import { PhysicsImpostor } from "@babylonjs/core/Physics/physicsImpostor";
 import { AmmoJSPlugin } from "@babylonjs/core/Physics/Plugins/ammoJSPlugin";
 import "@babylonjs/core/Physics/physicsEngineComponent";
-import { setAndStartTimer } from "@babylonjs/core/Misc/timer";
 import { ammoModule, ammoReadyPromise } from "../externals/ammoWrapper";
 
 import AsteroidBelt from "./asteroidBelt";
@@ -23,7 +22,8 @@ import SpaceTruckerSoundManager from "../spaceTruckerSoundManager";
 import PlanningScreenGui from "./route-plan-gui";
 import Star from "./star";
 import gameData from "./gameData";
-import { MeshBuilder } from "@babylonjs/core";
+import { ActionManager, ExecuteCodeAction } from "@babylonjs/core";
+import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
 
 const preFlightActionList = [
     { action: 'ACTIVATE', shouldBounce: () => true },
@@ -55,7 +55,9 @@ class SpaceTruckerPlanningScreen {
         InFlight: 3,
         CargoArrived: 4,
         RouteAccepted: 5,
-        GeneratingCourse: 6
+        GeneratingCourse: 6,
+        CargoDestroyed: 7,
+        Paused: 8
     });
 
     get gameState() {
@@ -83,7 +85,6 @@ class SpaceTruckerPlanningScreen {
 
         this.scene.clearColor = new Color3(0.1, 0.1, 0.1);
 
-
         this.star = new Star(this.scene, config.starData);
 
         const planetData = config.planetaryInfo;
@@ -91,7 +92,6 @@ class SpaceTruckerPlanningScreen {
             let planet = new Planet(this.scene, planData);
             this.planets.push(planet);
         });
-
 
         this.asteroidBelt = new AsteroidBelt(this.scene, config.asteroidBeltOptions);
 
@@ -102,28 +102,17 @@ class SpaceTruckerPlanningScreen {
         this.skybox = this.scene.createDefaultSkybox(skyTexture, false, 20000);
 
         this.camera = new ArcRotateCamera("cam", 0, 1.35, 3000, Vector3.Zero(), this.scene);
-
-
         this.camera.maxZ = 100000;
         this.camera.position.y += 10000;
 
         this.light = new PointLight("starLight", new Vector3(), this.scene);
         this.light.intensity = 10000000;
 
-
         this.origin = this.planets.filter(p => p.name ===
             this.config.startingPlanet)[0];
 
         this.destination = this.planets.filter(p =>
             p.name === this.config.endingPlanet)[0];
-        
-        this.destinationMesh = MeshBuilder.CreateIcoSphere("destination", {
-            radius: this.destination.diameter * 1.5,
-            subdivisions: 6,
-            flat: false
-        }, this.scene);
-        this.destinationMesh.visibility = 0.38;
-        this.destinationMesh.parent = this.destination.mesh;
 
         this.cargo = new CargoUnit(this.scene,
             this.origin, {
@@ -131,6 +120,37 @@ class SpaceTruckerPlanningScreen {
             cargoMass: config.cargoMass,
             ...gameData
         });
+        const arrowLines = [
+            new Vector3(-1, 0, 0),
+            new Vector3(-1, 0, -3),
+            new Vector3(-2, 0, -3),
+            new Vector3(0, 0, -5),
+            new Vector3(2, 0, -3),
+            new Vector3(1, 0, -3),
+            new Vector3(1, 0, 0)
+
+        ];
+        this.launchArrow = MeshBuilder.CreateDashedLines("launchArrow", { points: arrowLines });
+        this.launchArrow.scaling.scaleInPlace(6);
+
+        this.destinationMesh = MeshBuilder.CreateIcoSphere("destination", {
+            radius: this.destination.diameter * 1.5,
+            subdivisions: 6,
+            flat: false
+        }, this.scene);
+        this.destinationMesh.visibility = 0.38;
+        this.destinationMesh.parent = this.destination.mesh;
+        this.destinationMesh.actionManager = new ActionManager(this.scene);
+        this.destinationMesh.actionManager.registerAction(
+            new ExecuteCodeAction(
+                {
+                    trigger: ActionManager.OnIntersectionEnterTrigger,
+                    parameter: this.cargo.mesh
+                },
+                (ev) => {
+                    this.state = SpaceTruckerPlanningScreen.PLANNING_STATE.CargoArrived;
+                }
+            ));
 
         this.scene.onReadyObservable.add(() => {
             this.ui = new PlanningScreenGui(this);
@@ -138,7 +158,7 @@ class SpaceTruckerPlanningScreen {
         });
         ammoReadyPromise.then(res => {
             console.log("ammo ready");
-           // this.initializePhysics();
+            // this.initializePhysics();
         });
         this.actionProcessor = new SpaceTruckerInputProcessor(this, inputManager, preFlightActionList);
         this.gameState = SpaceTruckerPlanningScreen.PLANNING_STATE.Initialized;
@@ -166,9 +186,11 @@ class SpaceTruckerPlanningScreen {
             console.log('Invalid attempt to launch before ready');
             return;
         }
+        this.launchArrow.parent = null;
+        this.launchArrow.visibility = 0;
         this.cargo.launch(impulse);
         console.log("launching cargo!");
-         
+
         this.gameState = SpaceTruckerPlanningScreen.PLANNING_STATE.InFlight;
     }
 
@@ -179,6 +201,9 @@ class SpaceTruckerPlanningScreen {
             muzak.play();
         }
         this.cargo.reset();
+        this.launchArrow.parent = this.cargo.mesh;
+        this.launchArrow.visibility = 0.38;
+
         this.initializePhysics();
 
         this.gameState = SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch;
@@ -206,15 +231,18 @@ class SpaceTruckerPlanningScreen {
             restitution: 0,
             disableBidirectionalTransformation: false
         }, this.scene));
-        this.cargo.physicsImpostor = new PhysicsImpostor(this.cargo.mesh, PhysicsImpostor.BoxImpostor, {
+        const cargoImp = this.cargo.physicsImpostor = new PhysicsImpostor(this.cargo.mesh, PhysicsImpostor.BoxImpostor, {
             mass: this.cargo.mass,
             disableBidirectionalTransformation: false
         }, this.scene);
 
         // const collisionImpostors = this.planets.map(p => p.physicsImpostor);
         // collisionImpostors.push(this.star.physicsImpostor);
-        // this.cargo.physicsImpostor.registerOnPhysicsCollide(collisionImpostors, (collider, collided) => { 
+        // cargoImp.registerOnPhysicsCollide(collisionImpostors, (collider, collided) => {
         //     console.log(`${collider.name} collided with ${collided.name}`);
+        //     // ISSUE: Uncaught ref error 'Ammo is not defined' thrown. 
+        //     // See https://forum.babylonjs.com/t/why-is-ammojsplugin-not-able-to-get-contact-points-with-concretecontactresultcallback/14640/5
+        //     this.gameState = SpaceTruckerPlanningScreen.PLANNING_STATE.CargoDestroyed;
         // });
     }
 
@@ -244,6 +272,8 @@ class SpaceTruckerPlanningScreen {
             case SpaceTruckerPlanningScreen.PLANNING_STATE.CargoArrived:
                 break;
             case SpaceTruckerPlanningScreen.PLANNING_STATE.RouteAccepted:
+                break;
+            case SpaceTruckerPlanningScreen.PLANNING_STATE.CargoDestroyed:
                 break;
             default:
                 break;
