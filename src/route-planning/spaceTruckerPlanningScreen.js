@@ -236,14 +236,14 @@ class SpaceTruckerPlanningScreen {
             disableBidirectionalTransformation: false
         }, this.scene);
 
-        // const collisionImpostors = this.planets.map(p => p.physicsImpostor);
-        // collisionImpostors.push(this.star.physicsImpostor);
-        // cargoImp.registerOnPhysicsCollide(collisionImpostors, (collider, collided) => {
-        //     console.log(`${collider.name} collided with ${collided.name}`);
-        //     // ISSUE: Uncaught ref error 'Ammo is not defined' thrown. 
-        //     // See https://forum.babylonjs.com/t/why-is-ammojsplugin-not-able-to-get-contact-points-with-concretecontactresultcallback/14640/5
-        //     this.gameState = SpaceTruckerPlanningScreen.PLANNING_STATE.CargoDestroyed;
-        // });
+        const collisionImpostors = this.planets.map(p => p.physicsImpostor);
+        collisionImpostors.push(this.star.physicsImpostor);
+        cargoImp.registerOnPhysicsCollide(collisionImpostors, (collider, collided) => {
+            console.log(`${collider.name} collided with ${collided.name}`);
+            // ISSUE: Uncaught ref error 'Ammo is not defined' thrown. 
+            // See https://forum.babylonjs.com/t/why-is-ammojsplugin-not-able-to-get-contact-points-with-concretecontactresultcallback/14640/5
+            this.gameState = SpaceTruckerPlanningScreen.PLANNING_STATE.CargoDestroyed;
+        });
     }
 
     update(deltaTime) {
