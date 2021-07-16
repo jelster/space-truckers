@@ -20,6 +20,7 @@ class CargoUnit extends OrbitingGameObject {
         this.originPlanet = origin;
         this.mass = this.options.cargoMass;
         this.mesh = MeshBuilder.CreateBox("cargo", { width: 1, height: 1, depth: 2 }, this.scene);
+        this.mesh.rotation = Vector3.Zero();
 
     }
 

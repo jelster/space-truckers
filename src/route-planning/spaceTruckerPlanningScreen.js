@@ -28,8 +28,10 @@ import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
 const preFlightActionList = [
     { action: 'ACTIVATE', shouldBounce: () => true },
     { action: 'MOVE_OUT', shouldBounce: () => true },
-
-    { action: 'GO_BACK', shouldBounce: () => true }
+    { action: 'MOVE_IN', shouldBounce: () => true },
+    { action: 'GO_BACK', shouldBounce: () => true },
+    { action: 'MOVE_LEFT', shouldBounce: () => false },
+    { action: 'MOVE_RIGHT', shouldBounce: () => false },
 ];
 const overworldMusic = "overworld";
 class SpaceTruckerPlanningScreen {
@@ -131,7 +133,9 @@ class SpaceTruckerPlanningScreen {
 
         ];
         this.launchArrow = MeshBuilder.CreateDashedLines("launchArrow", { points: arrowLines });
-        this.launchArrow.scaling.scaleInPlace(6);
+        this.launchArrow.scaling.scaleInPlace(10);
+        this.launchArrow.rotation = new Vector3(0, Math.PI, 0);
+        this.launchArrow.bakeCurrentTransformIntoVertices();
 
         this.destinationMesh = MeshBuilder.CreateIcoSphere("destination", {
             radius: this.destination.diameter * 1.5,
@@ -168,7 +172,7 @@ class SpaceTruckerPlanningScreen {
 
     MOVE_OUT(state) {
         if (!state.previousState && this.gameState === SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch) {
-            this.launchCargo(new Vector3(-1, 0, 1).scale(100));
+            this.launchCargo(this.cargo.forward.scale(100));
         }
         return true;
     }
@@ -178,6 +182,18 @@ class SpaceTruckerPlanningScreen {
             this.setReadyToLaunchState();
         }
         return true;
+    }
+
+    MOVE_LEFT(state) {
+        if (this.gameState === SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch) {
+            this.cargo.mesh.rotationQuaternion.y += -0.02;
+        }
+    }
+
+    MOVE_RIGHT(state) {
+        if (this.gameState === SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch) {
+            this.cargo.mesh.rotationQuaternion.y += 0.02;
+        }
     }
 
 
@@ -233,17 +249,18 @@ class SpaceTruckerPlanningScreen {
         }, this.scene));
         const cargoImp = this.cargo.physicsImpostor = new PhysicsImpostor(this.cargo.mesh, PhysicsImpostor.BoxImpostor, {
             mass: this.cargo.mass,
-            disableBidirectionalTransformation: false
+            disableBidirectionalTransformation: false,
+            ignoreParent: true
         }, this.scene);
 
-        const collisionImpostors = this.planets.map(p => p.physicsImpostor);
-        collisionImpostors.push(this.star.physicsImpostor);
-        cargoImp.registerOnPhysicsCollide(collisionImpostors, (collider, collided) => {
-            console.log(`${collider.name} collided with ${collided.name}`);
-            // ISSUE: Uncaught ref error 'Ammo is not defined' thrown. 
-            // See https://forum.babylonjs.com/t/why-is-ammojsplugin-not-able-to-get-contact-points-with-concretecontactresultcallback/14640/5
-            this.gameState = SpaceTruckerPlanningScreen.PLANNING_STATE.CargoDestroyed;
-        });
+        //const collisionImpostors = this.planets.map(p => p.physicsImpostor);
+        //collisionImpostors.push(this.star.physicsImpostor);
+        // cargoImp.registerOnPhysicsCollide(collisionImpostors, (collider, collided) => {
+        //     console.log(`${collider.name} collided with ${collided.name}`);
+        //     // ISSUE: Uncaught ref error 'Ammo is not defined' thrown. 
+        //     // See https://forum.babylonjs.com/t/why-is-ammojsplugin-not-able-to-get-contact-points-with-concretecontactresultcallback/14640/5
+        //     this.gameState = SpaceTruckerPlanningScreen.PLANNING_STATE.CargoDestroyed;
+        // });
     }
 
     update(deltaTime) {
