@@ -102,7 +102,8 @@ class SpaceTruckerInputProcessor {
             if (!actionFn) {
                 return;
             }
-            this.actionMap[action] = actionDef.shouldBounce() ? bounce(actionFn, 250, this) : actionFn.bind(this.screen, ...args);
+            
+            this.actionMap[action] = actionDef.shouldBounce() ? bounce(actionFn, 250, this) : actionFn.bind(this.screen);
         });
     }
 
