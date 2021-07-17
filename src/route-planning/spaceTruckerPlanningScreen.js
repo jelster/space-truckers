@@ -210,9 +210,6 @@ class SpaceTruckerPlanningScreen {
         }
     }
 
-     
-
-
     launchCargo(impulse) {
         if (this.gameState !== SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch) {
             console.log('Invalid attempt to launch before ready');

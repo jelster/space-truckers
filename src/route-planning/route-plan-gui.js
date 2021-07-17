@@ -34,20 +34,30 @@ class PlanningScreenGui {
     }
 
     updateControls() {
-        this.transitTime.text = `Time in transit: ${this.planningScreen.cargo.timeInTransit.toFixed(2)} s`;
-        this.transitDistance.text = `Transit distance: ${this.planningScreen.cargo.distanceTraveled.toFixed(2)} m`;
+        const gameStage = PLAN_STATE_KEYS[this.planningScreen.gameState],
+            transitTime = this.planningScreen.cargo.timeInTransit,
+            transitDistance = this.planningScreen.cargo.distanceTraveled,
+            launchForce = this.planningScreen.launchForce;
+        
+        this.launchSlider.value = launchForce;
+        this.transitTime.text = `Time in transit: ${transitTime.toFixed(2)} s`;
+        this.transitDistance.text = `Transit distance: ${transitDistance.toFixed(2)} m`;
 
-        this.gameStage.text = `Current State: ${PLAN_STATE_KEYS[this.planningScreen.gameState]}`;
-        this.launchForce.text = `Launch Force: ${this.planningScreen.launchForce.toFixed(3)} N`;
+        this.gameStage.text = `Current State: ${gameStage}`;
+        this.launchForce.text = `Launch Force: ${launchForce.toFixed(3)} N`;
         this.planningScreen.launchArrow.scaling.setAll(this.planningScreen.launchForce * 0.05);
+
     }
     onScreenStateChange(newState) {
         switch (newState) {
             case SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch:
+
+                this.launchSlider.isEnabled = true; 
                 this.gameStage.color = "white";
                 break;
             case SpaceTruckerPlanningScreen.PLANNING_STATE.InFlight:
                 this.gameStage.color = "lightblue";
+                this.launchSlider.isEnabled = false;
                 break;
             case SpaceTruckerPlanningScreen.PLANNING_STATE.CargoDestroyed:
                 this.gameStage.color = "red";
@@ -81,45 +91,61 @@ class PlanningScreenGui {
             marker.linkOffsetY = "6px";
         });
 
-        this.screenUi = new StackPanel("screen-ui");
-        this.screenUi.width = "100%";
-        this.screenUi.height = "100%";
+        this.screenUi = new StackPanel("screen-ui");        
         this.screenUi.setPadding(20, 20, 20, 20);
+ 
         //this.screenUi.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
         //this.screenUi.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
         this.screenUi.isHitTestVisible = false;
         this.screenUi.isPointerBlocker = false;
         this.gui.addControl(this.screenUi);
 
+        this.bottomDisplayPanel = new StackPanel("bottom-display-panel");
+        this.bottomDisplayPanel.width = "100%";
+        this.bottomDisplayPanel.verticalAlignment = Control.VERTICAL_ALIGNMENT_BOTTOM;
+       
+
+        this.topDisplayPanel = new StackPanel("top-display-panel");
+        this.topDisplayPanel.width = "100%";
+        this.topDisplayPanel.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP; 
+        this.topDisplayPanel.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
+        
+
         this.gameStage = new TextBlock("route-planning-stage", "Current State: Unknown");
         this.gameStage.fontSize = "48pt";
         this.gameStage.color = "white";
         this.gameStage.height = "60px";
-        this.screenUi.addControl(this.gameStage);
+        this.topDisplayPanel.addControl(this.gameStage);
 
         this.transitTime = new TextBlock("transit-time", "Transit time: 0s");
         this.transitTime.fontSize = "36pt";
         this.transitTime.color = "white";
         this.transitTime.height = "40px";
-        this.screenUi.addControl(this.transitTime);
+        this.topDisplayPanel.addControl(this.transitTime);
 
         this.transitDistance = new TextBlock("transit-distance", "Transit distance: 0m");
         this.transitDistance.fontSize = "36pt";
         this.transitDistance.color = "white";
         this.transitDistance.height = "40px";
-        this.screenUi.addControl(this.transitDistance);
+        this.topDisplayPanel.addControl(this.transitDistance);
 
         this.launchForce = new TextBlock("launch-force", "Launch force: 0 N");
         this.launchForce.fontSize = "36pt";
         this.launchForce.color = "white";
         this.launchForce.height = "40px";
-        this.screenUi.addControl(this.launchForce);
+        this.topDisplayPanel.addControl(this.launchForce);
 
-        this.launchSlider = new Slider("launchSlider");     
-        this.launchSlider.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
-        this.launchSlider.verticalAlignment = Control.VERTICAL_ALIGNMENT_BOTTOM;   
-        this.launchSlider.height = "40%";
+        
+        // this.middleDisplayPanel = new StackPanel("middle-display-panel");
+        // this.middleDisplayPanel.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
+        // this.middleDisplayPanel.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
+        // this.middleDisplayPanel.height = "60%"
+        // this.screenUi.addControl(this.middleDisplayPanel);
+
+        this.launchSlider = new Slider("launchSlider");
+        this.launchSlider.height = "600px";
         this.launchSlider.width = "90px";
+        this.launchSlider.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
         this.launchSlider.isThumbClamped = true;
         this.launchSlider.isVertical = true;
         this.launchSlider.thumbColor = "black";
@@ -131,13 +157,13 @@ class PlanningScreenGui {
         this.launchSlider.step = this.planningScreen.launchIncrement;
         this.launchSlider.value = this.planningScreen.launchForce;
         this.launchSlider.onValueChangedObservable.add((ev, es) => {
-
-            this.planningScreen.launchForce = ev;
-            
+            this.planningScreen.launchForce = ev;            
         });
-        this.screenUi.addControl(this.launchSlider);
+        this.bottomDisplayPanel.addControl(this.launchSlider);
 
-
+        this.screenUi.addControl(this.bottomDisplayPanel);
+        this.screenUi.addControl(this.topDisplayPanel);
+        
     }
 
     createDisplayCageUi(name) {
