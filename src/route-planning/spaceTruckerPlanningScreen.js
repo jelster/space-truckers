@@ -22,7 +22,7 @@ import SpaceTruckerSoundManager from "../spaceTruckerSoundManager";
 import PlanningScreenGui from "./route-plan-gui";
 import Star from "./star";
 import gameData from "./gameData";
-import { ActionManager, ExecuteCodeAction } from "@babylonjs/core";
+import { ActionManager, Axis, ExecuteCodeAction, Space } from "@babylonjs/core";
 import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
 
 const preFlightActionList = [
@@ -172,7 +172,7 @@ class SpaceTruckerPlanningScreen {
 
     MOVE_OUT(state) {
         if (!state.previousState && this.gameState === SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch) {
-            this.launchCargo(this.cargo.forward.scale(100));
+            this.launchCargo(this.cargo.forward.scale(this.launchForce));
         }
         return true;
     }
@@ -186,7 +186,7 @@ class SpaceTruckerPlanningScreen {
 
     MOVE_LEFT(state) {
         if (this.gameState === SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch) {
-            this.cargo.mesh.rotationQuaternion.y += -0.02;
+            this.cargo.mesh.rotate(Axis.Y, -0.02, Space.World);
         }
     }
 
