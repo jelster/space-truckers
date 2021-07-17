@@ -37,7 +37,7 @@ const overworldMusic = "overworld";
 class SpaceTruckerPlanningScreen {
     scene;
     config;
-    launchForce = 5.0;
+    launchForce = 150.0;
     planets = [];
     origin;
     destination;
@@ -219,6 +219,7 @@ class SpaceTruckerPlanningScreen {
         this.cargo.reset();
         this.launchArrow.parent = this.cargo.mesh;
         this.launchArrow.visibility = 0.38;
+        this.launchArrow.rotation = Vector3.Zero();
 
         this.initializePhysics();
 

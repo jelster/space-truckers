@@ -37,11 +37,11 @@ class CargoUnit extends OrbitingGameObject {
             this.trailMesh.dispose();
             this.trailMesh = null;
         }
-        this.physicsImpostor?.setLinearVelocity(Vector3.Zero());
-        this.physicsImpostor?.setAngularVelocity(Vector3.Zero());
+        //this.physicsImpostor?.setLinearVelocity(Vector3.Zero());
+        //this.physicsImpostor?.setAngularVelocity(Vector3.Zero());
         this.position = this.originPlanet.position.clone().scaleInPlace(1.1, 1, 1);
         this.rotation = Vector3.Zero();
-        this.mesh.rotationQuaternion = Quaternion.Zero();
+
         this.mesh.computeWorldMatrix(true);
         this.isInFlight = false;
     }
@@ -50,11 +50,12 @@ class CargoUnit extends OrbitingGameObject {
 
         if (this.isInFlight) {
             const up = this.mesh.up;
-            const linVel = this.physicsImpostor.getLinearVelocity().normalize();
-
-            this.rotation = Vector3.Cross(up, linVel);
+            const linVel = this.physicsImpostor.getLinearVelocity();
             this.timeInTransit += deltaTime;
             this.distanceTraveled += linVel.length() * deltaTime;
+            linVel.normalize();
+            this.rotation = Vector3.Cross(up, linVel);
+            
         }
 
         //super.update(deltaTime);
