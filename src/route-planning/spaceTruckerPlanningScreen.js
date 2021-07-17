@@ -22,13 +22,13 @@ import SpaceTruckerSoundManager from "../spaceTruckerSoundManager";
 import PlanningScreenGui from "./route-plan-gui";
 import Star from "./star";
 import gameData from "./gameData";
-import { ActionManager, Axis, ExecuteCodeAction, Space } from "@babylonjs/core";
+import { ActionManager, Axis, ExecuteCodeAction, Scalar, Space } from "@babylonjs/core";
 import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
 
 const preFlightActionList = [
     { action: 'ACTIVATE', shouldBounce: () => true },
-    { action: 'MOVE_OUT', shouldBounce: () => true },
-    { action: 'MOVE_IN', shouldBounce: () => true },
+    { action: 'MOVE_OUT', shouldBounce: () => false },
+    { action: 'MOVE_IN', shouldBounce: () => false },
     { action: 'GO_BACK', shouldBounce: () => true },
     { action: 'MOVE_LEFT', shouldBounce: () => false },
     { action: 'MOVE_RIGHT', shouldBounce: () => false },
@@ -38,6 +38,8 @@ class SpaceTruckerPlanningScreen {
     scene;
     config;
     launchForce = 150.0;
+    launchForceIncrement = 1.0;
+    launchForceMax = 500;
     planets = [];
     origin;
     destination;
@@ -170,11 +172,23 @@ class SpaceTruckerPlanningScreen {
         this.camera.attachControl(true);
     }
 
-    MOVE_OUT(state) {
+    ACTIVATE(state) {
         if (!state.previousState && this.gameState === SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch) {
             this.launchCargo(this.cargo.forward.scale(this.launchForce));
         }
         return true;
+    }
+    
+    MOVE_OUT(state) {
+        if (this.gameState === SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch) {
+            this.launchForce = Scalar.Clamp(this.launchForce + this.launchForceIncrement, 0, this.launchForceMax);
+        }
+    }
+
+    MOVE_IN(state) {
+        if (this.gameState === SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch) {
+            this.launchForce = Scalar.Clamp(this.launchForce - this.launchForceIncrement, 0, this.launchForceMax);
+        }
     }
 
     GO_BACK(state) {
@@ -195,6 +209,8 @@ class SpaceTruckerPlanningScreen {
             this.cargo.mesh.rotationQuaternion.y += 0.02;
         }
     }
+
+     
 
 
     launchCargo(impulse) {

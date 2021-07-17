@@ -4,7 +4,7 @@ import { AdvancedDynamicTexture } from "@babylonjs/gui/2D/advancedDynamicTexture
 import { TextBlock } from "@babylonjs/gui/2D/controls/textBlock";
 import { Control } from "@babylonjs/gui/2D/controls/control";
 import SpaceTruckerPlanningScreen, { PLAN_STATE_KEYS } from "./spaceTruckerPlanningScreen";
-import { StackPanel } from "@babylonjs/gui";
+import { Slider, StackPanel } from "@babylonjs/gui";
 
 
 class PlanningScreenGui {
@@ -39,12 +39,15 @@ class PlanningScreenGui {
 
         this.gameStage.text = `Current State: ${PLAN_STATE_KEYS[this.planningScreen.gameState]}`;
         this.launchForce.text = `Launch Force: ${this.planningScreen.launchForce.toFixed(3)} N`;
+        this.planningScreen.launchArrow.scaling.setAll(this.planningScreen.launchForce * 0.05);
     }
     onScreenStateChange(newState) {
         switch (newState) {
             case SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch:
+                this.gameStage.color = "white";
                 break;
             case SpaceTruckerPlanningScreen.PLANNING_STATE.InFlight:
+                this.gameStage.color = "lightblue";
                 break;
             case SpaceTruckerPlanningScreen.PLANNING_STATE.CargoDestroyed:
                 this.gameStage.color = "red";
@@ -80,10 +83,12 @@ class PlanningScreenGui {
 
         this.screenUi = new StackPanel("screen-ui");
         this.screenUi.width = "100%";
-        this.screenUi.height = "30%";
+        this.screenUi.height = "100%";
+        this.screenUi.setPadding(20, 20, 20, 20);
+        //this.screenUi.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
+        //this.screenUi.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
         this.screenUi.isHitTestVisible = false;
         this.screenUi.isPointerBlocker = false;
-        this.screenUi.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
         this.gui.addControl(this.screenUi);
 
         this.gameStage = new TextBlock("route-planning-stage", "Current State: Unknown");
@@ -109,6 +114,29 @@ class PlanningScreenGui {
         this.launchForce.color = "white";
         this.launchForce.height = "40px";
         this.screenUi.addControl(this.launchForce);
+
+        this.launchSlider = new Slider("launchSlider");     
+        this.launchSlider.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
+        this.launchSlider.verticalAlignment = Control.VERTICAL_ALIGNMENT_BOTTOM;   
+        this.launchSlider.height = "40%";
+        this.launchSlider.width = "90px";
+        this.launchSlider.isThumbClamped = true;
+        this.launchSlider.isVertical = true;
+        this.launchSlider.thumbColor = "black";
+        this.launchSlider.barOffset = "15px"
+        this.launchSlider.color = "white";
+        this.launchSlider.maximum = this.planningScreen.launchForceMax;
+        this.launchSlider.minimum = 10;
+        this.launchSlider.displayValueBar = true;
+        this.launchSlider.step = this.planningScreen.launchIncrement;
+        this.launchSlider.value = this.planningScreen.launchForce;
+        this.launchSlider.onValueChangedObservable.add((ev, es) => {
+
+            this.planningScreen.launchForce = ev;
+            
+        });
+        this.screenUi.addControl(this.launchSlider);
+
 
     }
 
