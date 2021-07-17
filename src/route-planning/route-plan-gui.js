@@ -3,8 +3,9 @@ import { Rectangle } from "@babylonjs/gui/2D/controls/rectangle";
 import { AdvancedDynamicTexture } from "@babylonjs/gui/2D/advancedDynamicTexture";
 import { TextBlock } from "@babylonjs/gui/2D/controls/textBlock";
 import { Control } from "@babylonjs/gui/2D/controls/control";
-import SpaceTruckerPlanningScreen from "./spaceTruckerPlanningScreen";
+import SpaceTruckerPlanningScreen, { PLAN_STATE_KEYS } from "./spaceTruckerPlanningScreen";
 import { StackPanel } from "@babylonjs/gui";
+
 
 class PlanningScreenGui {
     gui;
@@ -36,7 +37,8 @@ class PlanningScreenGui {
         this.transitTime.text = `Time in transit: ${this.planningScreen.cargo.timeInTransit.toFixed(2)} s`;
         this.transitDistance.text = `Transit distance: ${this.planningScreen.cargo.distanceTraveled.toFixed(2)} m`;
 
-        this.gameStage.text = `Current State: ${this.planningScreen.gameState}`;
+        this.gameStage.text = `Current State: ${PLAN_STATE_KEYS[this.planningScreen.gameState]}`;
+        this.launchForce.text = `Launch Force: ${this.planningScreen.launchForce.toFixed(3)} N`;
     }
     onScreenStateChange(newState) {
         switch (newState) {
@@ -45,6 +47,7 @@ class PlanningScreenGui {
             case SpaceTruckerPlanningScreen.PLANNING_STATE.InFlight:
                 break;
             case SpaceTruckerPlanningScreen.PLANNING_STATE.CargoDestroyed:
+                this.gameStage.color = "red";
                 break;
             default:
                 break;
@@ -77,29 +80,35 @@ class PlanningScreenGui {
 
         this.screenUi = new StackPanel("screen-ui");
         this.screenUi.width = "100%";
-        this.screenUi.height = "20%";
+        this.screenUi.height = "30%";
         this.screenUi.isHitTestVisible = false;
         this.screenUi.isPointerBlocker = false;
         this.screenUi.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
         this.gui.addControl(this.screenUi);
 
         this.gameStage = new TextBlock("route-planning-stage", "Current State: Unknown");
-        this.gameStage.fontSize = "24pt";
+        this.gameStage.fontSize = "48pt";
         this.gameStage.color = "white";
-        this.gameStage.height = "20px";
+        this.gameStage.height = "60px";
         this.screenUi.addControl(this.gameStage);
 
         this.transitTime = new TextBlock("transit-time", "Transit time: 0s");
-        this.transitTime.fontSize = "24pt";
+        this.transitTime.fontSize = "36pt";
         this.transitTime.color = "white";
-        this.transitTime.height = "20px";
+        this.transitTime.height = "40px";
         this.screenUi.addControl(this.transitTime);
 
         this.transitDistance = new TextBlock("transit-distance", "Transit distance: 0m");
-        this.transitDistance.fontSize = "24pt";
+        this.transitDistance.fontSize = "36pt";
         this.transitDistance.color = "white";
-        this.transitDistance.height = "20px";
+        this.transitDistance.height = "40px";
         this.screenUi.addControl(this.transitDistance);
+
+        this.launchForce = new TextBlock("launch-force", "Launch force: 0 N");
+        this.launchForce.fontSize = "36pt";
+        this.launchForce.color = "white";
+        this.launchForce.height = "40px";
+        this.screenUi.addControl(this.launchForce);
 
     }
 

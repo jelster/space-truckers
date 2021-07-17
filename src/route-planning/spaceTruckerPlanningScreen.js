@@ -310,3 +310,5 @@ class SpaceTruckerPlanningScreen {
 }
 
 export default SpaceTruckerPlanningScreen;
+const PLAN_STATE_KEYS = Object.keys(SpaceTruckerPlanningScreen.PLANNING_STATE);
+export {PLAN_STATE_KEYS};
