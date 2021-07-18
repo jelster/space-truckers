@@ -85,7 +85,7 @@ class SpaceTruckerInputManager {
 
     enableMouse(scene) {
         const obs = scene.onPointerObservable.add((pointerInfo) => {
-            if (pointerInfo.type === PointerEventTypes.POINTERDOWN) {
+            if (pointerInfo.type === PointerEventTypes.POINTERTAP) {
                 this.inputMap["PointerTap"] = pointerInfo.event;
             }
             else if (pointerInfo.type === PointerEventTypes.POINTERUP) {
@@ -105,6 +105,7 @@ class SpaceTruckerInputManager {
             const keyMapped = SpaceTruckerControls.inputControlsMap[key];
 
             if (!keyMapped) {
+                console.log("Unmapped key processed by app", kbInfo);
                 return;
             }
 
@@ -174,7 +175,7 @@ class SpaceTruckerInputManager {
             SpaceTruckerControls.mapStickTranslationInputToActions(LSValues, iMap);
 
             let RSValues = SpaceTruckerControls.normalizeJoystickInputs(this.gamepad.rightStick);
-            SpaceTruckerControls.mapStickRotationInputToActions(RSValues, iMap);
+            SpaceTruckerControls.mapRotationInputToActions(RSValues, iMap);
 
         };
 

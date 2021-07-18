@@ -1,9 +1,12 @@
 import { Engine } from "@babylonjs/core/Engines/engine";
+import "@babylonjs/core/Debug/debugLayer";
+import "@babylonjs/inspector";
 import SpaceTruckerApplication from "./spaceTruckerApplication";
 import SpaceTruckerLoadingScreen from "./spaceTruckerLoadingScreen";
 import logger from "./logger";
-import styleSheet from "../public/assets/index.css";
-import landingPageBackground from "../public/assets/space-truckers-landing-logo.jpg";
+import "../public/assets/index.css";
+import "../public/assets/space-truckers-landing-logo.jpg";
+
 
 const CanvasName = "index-canvas";
 const launchButton = document.getElementById("btnLaunch");
@@ -33,4 +36,21 @@ launchButton.addEventListener("click", btnClickEvtHandle);
 
 window.addEventListener('resize', () => {
     eng.resize();
+});
+
+// For debug purposes
+window.addEventListener("keydown", (ev) => {
+    if (ev.shiftKey && ev.altKey && ev.key === "I") {
+        ev.preventDefault();
+        const scene = theApp.activeScene?.scene;
+        if (!scene) {
+            return false;
+        }
+        if (scene.debugLayer?.isVisible()) {
+            scene.debugLayer.hide();
+        }
+        else {
+            scene.debugLayer.show();
+        } 
+    }
 });

@@ -13,7 +13,7 @@ import SpaceTruckerInputProcessor from "./spaceTruckerInputProcessor";
 
 
 import menuBackground from "../assets/menuBackground.png";
-import titleMusic from "../assets/sounds/space-trucker-title-theme.m4a";
+
 import selectionIcon from "../assets/ui-selection-icon.PNG";
 
 const menuActionList = [
