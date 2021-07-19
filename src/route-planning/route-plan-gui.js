@@ -4,7 +4,7 @@ import { AdvancedDynamicTexture } from "@babylonjs/gui/2D/advancedDynamicTexture
 import { TextBlock } from "@babylonjs/gui/2D/controls/textBlock";
 import { Control } from "@babylonjs/gui/2D/controls/control";
 import SpaceTruckerPlanningScreen, { PLAN_STATE_KEYS } from "./spaceTruckerPlanningScreen";
-import { Slider, StackPanel } from "@babylonjs/gui";
+import { Grid, Slider, StackPanel } from "@babylonjs/gui";
 
 
 class PlanningScreenGui {
@@ -91,8 +91,12 @@ class PlanningScreenGui {
             marker.linkOffsetY = "6px";
         });
 
-        this.screenUi = new StackPanel("screen-ui");        
+
+        this.screenUi = new Grid("screen-ui");        
         this.screenUi.setPadding(20, 20, 20, 20);
+        this.screenUi.addRowDefinition(0.2, false);
+        this.screenUi.addRowDefinition(0.4, false);
+        this.screenUi.addRowDefinition(0.4, false);
  
         //this.screenUi.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
         //this.screenUi.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
@@ -101,14 +105,15 @@ class PlanningScreenGui {
         this.gui.addControl(this.screenUi);
 
         this.bottomDisplayPanel = new StackPanel("bottom-display-panel");
-        this.bottomDisplayPanel.width = "100%";
-        this.bottomDisplayPanel.verticalAlignment = Control.VERTICAL_ALIGNMENT_BOTTOM;
+        this.bottomDisplayPanel.height = "100%";
+        this.bottomDisplayPanel.isVertical = false;
+        this.bottomDisplayPanel.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
+        this.screenUi.addControl(this.bottomDisplayPanel, 2);
        
 
         this.topDisplayPanel = new StackPanel("top-display-panel");
         this.topDisplayPanel.width = "100%";
-        this.topDisplayPanel.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP; 
-        this.topDisplayPanel.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
+        this.screenUi.addControl(this.topDisplayPanel, 0);
         
 
         this.gameStage = new TextBlock("route-planning-stage", "Current State: Unknown");
@@ -160,9 +165,6 @@ class PlanningScreenGui {
             this.planningScreen.launchForce = ev;            
         });
         this.bottomDisplayPanel.addControl(this.launchSlider);
-
-        this.screenUi.addControl(this.bottomDisplayPanel);
-        this.screenUi.addControl(this.topDisplayPanel);
         
     }
 
