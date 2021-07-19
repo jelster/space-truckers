@@ -213,7 +213,7 @@ class SpaceTruckerPlanningScreen {
     }
 
     GO_BACK(state) {
-        if (!state && this.gameState === SpaceTruckerPlanningScreen.PLANNING_STATE.InFlight) {
+        if (!state && this.gameState !== SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch) {
             this.setReadyToLaunchState();
         }
         return true;
@@ -227,7 +227,7 @@ class SpaceTruckerPlanningScreen {
 
     MOVE_RIGHT(state) {
         if (this.gameState === SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch) {
-            this.cargo.mesh.rotationQuaternion.y += 0.02;
+            this.cargo.mesh.rotate(Axis.Y, 0.02, Space.World);
         }
     }
 
