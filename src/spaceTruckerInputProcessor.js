@@ -6,7 +6,7 @@ function bounce(funcToBounce, bounceInMilliseconds, inputProcessor) {
     let composer = () => {
         var isBounced = false;
         const observableContext = inputProcessor.screen.scene.onBeforeRenderObservable;
-        return (...args) => {
+        return (priorState, inputParam) => {
             if (isBounced) {
                 return false;
             }
@@ -16,7 +16,7 @@ function bounce(funcToBounce, bounceInMilliseconds, inputProcessor) {
                 onEnded: () => isBounced = false,
                 contextObservable: observableContext
             });
-            return funcToBounce.call(inputProcessor.screen, args);
+            return funcToBounce.call(inputProcessor.screen, priorState, inputParam);
         };
     }
     return composer();
@@ -77,9 +77,11 @@ class SpaceTruckerInputProcessor {
         if (!this.controlsAttached) {
             return;
         }
+
         this.inputManager.getInputs(this.scene);
         this.lastActionState = this.actionState;
-
+        this.actionState = {};
+        
         const inputQueue = this.inputQueue;
         while (inputQueue.length > 0) {
             let input = inputQueue.pop();
@@ -119,7 +121,7 @@ class SpaceTruckerInputProcessor {
                 // function being dispatched. Calling bind on the function object returns a new function with the correct
                 // "this" set as expected. That function is immediately invoked with the target and magnitude parameter values.
                 
-                this.actionState[i.action] = actionFn({priorState}, inputParam);
+                this.actionState[i.action] = actionFn(priorState, inputParam);
                 // use the return value of the actionFn to allow handlers to maintain individual states (if they choose).
                 // handlers that don't need to maintain state also don't need to know what to return, 
                 // since undefined == null == false.

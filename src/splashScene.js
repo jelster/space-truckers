@@ -155,9 +155,9 @@ class SplashScene {
         }
     }
 
-    ACTIVATE(state) {
-        const lastState = state.priorState;
-        if (!this.skipRequested && !lastState) {
+    ACTIVATE(priorState) {
+        
+        if (!this.skipRequested && !priorState) {
             logger.logInfo("Key press detected. Skipping cut scene.");
             this.skipRequested = true;
             this.music?.stop();

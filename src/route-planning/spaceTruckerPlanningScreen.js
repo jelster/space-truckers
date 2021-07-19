@@ -172,13 +172,26 @@ class SpaceTruckerPlanningScreen {
         this.camera.attachControl(true);
     }
 
-    ACTIVATE(state) {
-        if (!state.previousState && this.gameState === SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch) {
-            this.launchCargo(this.cargo.forward.scale(this.launchForce));
+    ACTIVATE(state, args) {
+        if (state) {
+            return;
         }
+        const what = args?.pickInfo;
+
+        if (this.gameState !== SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch) {
+            return true;
+        }
+
+        if (what && what.pickedMesh) {
+            if (what.pickedMesh !== this.cargo.mesh) {
+                return true;
+            }
+        }
+        this.launchCargo(this.cargo.forward.scale(this.launchForce));
+
         return true;
     }
-    
+
     MOVE_OUT(state) {
         if (this.gameState === SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch) {
             this.launchForce = Scalar.Clamp(this.launchForce + this.launchForceIncrement, 0, this.launchForceMax);
@@ -192,7 +205,7 @@ class SpaceTruckerPlanningScreen {
     }
 
     GO_BACK(state) {
-        if (!state.previousState && this.gameState === SpaceTruckerPlanningScreen.PLANNING_STATE.InFlight) {
+        if (!state && this.gameState === SpaceTruckerPlanningScreen.PLANNING_STATE.InFlight) {
             this.setReadyToLaunchState();
         }
         return true;
@@ -324,4 +337,4 @@ class SpaceTruckerPlanningScreen {
 
 export default SpaceTruckerPlanningScreen;
 const PLAN_STATE_KEYS = Object.keys(SpaceTruckerPlanningScreen.PLANNING_STATE);
-export {PLAN_STATE_KEYS};
+export { PLAN_STATE_KEYS };
