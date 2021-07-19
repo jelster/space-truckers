@@ -177,17 +177,15 @@ class SpaceTruckerPlanningScreen {
             return;
         }
         const what = args?.pickInfo;
-
-        if (this.gameState !== SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch) {
-            return true;
+        if (what?.pickInfo) {
+            console.log(args);
         }
+        const shouldActivate = this.gameState === SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch && (!what 
+            || what && what.hit && what.pickedMesh === this.cargo.mesh);
 
-        if (what && what.pickedMesh) {
-            if (what.pickedMesh !== this.cargo.mesh) {
-                return true;
-            }
+        if (shouldActivate) {
+            this.launchCargo(this.cargo.forward.scale(this.launchForce));
         }
-        this.launchCargo(this.cargo.forward.scale(this.launchForce));
 
         return true;
     }
