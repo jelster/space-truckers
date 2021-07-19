@@ -17,7 +17,7 @@ const inputControlsMap = {
     /*                  */
 
     /* Mouse and Touch Mappings */
-    //PointerTap: 'ACTIVATE',
+    PointerTap: 'ACTIVATE',
     /*                  */
 
     /* Gamepad Mappings */
