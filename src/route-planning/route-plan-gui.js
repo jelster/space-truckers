@@ -37,27 +37,39 @@ class PlanningScreenGui {
         const gameStage = PLAN_STATE_KEYS[this.planningScreen.gameState],
             transitTime = this.planningScreen.cargo.timeInTransit,
             transitDistance = this.planningScreen.cargo.distanceTraveled,
-            launchForce = this.planningScreen.launchForce;
+            launchForce = this.planningScreen.launchForce,
+            currentVelocity = this.planningScreen.cargo.linearVelocity;
         
         this.launchSlider.value = launchForce;
+        this.launchForce.text = `Launch Force: ${launchForce.toFixed(3)} N`;
         this.transitTime.text = `Time in transit: ${transitTime.toFixed(2)} s`;
         this.transitDistance.text = `Transit distance: ${transitDistance.toFixed(2)} m`;
-
+        this.currentVelocity.text = `Current velocity: ${currentVelocity.toFixed(2)} m/s`;
         this.gameStage.text = `Current State: ${gameStage}`;
-        this.launchForce.text = `Launch Force: ${launchForce.toFixed(3)} N`;
+        
         this.planningScreen.launchArrow.scaling.setAll(this.planningScreen.launchForce * 0.05);
 
     }
     onScreenStateChange(newState) {
         switch (newState) {
             case SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch:
-
-                this.launchSlider.isEnabled = true; 
                 this.gameStage.color = "white";
+
+                this.currentVelocity.isVisible = false;
+                this.transitDistance.isVisible = false;
+                this.transitTime.isVisible = false;
+
+                this.launchForce.isVisible = true;
+                this.launchSlider.isVisible = true;
                 break;
             case SpaceTruckerPlanningScreen.PLANNING_STATE.InFlight:
                 this.gameStage.color = "lightblue";
-                this.launchSlider.isEnabled = false;
+
+                this.currentVelocity.isVisible = true;
+                this.transitDistance.isVisible = true;
+                this.transitTime.isVisible = true;
+
+                this.launchSlider.isVisible = false;
                 break;
             case SpaceTruckerPlanningScreen.PLANNING_STATE.CargoDestroyed:
                 this.gameStage.color = "red";
@@ -91,15 +103,11 @@ class PlanningScreenGui {
             marker.linkOffsetY = "6px";
         });
 
-
         this.screenUi = new Grid("screen-ui");        
         this.screenUi.setPadding(20, 20, 20, 20);
         this.screenUi.addRowDefinition(0.2, false);
         this.screenUi.addRowDefinition(0.4, false);
         this.screenUi.addRowDefinition(0.4, false);
- 
-        //this.screenUi.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
-        //this.screenUi.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
         this.screenUi.isHitTestVisible = false;
         this.screenUi.isPointerBlocker = false;
         this.gui.addControl(this.screenUi);
@@ -108,13 +116,11 @@ class PlanningScreenGui {
         this.bottomDisplayPanel.height = "100%";
         this.bottomDisplayPanel.isVertical = false;
         this.bottomDisplayPanel.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
-        this.screenUi.addControl(this.bottomDisplayPanel, 2);
-       
+        this.screenUi.addControl(this.bottomDisplayPanel, 2);       
 
         this.topDisplayPanel = new StackPanel("top-display-panel");
         this.topDisplayPanel.width = "100%";
-        this.screenUi.addControl(this.topDisplayPanel, 0);
-        
+        this.screenUi.addControl(this.topDisplayPanel, 0);        
 
         this.gameStage = new TextBlock("route-planning-stage", "Current State: Unknown");
         this.gameStage.fontSize = "48pt";
@@ -127,30 +133,33 @@ class PlanningScreenGui {
         this.transitTime.color = "white";
         this.transitTime.height = "40px";
         this.topDisplayPanel.addControl(this.transitTime);
+        this.transitTime.isVisible = false;
 
         this.transitDistance = new TextBlock("transit-distance", "Transit distance: 0m");
         this.transitDistance.fontSize = "36pt";
         this.transitDistance.color = "white";
         this.transitDistance.height = "40px";
         this.topDisplayPanel.addControl(this.transitDistance);
+        this.transitDistance.isVisible = false;
 
         this.launchForce = new TextBlock("launch-force", "Launch force: 0 N");
         this.launchForce.fontSize = "36pt";
         this.launchForce.color = "white";
         this.launchForce.height = "40px";
+        
         this.topDisplayPanel.addControl(this.launchForce);
 
-        
-        // this.middleDisplayPanel = new StackPanel("middle-display-panel");
-        // this.middleDisplayPanel.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
-        // this.middleDisplayPanel.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
-        // this.middleDisplayPanel.height = "60%"
-        // this.screenUi.addControl(this.middleDisplayPanel);
+        this.currentVelocity = new TextBlock("current-velocity", "Current velocity: 0 m/s");
+        this.currentVelocity.fontSize = "36pt";
+        this.currentVelocity.color = "white";
+        this.currentVelocity.height = "40px";
+        this.currentVelocity.isVisible = false;
+        this.topDisplayPanel.addControl(this.currentVelocity);
 
         this.launchSlider = new Slider("launchSlider");
         this.launchSlider.height = "600px";
         this.launchSlider.width = "90px";
-        this.launchSlider.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
+        //this.launchSlider.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
         this.launchSlider.isThumbClamped = true;
         this.launchSlider.isVertical = true;
         this.launchSlider.thumbColor = "black";

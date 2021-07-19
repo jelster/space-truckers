@@ -13,6 +13,10 @@ class CargoUnit extends OrbitingGameObject {
     mass = 0;
     isInFlight = false;
 
+    get linearVelocity() {
+        return this?.physicsImpostor?.getLinearVelocity()?.length() ?? 0;
+    }
+
     constructor(scene, origin, options) {
         super(scene, options);
         this.autoUpdatePosition = false;
