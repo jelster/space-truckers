@@ -22,7 +22,10 @@ import SpaceTruckerSoundManager from "../spaceTruckerSoundManager";
 import PlanningScreenGui from "./route-plan-gui";
 import Star from "./star";
 import gameData from "./gameData";
-import { ActionManager, Axis, ExecuteCodeAction, Scalar, Space } from "@babylonjs/core";
+import { ActionManager } from "@babylonjs/core/Actions/actionManager";
+import { Ray } from"@babylonjs/core/Culling/ray"; // used by ActionManager
+import { ExecuteCodeAction } from "@babylonjs/core/Actions/directActions";
+import { Axis, Scalar, Space } from "@babylonjs/core";
 import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
 
 const preFlightActionList = [
@@ -154,13 +157,15 @@ class SpaceTruckerPlanningScreen {
                     parameter: this.cargo.mesh
                 },
                 (ev) => {
-                    this.state = SpaceTruckerPlanningScreen.PLANNING_STATE.CargoArrived;
+                    console.log('mesh intersection triggered!', ev);
+                    this.cargoArrived();
                 }
             ));
 
         this.scene.onReadyObservable.add(() => {
             this.ui = new PlanningScreenGui(this);
             this.ui.bindToScreen();
+            console.log(this.destinationMesh.actionManager);
         });
         ammoReadyPromise.then(res => {
             console.log("ammo ready");
@@ -170,6 +175,11 @@ class SpaceTruckerPlanningScreen {
         this.gameState = SpaceTruckerPlanningScreen.PLANNING_STATE.Initialized;
         this.camera.useFramingBehavior = true;
         this.camera.attachControl(true);
+    }
+
+    cargoArrived() {
+        this.gameState = SpaceTruckerPlanningScreen.PLANNING_STATE.CargoArrived;
+        this.cargo.physicsImpostor.setLinearVelocity(new Vector3(0, 0, 0));
     }
 
     ACTIVATE(state, args) {
@@ -278,14 +288,14 @@ class SpaceTruckerPlanningScreen {
             ignoreParent: true
         }, this.scene);
 
-        //const collisionImpostors = this.planets.map(p => p.physicsImpostor);
-        //collisionImpostors.push(this.star.physicsImpostor);
-        // cargoImp.registerOnPhysicsCollide(collisionImpostors, (collider, collided) => {
-        //     console.log(`${collider.name} collided with ${collided.name}`);
-        //     // ISSUE: Uncaught ref error 'Ammo is not defined' thrown. 
-        //     // See https://forum.babylonjs.com/t/why-is-ammojsplugin-not-able-to-get-contact-points-with-concretecontactresultcallback/14640/5
-        //     this.gameState = SpaceTruckerPlanningScreen.PLANNING_STATE.CargoDestroyed;
-        // });
+        const collisionImpostors = this.planets.map(p => p.physicsImpostor);
+        collisionImpostors.push(this.star.physicsImpostor);
+        cargoImp.registerOnPhysicsCollide(collisionImpostors, (collider, collided) => {
+            console.log(`${collider.name} collided with ${collided.name}`);
+            // ISSUE: Uncaught ref error 'Ammo is not defined' thrown. 
+            // See https://forum.babylonjs.com/t/why-is-ammojsplugin-not-able-to-get-contact-points-with-concretecontactresultcallback/14640/5
+            this.gameState = SpaceTruckerPlanningScreen.PLANNING_STATE.CargoDestroyed;
+        });
     }
 
     update(deltaTime) {
