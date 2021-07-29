@@ -1,16 +1,10 @@
+import { Observable } from "@babylonjs/core/Misc/observable";
+import { Sound } from "@babylonjs/core/Audio/sound";
+import { SoundTrack } from "@babylonjs/core/Audio/soundTrack";
 
-
-import { Observable, Observer, Sound, SoundTrack } from "@babylonjs/core";
-import backgroundMusicUrl from "../assets/music/space-truckers-overworld-theme.m4a";
-import titleSongUrl from "../assets/music/space-trucker-title-theme.m4a";
-
-
-const soundFileMap = {
-    "title": { url: titleSongUrl, channel: 'music', loop: true },
-    "overworld": { url: backgroundMusicUrl, channel: 'music', loop: true }
-};
-
+import soundFileMap from "./spaceTruckerSoundMap";
 class SpaceTruckerSoundManager {
+    onSoundPlaybackEnded = new Observable();
     onReadyObservable = new Observable();
     channels = {
         music: null,
@@ -18,14 +12,10 @@ class SpaceTruckerSoundManager {
         ui: null
     };
     registeredSounds = {};
-
-    onSoundPlaybackEnded = new Observable();
-
     sound(id) {
         return this.registeredSounds[id];
     }
     constructor(scene, ...soundIds) {
-
         this.channels.music = new SoundTrack(scene, { mainTrack: false, volume: 0.89 });
         this.channels.sfx = new SoundTrack(scene, { mainTrack: true, volume: 1 });
         this.channels.ui = new SoundTrack(scene, { mainTrack: false, volume: 0.94 });
@@ -55,7 +45,8 @@ class SpaceTruckerSoundManager {
 
 
         });
-        Promise.all(onReadyPromises).then(readyIds => this.onReadyObservable.notifyObservers(readyIds));
+        Promise.all(onReadyPromises)
+            .then(readyIds => this.onReadyObservable.notifyObservers(readyIds));
     }
 
      
