@@ -107,7 +107,7 @@ class MainMenuScene {
             logger.logInfo("MOVE_DOWN " + newIdx);
             this.selectedItemIndex = newIdx;
         }
-        return lastState;
+        return true;
 
     }
 
