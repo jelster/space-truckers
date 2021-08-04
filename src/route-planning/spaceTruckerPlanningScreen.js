@@ -23,7 +23,7 @@ import PlanningScreenGui from "./route-plan-gui";
 import Star from "./star";
 import gameData from "./gameData";
 import { ActionManager } from "@babylonjs/core/Actions/actionManager";
-import { Ray } from"@babylonjs/core/Culling/ray"; // used by ActionManager
+import { Ray } from "@babylonjs/core/Culling/ray"; // used by ActionManager
 import { ExecuteCodeAction } from "@babylonjs/core/Actions/directActions";
 import { Axis, Scalar, Space } from "@babylonjs/core";
 import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
@@ -35,6 +35,7 @@ const preFlightActionList = [
     { action: 'GO_BACK', shouldBounce: () => true },
     { action: 'MOVE_LEFT', shouldBounce: () => false },
     { action: 'MOVE_RIGHT', shouldBounce: () => false },
+    { action: 'PAUSE', shouldBounce: () => true }
 ];
 const overworldMusic = "overworld";
 class SpaceTruckerPlanningScreen {
@@ -177,9 +178,38 @@ class SpaceTruckerPlanningScreen {
         this.camera.attachControl(true);
     }
 
-    cargoArrived() {
-        this.gameState = SpaceTruckerPlanningScreen.PLANNING_STATE.CargoArrived;
-        this.cargo.physicsImpostor.setLinearVelocity(new Vector3(0, 0, 0));
+    update(deltaTime) {
+        const dT = deltaTime ?? (this.scene.getEngine().getDeltaTime() / 1000);
+        this.actionProcessor?.update();
+        switch (this.gameState) {
+            case SpaceTruckerPlanningScreen.PLANNING_STATE.Created:
+                break;
+            case SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch:
+                this.star.update(dT);
+                this.planets.forEach(p => p.update(dT));
+                this.asteroidBelt.update(dT);
+                this.cargo.update(dT);
+                this.cargo.position = this.origin.position.clone().scaleInPlace(1.1, 1, 1);
+
+                break;
+            case SpaceTruckerPlanningScreen.PLANNING_STATE.InFlight:
+                this.star.update(dT);
+                this.planets.forEach(p => p.update(dT));
+                this.asteroidBelt.update(dT);
+                this.cargo.update(dT);
+
+                let grav = this.updateGravitationalForcesForBox(dT);
+                this.cargo.physicsImpostor.applyImpulse(grav, this.cargo.mesh.getAbsolutePosition());
+                break;
+            case SpaceTruckerPlanningScreen.PLANNING_STATE.CargoArrived:
+                break;
+            case SpaceTruckerPlanningScreen.PLANNING_STATE.CargoDestroyed:
+                break;
+            case SpaceTruckerPlanningScreen.PLANNING_STATE.Paused:
+                break;
+            default:
+                break;
+        }
     }
 
     ACTIVATE(state, args) {
@@ -190,7 +220,7 @@ class SpaceTruckerPlanningScreen {
         if (what?.pickInfo) {
             console.log(args);
         }
-        const shouldActivate = this.gameState === SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch && (!what 
+        const shouldActivate = this.gameState === SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch && (!what
             || what && what.hit && what.pickedMesh === this.cargo.mesh);
 
         if (shouldActivate) {
@@ -231,6 +261,36 @@ class SpaceTruckerPlanningScreen {
         }
     }
 
+    PAUSE(state) {
+        if (!state) {
+            this.togglePause();
+        }
+        return true;
+    }
+
+    togglePause() {
+        if (this.gameState === SpaceTruckerPlanningScreen.PLANNING_STATE.Paused) {
+            this.gameState = this._previousState;
+            this.cargo.physicsImpostor.wakeUp();
+        }
+        else {
+            this.cargo.physicsImpostor.sleep();
+            this.gameState = SpaceTruckerPlanningScreen.PLANNING_STATE.Paused;
+        }
+    }
+
+    cargoArrived() {
+        this.gameState = SpaceTruckerPlanningScreen.PLANNING_STATE.CargoArrived;
+        this.cargo.physicsImpostor.setLinearVelocity(new Vector3(0, 0, 0));
+    }
+
+
+    onCargoDestroyed(collided) {
+        this.destroyedBy = collided.name;
+        this.cargo.destroy();
+        this.gameState = SpaceTruckerPlanningScreen.PLANNING_STATE.CargoDestroyed;
+    }
+
     launchCargo(impulse) {
         if (this.gameState !== SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch) {
             console.log('Invalid attempt to launch before ready');
@@ -259,6 +319,8 @@ class SpaceTruckerPlanningScreen {
 
         this.gameState = SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch;
     }
+
+
 
     initializePhysics() {
         this.scene.gravity = Vector3.Zero();
@@ -291,47 +353,12 @@ class SpaceTruckerPlanningScreen {
         const collisionImpostors = this.planets.map(p => p.physicsImpostor);
         collisionImpostors.push(this.star.physicsImpostor);
         cargoImp.registerOnPhysicsCollide(collisionImpostors, (collider, collided) => {
-            console.log(`${collider.name} collided with ${collided.name}`);
+            console.log(`${collider.object?.name} collided with ${collided.object?.name}`);
             // ISSUE: Uncaught ref error 'Ammo is not defined' thrown. 
             // See https://forum.babylonjs.com/t/why-is-ammojsplugin-not-able-to-get-contact-points-with-concretecontactresultcallback/14640/5
-            this.gameState = SpaceTruckerPlanningScreen.PLANNING_STATE.CargoDestroyed;
+            this.onCargoDestroyed(collided);
+
         });
-    }
-
-    update(deltaTime) {
-        const dT = deltaTime ?? (this.scene.getEngine().getDeltaTime() / 1000);
-        this.actionProcessor?.update();
-        switch (this.gameState) {
-            case SpaceTruckerPlanningScreen.PLANNING_STATE.Created:
-                break;
-            case SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch:
-                this.star.update(dT);
-                this.planets.forEach(p => p.update(dT));
-                this.asteroidBelt.update(dT);
-                this.cargo.update(dT);
-                this.cargo.position = this.origin.position.clone().scaleInPlace(1.1, 1, 1);
-
-                break;
-            case SpaceTruckerPlanningScreen.PLANNING_STATE.InFlight:
-                this.star.update(dT);
-                this.planets.forEach(p => p.update(dT));
-                this.asteroidBelt.update(dT);
-                this.cargo.update(dT);
-
-                let grav = this.updateGravitationalForcesForBox(dT);
-                this.cargo.physicsImpostor.applyImpulse(grav, this.cargo.mesh.getAbsolutePosition());
-                break;
-            case SpaceTruckerPlanningScreen.PLANNING_STATE.CargoArrived:
-                break;
-            case SpaceTruckerPlanningScreen.PLANNING_STATE.RouteAccepted:
-                break;
-            case SpaceTruckerPlanningScreen.PLANNING_STATE.CargoDestroyed:
-                break;
-            default:
-                break;
-        }
-
-
     }
 
     updateGravitationalForcesForBox(timeStep) {

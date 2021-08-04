@@ -30,7 +30,7 @@ class CargoUnit extends OrbitingGameObject {
 
     launch(impulse) {
         this.isInFlight = true;
-        this.trailMesh = new TrailMesh("cargoTrail", this.mesh, this.scene, 3, 1000);
+        this.trailMesh = new TrailMesh("cargoTrail", this.mesh, this.scene, 3, 10000);
         this.physicsImpostor.applyImpulse(impulse, this.mesh.getAbsolutePosition());
     }
 
@@ -51,18 +51,21 @@ class CargoUnit extends OrbitingGameObject {
     }
 
     update(deltaTime) {
-
+        super.update(deltaTime);
         if (this.isInFlight) {
             const up = this.mesh.up;
             const linVel = this.physicsImpostor.getLinearVelocity();
             this.timeInTransit += deltaTime;
             this.distanceTraveled += linVel.length() * deltaTime;
             linVel.normalize();
-            this.rotation = Vector3.Cross(up, linVel);
-            
-        }
+            this.rotation = Vector3.Cross(up, linVel);            
+        }        
+    }
 
-        //super.update(deltaTime);
+    destroy() {
+        // TODO: play explosion animation and sound
+        this.physicsImpostor.setLinearVelocity(Vector3.Zero());
+        this.physicsImpostor.setAngularVelocity(Vector3.Zero());
     }
 }
 

@@ -6,6 +6,7 @@ const inputControlsMap = {
     d: 'MOVE_RIGHT', 68: 'MOVE_RIGHT',
     q: 'ROTATE_LEFT',
     e: 'ROTATE_RIGHT',
+    p: 'PAUSE',
     Backspace: 'GO_BACK', Delete: 'GO_BACK', 46: 'GO_BACK', 8: 'GO_BACK',
     Enter: 'ACTIVATE', Return: 'ACTIVATE', 13: 'ACTIVATE',  Space: 'ACTIVATE', 32: 'ACTIVATE', ' ': 'ACTIVATE',
     Shift: 'MOVE_IN',
@@ -14,6 +15,7 @@ const inputControlsMap = {
     ArrowDown: 'MOVE_DOWN',
     ArrowLeft: 'MOVE_LEFT',
     ArrowRight: 'MOVE_RIGHT',
+    
     /*                  */
 
     /* Mouse and Touch Mappings */
@@ -21,7 +23,7 @@ const inputControlsMap = {
     /*                  */
 
     /* Gamepad Mappings */
-    button1: 'ACTIVATE', buttonStart: 'ACTIVATE',
+    button1: 'ACTIVATE', buttonStart: 'PAUSE',
     buttonBack: 'GO_BACK', button2: 'GO_BACK',
     dPadDown: 'MOVE_DOWN', lStickDown: 'MOVE_DOWN',
     dPadUp: 'MOVE_UP', lStickUp: 'MOVE_UP',
