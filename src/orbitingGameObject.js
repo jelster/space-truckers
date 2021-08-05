@@ -40,7 +40,7 @@ class OrbitingGameObject extends BaseGameObject {
         const rCubed = Math.pow(orbitalRadius, 3);
         const period = Scalar.TwoPi * Math.sqrt(rCubed / Gm);
         const v = Math.sqrt(Gm / orbitalRadius);
-        const w = v / period;
+        const w = v / orbitalRadius;
         const orbitalCircumfrence = Math.pow(Math.PI * orbitalRadius, 2);
         return {
             orbitalPeriod: period,
@@ -63,7 +63,7 @@ class OrbitingGameObject extends BaseGameObject {
         const w = this.angularVelocity * (deltaTime ?? 0.016);
         const posRadius = this.orbitalRadius;
 
-        this.angularPosition = Scalar.Repeat(angPos + w, Scalar.TwoPi);
+        this.angularPosition = Scalar.NormalizeRadians(angPos + w, Scalar.TwoPi);
         // TODO: support inclined orbits by calculating the z-coordinate using the correct trig fn
         this.position.x = posRadius * Math.sin(this.angularPosition);
         this.position.z = posRadius * Math.cos(this.angularPosition);
@@ -75,12 +75,12 @@ class OrbitingGameObject extends BaseGameObject {
         if (mass <= 0) {
             return Vector3.Zero();
         }
-        let direction = m1Pos.subtract(position);
+        let direction = position.subtract(m1Pos);
         let distanceSq = direction.lengthSquared();
         if (distanceSq <= 0) {
             return Vector3.Zero();
         }
-        let gravScale = (gravConstant * (mass * (1 / distanceSq)))
+        let gravScale = -(gravConstant * (mass * (1 / distanceSq)))
         if (isNaN(gravScale)) {
             throw new Error("Should not see NaN for gravScale in calculateGravitationalForce!");
         }

@@ -5,6 +5,9 @@ import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
 import OrbitingGameObject from "../orbitingGameObject";
 
 class CargoUnit extends OrbitingGameObject {
+    currentGravity = new Vector3(0, 0, 0);
+    lastVelocity = new Vector3(0, 0, 0);
+    lastGravity = new Vector3(0, 0, 0);
     distanceTraveled = 0.0;
     timeInTransit = 0.0;
     originPlanet;
@@ -53,13 +56,19 @@ class CargoUnit extends OrbitingGameObject {
     update(deltaTime) {
         super.update(deltaTime);
         if (this.isInFlight) {
+            this.lastGravity = this.currentGravity;
+            this.physicsImpostor.applyImpulse(this.currentGravity.scale(deltaTime), this.mesh.getAbsolutePosition());
+           
+            this.currentGravity = Vector3.Zero();
             const up = this.mesh.up;
             const linVel = this.physicsImpostor.getLinearVelocity();
+            this.lastVelocity = linVel.clone();
+            
             this.timeInTransit += deltaTime;
             this.distanceTraveled += linVel.length() * deltaTime;
-            linVel.normalize();
-            this.rotation = Vector3.Cross(up, linVel);            
-        }        
+            //linVel.normalize();
+            this.rotation = Vector3.Cross(up, linVel).normalize();
+        }
     }
 
     destroy() {

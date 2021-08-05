@@ -163,10 +163,10 @@ class SpaceTruckerPlanningScreen {
                 }
             ));
 
+
         this.scene.onReadyObservable.add(() => {
             this.ui = new PlanningScreenGui(this);
             this.ui.bindToScreen();
-            console.log(this.destinationMesh.actionManager);
         });
         ammoReadyPromise.then(res => {
             console.log("ammo ready");
@@ -181,6 +181,7 @@ class SpaceTruckerPlanningScreen {
     update(deltaTime) {
         const dT = deltaTime ?? (this.scene.getEngine().getDeltaTime() / 1000);
         this.actionProcessor?.update();
+
         switch (this.gameState) {
             case SpaceTruckerPlanningScreen.PLANNING_STATE.Created:
                 break;
@@ -196,10 +197,10 @@ class SpaceTruckerPlanningScreen {
                 this.star.update(dT);
                 this.planets.forEach(p => p.update(dT));
                 this.asteroidBelt.update(dT);
+
+                this.cargo.currentGravity = this.updateGravitationalForcesForBox(dT);
                 this.cargo.update(dT);
 
-                let grav = this.updateGravitationalForcesForBox(dT);
-                this.cargo.physicsImpostor.applyImpulse(grav, this.cargo.mesh.getAbsolutePosition());
                 break;
             case SpaceTruckerPlanningScreen.PLANNING_STATE.CargoArrived:
                 break;
@@ -210,6 +211,7 @@ class SpaceTruckerPlanningScreen {
             default:
                 break;
         }
+
     }
 
     ACTIVATE(state, args) {
@@ -361,12 +363,12 @@ class SpaceTruckerPlanningScreen {
         });
     }
 
-    updateGravitationalForcesForBox(timeStep) {
+    updateGravitationalForcesForBox() {
         const cargoPosition = this.cargo.position;
         let summedForces = this.star.calculateGravitationalForce(cargoPosition);
         this.planets.forEach(p => summedForces.addInPlace(p.calculateGravitationalForce(cargoPosition)));
 
-        return summedForces; //.scaleInPlace(timeStep);
+        return summedForces;
     }
 }
 

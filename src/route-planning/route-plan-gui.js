@@ -29,23 +29,29 @@ class PlanningScreenGui {
         });
 
         this.scene.onBeforeRenderObservable.add(() => {
-            this.updateControls();
+            this.update();
         });
     }
 
-    updateControls() {
+    update() {
+        if (this.planningScreen.gameState === SpaceTruckerPlanningScreen.PLANNING_STATE.Initialized) {
+            return;
+        }
         const gameStage = PLAN_STATE_KEYS[this.planningScreen.gameState],
             transitTime = this.planningScreen.cargo.timeInTransit,
             transitDistance = this.planningScreen.cargo.distanceTraveled,
             launchForce = this.planningScreen.launchForce,
-            currentVelocity = this.planningScreen.cargo.linearVelocity;
+            currentVelocity = this.planningScreen.cargo.lastVelocity.length(),
+            currentGravity = this.planningScreen.cargo.lastGravity;
         
         this.launchSlider.value = launchForce;
-        this.launchForce.text = `Launch Force: ${launchForce.toFixed(3)} N`;
+        this.launchForce.text = `Launch Force: ${launchForce.toFixed(2)} N`;
+        
         this.transitTime.text = `Time in transit: ${transitTime.toFixed(2)} s`;
         this.transitDistance.text = `Transit distance: ${transitDistance.toFixed(2)} m`;
         this.currentVelocity.text = `Current velocity: ${currentVelocity.toFixed(2)} m/s`;
         this.gameStage.text = `Current State: ${gameStage}`;
+        this.currentGravity.text = `Grav. Accel.: ${currentGravity.length().toFixed(3)} m/s^2`;
         
         this.planningScreen.launchArrow.scaling.setAll(this.planningScreen.launchForce * 0.05);
 
@@ -68,6 +74,7 @@ class PlanningScreenGui {
                 this.currentVelocity.isVisible = true;
                 this.transitDistance.isVisible = true;
                 this.transitTime.isVisible = true;
+                this.currentGravity.isVisible = true;
 
                 this.launchSlider.isVisible = false;
                 break;
@@ -155,6 +162,13 @@ class PlanningScreenGui {
         this.currentVelocity.height = "40px";
         this.currentVelocity.isVisible = false;
         this.topDisplayPanel.addControl(this.currentVelocity);
+
+        this.currentGravity = new TextBlock("current-gravity", "Current gravity: 0 m/s^2");
+        this.currentGravity.fontSize = "36pt";
+        this.currentGravity.color = "white";
+        this.currentGravity.height = "40px";
+        this.currentGravity.isVisible = false;
+        this.topDisplayPanel.addControl(this.currentGravity);
 
         this.launchSlider = new Slider("launchSlider");
         this.launchSlider.height = "600px";
