@@ -57,17 +57,16 @@ class CargoUnit extends OrbitingGameObject {
         super.update(deltaTime);
         if (this.isInFlight) {
             this.lastGravity = this.currentGravity.clone();
-            this.physicsImpostor.applyImpulse(this.currentGravity.scale(deltaTime), this.mesh.getAbsolutePosition());
-           
-            this.currentGravity = Vector3.Zero();
-            const up = this.mesh.up;
             const linVel = this.physicsImpostor.getLinearVelocity();
             this.lastVelocity = linVel.clone();
-            
+            linVel.normalize();
+
             this.timeInTransit += deltaTime;
-            this.distanceTraveled += linVel.length() * deltaTime;
-            //linVel.normalize();
-            this.rotation = Vector3.Cross(up, linVel).normalize();
+            this.distanceTraveled += this.lastVelocity.length() * deltaTime;            
+            
+            this.rotation = Vector3.Cross(this.mesh.up, linVel);
+            this.physicsImpostor.applyImpulse(this.currentGravity.scale(deltaTime), this.mesh.getAbsolutePosition());
+            this.currentGravity = Vector3.Zero();
         }
     }
 
