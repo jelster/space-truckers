@@ -79,9 +79,9 @@ const planetData = [
 const gameData = {
     planetaryInfo: planetData,
     asteroidBeltOptions: {
-        density: 250,
+        density: 280,
         maxScale: new Vector3(10.25, 10.25, 10.25),
-        number: 5000,
+        number: 3000,
         innerBeltRadius: 1000 * distanceMultiplier,
         outerBeltRadius: 1700 * distanceMultiplier,
         posRadians: 0,

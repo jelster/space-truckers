@@ -56,7 +56,7 @@ class CargoUnit extends OrbitingGameObject {
     update(deltaTime) {
         super.update(deltaTime);
         if (this.isInFlight) {
-            this.lastGravity = this.currentGravity;
+            this.lastGravity = this.currentGravity.clone();
             this.physicsImpostor.applyImpulse(this.currentGravity.scale(deltaTime), this.mesh.getAbsolutePosition());
            
             this.currentGravity = Vector3.Zero();
