@@ -38,6 +38,17 @@ const preFlightActionList = [
     { action: 'PAUSE', shouldBounce: () => true }
 ];
 const overworldMusic = "overworld";
+const PLANNING_STATE = Object.freeze({
+    Created: 0,
+    Initialized: 1,
+    ReadyToLaunch: 2,
+    InFlight: 3,
+    CargoArrived: 4,
+    RouteAccepted: 5,
+    GeneratingCourse: 6,
+    CargoDestroyed: 7,
+    Paused: 8
+});
 class SpaceTruckerPlanningScreen {
     scene;
     config;
@@ -56,17 +67,7 @@ class SpaceTruckerPlanningScreen {
     actionProcessor;
     onStateChangeObservable = new Observable();
 
-    static PLANNING_STATE = Object.freeze({
-        Created: 0,
-        Initialized: 1,
-        ReadyToLaunch: 2,
-        InFlight: 3,
-        CargoArrived: 4,
-        RouteAccepted: 5,
-        GeneratingCourse: 6,
-        CargoDestroyed: 7,
-        Paused: 8
-    });
+
 
     get gameState() {
         return this._state;
@@ -78,8 +79,8 @@ class SpaceTruckerPlanningScreen {
             this.onStateChangeObservable.notifyObservers({ priorState: this._previousState, currentState: value });
         }
     }
-    _previousState = SpaceTruckerPlanningScreen.PLANNING_STATE.Created;
-    _state = SpaceTruckerPlanningScreen.PLANNING_STATE.Created;
+    _previousState = PLANNING_STATE.Created;
+    _state = PLANNING_STATE.Created;
 
     constructor(engine, inputManager, config) {
         this.onStateChangeObservable.add(s => console.log(`${s.currentState} is new state. Prev was ${s.priorState}`));
@@ -173,7 +174,7 @@ class SpaceTruckerPlanningScreen {
             // this.initializePhysics();
         });
         this.actionProcessor = new SpaceTruckerInputProcessor(this, inputManager, preFlightActionList);
-        this.gameState = SpaceTruckerPlanningScreen.PLANNING_STATE.Initialized;
+        this.gameState = PLANNING_STATE.Initialized;
         this.camera.useFramingBehavior = true;
         this.camera.attachControl(true);
     }
@@ -183,9 +184,9 @@ class SpaceTruckerPlanningScreen {
         this.actionProcessor?.update();
 
         switch (this.gameState) {
-            case SpaceTruckerPlanningScreen.PLANNING_STATE.Created:
+            case PLANNING_STATE.Created:
                 break;
-            case SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch:
+            case PLANNING_STATE.ReadyToLaunch:
                 this.star.update(dT);
                 this.planets.forEach(p => p.update(dT));
                 this.asteroidBelt.update(dT);
@@ -193,7 +194,7 @@ class SpaceTruckerPlanningScreen {
                 this.cargo.position = this.origin.position.clone().scaleInPlace(1.1, 1, 1);
 
                 break;
-            case SpaceTruckerPlanningScreen.PLANNING_STATE.InFlight:
+            case PLANNING_STATE.InFlight:
                 this.star.update(dT);
                 this.planets.forEach(p => p.update(dT));
                 this.asteroidBelt.update(dT);
@@ -202,11 +203,11 @@ class SpaceTruckerPlanningScreen {
                 this.cargo.update(dT);
 
                 break;
-            case SpaceTruckerPlanningScreen.PLANNING_STATE.CargoArrived:
+            case PLANNING_STATE.CargoArrived:
                 break;
-            case SpaceTruckerPlanningScreen.PLANNING_STATE.CargoDestroyed:
+            case PLANNING_STATE.CargoDestroyed:
                 break;
-            case SpaceTruckerPlanningScreen.PLANNING_STATE.Paused:
+            case PLANNING_STATE.Paused:
                 break;
             default:
                 break;
@@ -222,7 +223,7 @@ class SpaceTruckerPlanningScreen {
         if (what?.pickInfo) {
             console.log(args);
         }
-        const shouldActivate = this.gameState === SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch && (!what
+        const shouldActivate = this.gameState === PLANNING_STATE.ReadyToLaunch && (!what
             || what && what.hit && what.pickedMesh === this.cargo.mesh);
 
         if (shouldActivate) {
@@ -233,32 +234,32 @@ class SpaceTruckerPlanningScreen {
     }
 
     MOVE_OUT(state) {
-        if (this.gameState === SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch) {
+        if (this.gameState === PLANNING_STATE.ReadyToLaunch) {
             this.launchForce = Scalar.Clamp(this.launchForce + this.launchForceIncrement, 0, this.launchForceMax);
         }
     }
 
     MOVE_IN(state) {
-        if (this.gameState === SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch) {
+        if (this.gameState === PLANNING_STATE.ReadyToLaunch) {
             this.launchForce = Scalar.Clamp(this.launchForce - this.launchForceIncrement, 0, this.launchForceMax);
         }
     }
 
     GO_BACK(state) {
-        if (!state && this.gameState !== SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch) {
+        if (!state && this.gameState !== PLANNING_STATE.ReadyToLaunch) {
             this.setReadyToLaunchState();
         }
         return true;
     }
 
     MOVE_LEFT(state) {
-        if (this.gameState === SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch) {
+        if (this.gameState === PLANNING_STATE.ReadyToLaunch) {
             this.cargo.mesh.rotate(Axis.Y, -0.02, Space.World);
         }
     }
 
     MOVE_RIGHT(state) {
-        if (this.gameState === SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch) {
+        if (this.gameState === PLANNING_STATE.ReadyToLaunch) {
             this.cargo.mesh.rotate(Axis.Y, 0.02, Space.World);
         }
     }
@@ -271,18 +272,18 @@ class SpaceTruckerPlanningScreen {
     }
 
     togglePause() {
-        if (this.gameState === SpaceTruckerPlanningScreen.PLANNING_STATE.Paused) {
+        if (this.gameState === PLANNING_STATE.Paused) {
             this.gameState = this._previousState;
             this.cargo.physicsImpostor.wakeUp();
         }
         else {
             this.cargo.physicsImpostor.sleep();
-            this.gameState = SpaceTruckerPlanningScreen.PLANNING_STATE.Paused;
+            this.gameState = PLANNING_STATE.Paused;
         }
     }
 
     cargoArrived() {
-        this.gameState = SpaceTruckerPlanningScreen.PLANNING_STATE.CargoArrived;
+        this.gameState = PLANNING_STATE.CargoArrived;
         this.cargo.physicsImpostor.setLinearVelocity(new Vector3(0, 0, 0));
     }
 
@@ -290,11 +291,11 @@ class SpaceTruckerPlanningScreen {
     onCargoDestroyed(collided) {
         this.destroyedBy = collided.name;
         this.cargo.destroy();
-        this.gameState = SpaceTruckerPlanningScreen.PLANNING_STATE.CargoDestroyed;
+        this.gameState = PLANNING_STATE.CargoDestroyed;
     }
 
     launchCargo(impulse) {
-        if (this.gameState !== SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch) {
+        if (this.gameState !== PLANNING_STATE.ReadyToLaunch) {
             console.log('Invalid attempt to launch before ready');
             return;
         }
@@ -303,7 +304,7 @@ class SpaceTruckerPlanningScreen {
         this.cargo.launch(impulse);
         console.log("launching cargo!");
 
-        this.gameState = SpaceTruckerPlanningScreen.PLANNING_STATE.InFlight;
+        this.gameState = PLANNING_STATE.InFlight;
     }
 
     setReadyToLaunchState() {
@@ -319,7 +320,7 @@ class SpaceTruckerPlanningScreen {
 
         this.initializePhysics();
 
-        this.gameState = SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch;
+        this.gameState = PLANNING_STATE.ReadyToLaunch;
     }
 
 
@@ -373,5 +374,5 @@ class SpaceTruckerPlanningScreen {
 }
 
 export default SpaceTruckerPlanningScreen;
-const PLAN_STATE_KEYS = Object.keys(SpaceTruckerPlanningScreen.PLANNING_STATE);
-export { PLAN_STATE_KEYS };
+const PLAN_STATE_KEYS = Object.keys(PLANNING_STATE);
+export { PLAN_STATE_KEYS,PLANNING_STATE  };

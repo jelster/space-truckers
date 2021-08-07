@@ -3,7 +3,7 @@ import { Rectangle } from "@babylonjs/gui/2D/controls/rectangle";
 import { AdvancedDynamicTexture } from "@babylonjs/gui/2D/advancedDynamicTexture";
 import { TextBlock } from "@babylonjs/gui/2D/controls/textBlock";
 import { Control } from "@babylonjs/gui/2D/controls/control";
-import SpaceTruckerPlanningScreen, { PLAN_STATE_KEYS } from "./spaceTruckerPlanningScreen";
+import SpaceTruckerPlanningScreen, { PLAN_STATE_KEYS, PLANNING_STATE } from "./spaceTruckerPlanningScreen";
 import { Grid, Slider, StackPanel } from "@babylonjs/gui";
 
 
@@ -34,7 +34,7 @@ class PlanningScreenGui {
     }
 
     update() {
-        if (this.planningScreen.gameState === SpaceTruckerPlanningScreen.PLANNING_STATE.Initialized) {
+        if (this.planningScreen.gameState === PLANNING_STATE.Initialized) {
             return;
         }
         const gameStage = PLAN_STATE_KEYS[this.planningScreen.gameState],
@@ -58,7 +58,7 @@ class PlanningScreenGui {
     }
     onScreenStateChange(newState) {
         switch (newState) {
-            case SpaceTruckerPlanningScreen.PLANNING_STATE.ReadyToLaunch:
+            case PLANNING_STATE.ReadyToLaunch:
                 this.gameStage.color = "white";
 
                 this.currentVelocity.isVisible = false;
@@ -68,7 +68,7 @@ class PlanningScreenGui {
                 this.launchForce.isVisible = true;
                 this.launchSlider.isVisible = true;
                 break;
-            case SpaceTruckerPlanningScreen.PLANNING_STATE.InFlight:
+            case PLANNING_STATE.InFlight:
                 this.gameStage.color = "lightblue";
 
                 this.currentVelocity.isVisible = true;
@@ -78,7 +78,7 @@ class PlanningScreenGui {
 
                 this.launchSlider.isVisible = false;
                 break;
-            case SpaceTruckerPlanningScreen.PLANNING_STATE.CargoDestroyed:
+            case PLANNING_STATE.CargoDestroyed:
                 this.gameStage.color = "red";
                 break;
             default:
