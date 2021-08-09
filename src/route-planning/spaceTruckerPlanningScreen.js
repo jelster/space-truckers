@@ -323,8 +323,6 @@ class SpaceTruckerPlanningScreen {
         this.gameState = PLANNING_STATE.ReadyToLaunch;
     }
 
-
-
     initializePhysics() {
         this.scene.gravity = Vector3.Zero();
         if (this.scene.isPhysicsEnabled()) {
@@ -357,10 +355,7 @@ class SpaceTruckerPlanningScreen {
         collisionImpostors.push(this.star.physicsImpostor);
         cargoImp.registerOnPhysicsCollide(collisionImpostors, (collider, collided) => {
             console.log(`${collider.object?.name} collided with ${collided.object?.name}`);
-            // ISSUE: Uncaught ref error 'Ammo is not defined' thrown. 
-            // See https://forum.babylonjs.com/t/why-is-ammojsplugin-not-able-to-get-contact-points-with-concretecontactresultcallback/14640/5
             this.onCargoDestroyed(collided);
-
         });
     }
 

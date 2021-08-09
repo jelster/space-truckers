@@ -71,53 +71,18 @@ class AsteroidBelt extends OrbitingGameObject {
         aSphere.thinInstanceSetBuffer("matrix", this.matrixBuffer);
 
         this.mesh = aSphere;
-
-        // const rockSPS = this.rockSPS = new SolidParticleSystem("asteroidSPS", this.scene,
-        //     {
-        //         updatable: false,
-        //         isPickable: false,
-        //         useModelMaterial: true
-        //     });
-
-        // rockSPS.addShape(aSphere, numAsteroids, {
-        //     vertexFunction: (vertex) => {
-        //         vertex.x *= 1 + (Math.random() + maxScale.x);
-        //         vertex.y *= 1 + (Math.random() + maxScale.y);
-        //         vertex.z *= 1 + (Math.random() + maxScale.z);
-        //     },
-        //     positionFunction: (part, i, s) => {
-        //         part.scaling.set(Math.random() * 2 + 1, Math.random() + 1, Math.random() * 2 + 1);
-
-        //         let theta = Math.random() * 2 * Math.PI;
-        //         let rTheta = Scalar.RandomRange(innerBeltRadius + density * 0.5, outerBeltRadius - density * 0.5);
-        //         part.position.x = Math.sin(theta) * rTheta;
-        //         part.position.y = (Math.random() - 0.5) * density;
-        //         part.position.z = Math.cos(theta) * rTheta;
-
-        //         part.rotation.x = Math.random() * 3.5;
-        //         part.rotation.y = Math.random() * 3.5;
-        //         part.rotation.z = Math.random() * 3.5;
-
-        //     }
-        // });
-
-        // this.mesh = rockSPS.buildMesh();
-        // aSphere.dispose();
-        // this.rockSPS = rockSPS;
-
     }
 
     updateMatrices() {
         for (let i = 0; i < this.numAsteroids; ++i) {
-            Quaternion.FromEulerAnglesToRef(this.rotations[i].x, this.rotations[i].y,  this.rotations[i].z,  this.quaternions[i]);
-            Matrix.ComposeToRef( this.scalings[i],  this.quaternions[i],  this.positions[i],  this.matrices[i]);
+            Quaternion.FromEulerAnglesToRef(this.rotations[i].x, this.rotations[i].y, this.rotations[i].z, this.quaternions[i]);
+            Matrix.ComposeToRef(this.scalings[i], this.quaternions[i], this.positions[i], this.matrices[i]);
             this.matrices[i].copyToArray(this.matrixBuffer, i * 16);
         }
     };
 
     update(deltaTime) {
-            this.rotation.y = Scalar.Repeat(this.rotation.y + 0.0001, Scalar.TwoPi);
-        //     super.update(deltaTime);
+        this.rotation.y = Scalar.Repeat(this.rotation.y + 0.0001, Scalar.TwoPi);
 
         for (let i = 0; i < this.numAsteroids; ++i) {
             this.rotations[i].x += Math.random() * 0.01;
