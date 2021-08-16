@@ -9,16 +9,18 @@ class SpaceTruckerSoundManager {
     channels = {
         music: null,
         sfx: null,
-        ui: null
+        ui: null,
+        ambient: null
     };
     registeredSounds = {};
     sound(id) {
         return this.registeredSounds[id];
     }
     constructor(scene, ...soundIds) {
-        this.channels.music = new SoundTrack(scene, { mainTrack: false, volume: 0.89 });
+        this.channels.music = new SoundTrack(scene, { mainTrack: false, volume: 0.95 });
         this.channels.sfx = new SoundTrack(scene, { mainTrack: true, volume: 1 });
-        this.channels.ui = new SoundTrack(scene, { mainTrack: false, volume: 0.94 });
+        this.channels.ui = new SoundTrack(scene, { mainTrack: false, volume: 0.78 });
+        this.channels.ambient = new SoundTrack(scene, { mainTrack: false, volume: 0.65 });
         const onReadyPromises = [];
         soundIds.forEach(soundId => {
             const mapped = soundFileMap[soundId];
