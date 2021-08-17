@@ -19,14 +19,13 @@
 
   #pageContainer {
     position: relative;
-    background-color: black;
     margin: 10px;
     padding: 17px;
     border: solid white;
     border-radius: 7px;
     color: brown;
     text-align: center;
-
+    height: 90vh;
   }
 
   #landingPageContainer {
@@ -35,7 +34,7 @@
   }
 
   #hero {
-    height: 600px;
+    height:65vh;
     background: url('./space-truckers-landing-logo.jpg') center center transparent no-repeat;
     background-size: cover;
     opacity: 0.68;
@@ -48,7 +47,7 @@
   }
 
   #ctaRow button {
-    font-size: 36pt;
+    font-size: 5vh;
     padding: 7px 9px;
     margin: 5px 7px;
     background: brown;
@@ -73,5 +72,11 @@
     user-select: none;
     outline: none;
     -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+    background-color: black;
     /* mobile webkit */
+  }
+
+  #pageContainer h1{
+    font-size: 4.5vh;
+    margin-top: 0;
   }
