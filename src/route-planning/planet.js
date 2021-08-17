@@ -1,3 +1,4 @@
+import { Axis } from "@babylonjs/core";
 import { PBRMaterial } from "@babylonjs/core/Materials/PBR/pbrMaterial";
 import { Texture } from "@babylonjs/core/Materials/Textures/texture";
 import { Color3 } from "@babylonjs/core/Maths/math.color";
@@ -49,7 +50,7 @@ class Planet extends OrbitingGameObject {
     }
 
     update(deltaTime) {
-        this.rotation.y = Scalar.Repeat(this.rotation.y + 0.01, Scalar.TwoPi);
+        this.mesh.rotate(Axis.Y,0.01);
         super.update(deltaTime);
     }
 
