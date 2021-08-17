@@ -52,9 +52,10 @@ const PLANNING_STATE = Object.freeze({
 class SpaceTruckerPlanningScreen {
     scene;
     config;
-    launchForce = 150.0;
-    launchForceIncrement = 1.0;
-    launchForceMax = 500;
+    launchForce = 100.0;
+    launchForceIncrement = 5.0;;
+    launchForceMax = 120;
+    launchRotationSpeed = 0.1;
     planets = [];
     origin;
     destination;
@@ -66,8 +67,6 @@ class SpaceTruckerPlanningScreen {
     soundManager;
     actionProcessor;
     onStateChangeObservable = new Observable();
-
-
 
     get gameState() {
         return this._state;
@@ -254,13 +253,13 @@ class SpaceTruckerPlanningScreen {
 
     MOVE_LEFT(state) {
         if (this.gameState === PLANNING_STATE.ReadyToLaunch) {
-            this.cargo.mesh.rotate(Axis.Y, -0.02, Space.World);
+            this.cargo.mesh.rotate(Axis.Y, -this.launchRotationSpeed, Space.World);
         }
     }
 
     MOVE_RIGHT(state) {
         if (this.gameState === PLANNING_STATE.ReadyToLaunch) {
-            this.cargo.mesh.rotate(Axis.Y, 0.02, Space.World);
+            this.cargo.mesh.rotate(Axis.Y, this.launchRotationSpeed, Space.World);
         }
     }
 
