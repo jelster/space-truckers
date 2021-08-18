@@ -17,11 +17,11 @@ import { TextWrapping } from "@babylonjs/gui/index";
 import CutSceneSegment from "./cutSceneSegment";
 import logger from "./logger";
 import SpaceTruckerInputProcessor from "./spaceTruckerInputProcessor";
-import titleSongUrl from "../assets/sounds/space-trucker-title-theme.m4a";
 import poweredByUrl from "../assets/powered-by.png";
 import communityUrl from "../assets/splash-screen-community.png";
 import spaceTruckerRigUrl from "../assets/space-trucker-and-rig.png";
 import babylonLogoUrl from "../assets/babylonjs_identity_color.png";
+import SpaceTruckerSoundManager from "./spaceTruckerSoundManager";
 
 
 const animationFps = 30;
@@ -30,13 +30,16 @@ const fadeAnimation = new Animation("entranceAndExitFade", "visibility", animati
 const scaleAnimation = new Animation("scaleTarget", "scaling", animationFps, Animation.ANIMATIONTYPE_VECTOR3, Animation.ANIMATIONLOOPMODE_CYCLE, true);
 
 const actionList = [{ action: "ACTIVATE", shouldBounce: () => true }];
+
 class SplashScene {
     // currentSegment;
     // poweredBy;
     // babylonBillboard;
     // communityProduction;
     // callToAction;
-    // music;
+    get music() {
+        return this.audioManager.sound("title");
+    }
     // skipRequested = false;
     // onReadyObservable = new Observable();
     get scene() {
@@ -46,6 +49,7 @@ class SplashScene {
         this.skipRequested = false;
         this.onReadyObservable = new Observable();
         let scene = this._scene = new Scene(engine);
+        
         scene.clearColor = Color3.Black();
         this.camera = new ArcRotateCamera("camera", 0, Math.PI / 2, 5, Vector3.Zero(), scene);
         this.light = new HemisphericLight("light", new Vector3(0, 1, 0), scene);
@@ -116,20 +120,19 @@ class SplashScene {
             ctaBlock.isVisible = true;
         });
 
-        this.music = new Sound("theme",
-            titleSongUrl,
-            scene,
-            () => {
-                this.onReadyObservable.notifyObservers();
-            },
-            { autoplay: false, loop: false, volume: .01 });
+       
 
         this.actionProcessor = new SpaceTruckerInputProcessor(this, inputManager, actionList);
+
+        this.audioManager = new SpaceTruckerSoundManager(scene, 'title');
+        this.audioManager.onReadyObservable.addOnce(_ => this.onReadyObservable.notifyObservers());
+        
 
     }
 
     run() {
         this.currentSegment = this.poweredBy;
+        this.music.setVolume(0.01);
         this.music.play();
         this.music.setVolume(0.998, 400);
         this.currentSegment.start();
@@ -152,11 +155,12 @@ class SplashScene {
         }
     }
 
-    ACTIVATE(state) {
-        const lastState = state.priorState;
-        if (!this.skipRequested && !lastState) {
+    ACTIVATE(priorState) {
+        
+        if (!this.skipRequested && !priorState) {
             logger.logInfo("Key press detected. Skipping cut scene.");
             this.skipRequested = true;
+            this.music?.stop();
             return true;
         }
         return false;

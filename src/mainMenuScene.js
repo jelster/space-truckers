@@ -13,7 +13,7 @@ import SpaceTruckerInputProcessor from "./spaceTruckerInputProcessor";
 
 
 import menuBackground from "../assets/menuBackground.png";
-import titleMusic from "../assets/sounds/space-trucker-title-theme.m4a";
+
 import selectionIcon from "../assets/ui-selection-icon.PNG";
 
 const menuActionList = [
@@ -90,9 +90,7 @@ class MainMenuScene {
 
     MOVE_UP(state) {
         logger.logInfo("MOVE_UP");
-        const lastState = state.priorState;
-
-        if (!lastState) {
+        if (!state) {
             const oldIdx = this.selectedItemIndex;
             const newIdx = oldIdx - 1;
             this.selectedItemIndex = newIdx;
@@ -103,21 +101,19 @@ class MainMenuScene {
     }
 
     MOVE_DOWN(state) {
-        const lastState = state.priorState;
-        if (!lastState) {
+        if (!state) {
             const oldIdx = this.selectedItemIndex;
             const newIdx = oldIdx + 1;
             logger.logInfo("MOVE_DOWN " + newIdx);
             this.selectedItemIndex = newIdx;
         }
-        return lastState;
+        return true;
 
     }
 
-    ACTIVATE(state) {
-        const lastState = state.priorState;
+    ACTIVATE(state, input) {
 
-        if (!lastState) {
+        if (!state) {
             // this is the first time through this action handler for this button press sequence
             console.log("ACIVATE - " + this.selectedItemIndex);
             const selectedItem = this.selectedItem;
