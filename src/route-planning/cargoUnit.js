@@ -15,6 +15,7 @@ class CargoUnit extends OrbitingGameObject {
     trailMesh;
     mass = 0;
     isInFlight = false;
+    routePath = [];
 
     get linearVelocity() {
         return this?.physicsImpostor?.getLinearVelocity()?.length() ?? 0;
@@ -38,6 +39,7 @@ class CargoUnit extends OrbitingGameObject {
     }
 
     reset() {
+        this.routePath = [];
         this.timeInTransit = 0;
         this.distanceTraveled = 0;
         if (this.trailMesh) {
@@ -65,6 +67,16 @@ class CargoUnit extends OrbitingGameObject {
             this.distanceTraveled += this.lastVelocity.length() * deltaTime;            
             
             this.rotation = Vector3.Cross(this.mesh.up, linVel);
+
+            let currentPoint = { 
+                time: this.timeInTransit, 
+                position: this.position.clone(), 
+                rotation: this.mesh.rotationQuaternion.clone(),
+                velocity: this.lastVelocity.clone(),
+                gravity: this.lastGravity.clone()
+            };
+            this.routePath.push(currentPoint);
+
             this.physicsImpostor.applyImpulse(this.currentGravity.scale(deltaTime), this.mesh.getAbsolutePosition());
             this.currentGravity = Vector3.Zero();
         }
