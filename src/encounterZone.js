@@ -1,7 +1,6 @@
 import { ActionManager, Color3, ExecuteCodeAction, PredicateCondition } from "@babylonjs/core";
 import { Observable } from "@babylonjs/core/Misc/observable";
-import { Vector3 } from "../../Maths/math.vector";
-import { MeshBuilder } from "../../Meshes/meshBuilder";
+import { TorusBuilder } from "@babylonjs/core/Meshes/Builders/torusBuilder";
 
 import BaseGameObject from "./baseGameObject";
  
@@ -49,6 +48,7 @@ class SpaceTruckerEncounterZone extends BaseGameObject {
     onExitObservable = new Observable();
 
     constructor(definition, scene) {
+        super(scene);
         this.name = definition.name;
         this.scene = scene;
         this.innerBoundary = definition.innerBoundary;
@@ -56,11 +56,12 @@ class SpaceTruckerEncounterZone extends BaseGameObject {
         this.encounterRate = definition.encounterRate;
         this.colorCode = definition.colorCode;
         this.color = Color3.FromHexString(this.colorCode);
-        this.mesh = MeshBuilder.CreateTorus(this.name, {
+        this.mesh = TorusBuilder.CreateTorus(this.name, {
             diameter: this.outerBoundary,
             thickness: this.innerBoundary,
             tesselation: 32
         }, scene);
+        this.mesh.visibility = 0;
     }
 
     isWithinZone(position) {
@@ -77,7 +78,7 @@ class SpaceTruckerEncounterZone extends BaseGameObject {
             parameter: { mesh: meshToWatch, usePreciseIntersections: true }
         },
             (c1) => this.onEnterObservable.notifyObservers(c1),
-            new PredicateCondition(zam, () => isWithinZone(ez, cargoUnit.absolutePosition))
+            new PredicateCondition(zam, () => this.isWithinZone(ez, cargoUnit.absolutePosition))
         );
 
         const zext = this.intersectionExitAction = new ExecuteCodeAction({
@@ -86,7 +87,7 @@ class SpaceTruckerEncounterZone extends BaseGameObject {
         },
             (c1) =>
                 this.onExitObservable.notifyObservers(c1),
-            new PredicateCondition(zam, () => isWithinZone(ez, cargoUnit.absolutePosition))
+            new PredicateCondition(zam, () => this.isWithinZone(ez, cargoUnit.absolutePosition))
         );
         const zam = meshToWatch.actionManager;
         zam.registerAction(zact);
