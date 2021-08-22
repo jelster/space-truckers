@@ -3,9 +3,8 @@ import { Observable } from "@babylonjs/core/Misc/observable";
 import { Vector3 } from "../../Maths/math.vector";
 import { MeshBuilder } from "../../Meshes/meshBuilder";
 
-import BaseGameObject from "../baseGameObject";
-import SpaceTruckerPlanningScreen from "./spaceTruckerPlanningScreen";
-
+import BaseGameObject from "./baseGameObject";
+ 
 const encounterZones = {
     innerSystem: {
         name: "Inner System",
@@ -46,6 +45,8 @@ class SpaceTruckerEncounterZone extends BaseGameObject {
     scene;
     meshToWatch;
     color = Color3.Black();
+    onEnterObservable = new Observable();
+    onExitObservable = new Observable();
 
     constructor(definition, scene) {
         this.name = definition.name;
@@ -60,9 +61,8 @@ class SpaceTruckerEncounterZone extends BaseGameObject {
             thickness: this.innerBoundary,
             tesselation: 32
         }, scene);
-
-
     }
+
     isWithinZone(position) {
         return true;
     }
@@ -76,7 +76,7 @@ class SpaceTruckerEncounterZone extends BaseGameObject {
             trigger: ActionManager.OnIntersectionEnterTrigger,
             parameter: { mesh: meshToWatch, usePreciseIntersections: true }
         },
-            (c1) => onIntersectEnter(c1),
+            (c1) => this.onEnterObservable.notifyObservers(c1),
             new PredicateCondition(zam, () => isWithinZone(ez, cargoUnit.absolutePosition))
         );
 
@@ -85,7 +85,7 @@ class SpaceTruckerEncounterZone extends BaseGameObject {
             parameter: { mesh: meshToWatch, usePreciseIntersections: true }
         },
             (c1) =>
-                onIntersectExit(c1),
+                this.onExitObservable.notifyObservers(c1),
             new PredicateCondition(zam, () => isWithinZone(ez, cargoUnit.absolutePosition))
         );
         const zam = meshToWatch.actionManager;
