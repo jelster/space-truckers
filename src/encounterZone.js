@@ -108,3 +108,4 @@ class SpaceTruckerEncounterZone extends BaseGameObject {
 }
 
 export default SpaceTruckerEncounterZone;
+export { encounterZones };
