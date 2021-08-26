@@ -42,7 +42,8 @@ class PlanningScreenGui {
             transitDistance = this.planningScreen.cargo.distanceTraveled,
             launchForce = this.planningScreen.launchForce,
             currentVelocity = this.planningScreen.cargo.lastVelocity.length(),
-            currentGravity = this.planningScreen.cargo.lastGravity;
+            currentGravity = this.planningScreen.cargo.lastGravity,
+            encounterManager = this.planningScreen.encounterManager;
         
         this.launchSlider.value = launchForce;
         this.launchForce.text = `Launch Force: ${launchForce.toFixed(2)} N`;
@@ -52,8 +53,9 @@ class PlanningScreenGui {
         this.currentVelocity.text = `Current velocity: ${currentVelocity.toFixed(2)} m/s`;
         this.gameStage.text = `Current State: ${gameStage}`;
         this.currentGravity.text = `Grav. Accel.: ${currentGravity.length().toFixed(3)} m/s^2`;
+        this.currentZone.text = `Current Zone (in/out): ${encounterManager.currentZone?.name}`;
         
-        this.planningScreen.launchArrow.scaling.setAll(this.planningScreen.launchForce * 0.05);
+        this.planningScreen.launchArrow.scaling.setAll(launchForce * 0.05);
 
     }
     onScreenStateChange(newState) {
@@ -64,6 +66,7 @@ class PlanningScreenGui {
                 this.currentVelocity.isVisible = false;
                 this.transitDistance.isVisible = false;
                 this.transitTime.isVisible = false;
+                this.currentZone.isVisible = false;
 
                 this.launchForce.isVisible = true;
                 this.launchSlider.isVisible = true;
@@ -75,6 +78,8 @@ class PlanningScreenGui {
                 this.transitDistance.isVisible = true;
                 this.transitTime.isVisible = true;
                 this.currentGravity.isVisible = true;
+                this.currentZone.isVisible = true;
+
 
                 this.launchSlider.isVisible = false;
                 break;
@@ -169,6 +174,13 @@ class PlanningScreenGui {
         this.currentGravity.height = "40px";
         this.currentGravity.isVisible = false;
         this.topDisplayPanel.addControl(this.currentGravity);
+
+        this.currentZone = new TextBlock("current-zone", "Current zone: Unknown");
+        this.currentZone.fontSize = "36pt";
+        this.currentZone.color = "white";
+        this.currentZone.height = "40px";
+        this.currentZone.isVisible = false;
+        this.topDisplayPanel.addControl(this.currentZone);
 
         this.launchSlider = new Slider("launchSlider");
         this.launchSlider.height = "600px";

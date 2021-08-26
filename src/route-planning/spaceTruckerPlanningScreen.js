@@ -70,6 +70,10 @@ class SpaceTruckerPlanningScreen {
     onStateChangeObservable = new Observable();
     encounterManager;
 
+    get currentZone() {
+        return this.encounterManager.currentZone;
+    }
+
     get gameState() {
         return this._state;
     }
@@ -169,6 +173,7 @@ class SpaceTruckerPlanningScreen {
         this.scene.onReadyObservable.add(() => {
             this.ui = new PlanningScreenGui(this);
             this.ui.bindToScreen();
+
         });
         ammoReadyPromise.then(res => {
             console.log("ammo ready");
@@ -178,8 +183,9 @@ class SpaceTruckerPlanningScreen {
         this.gameState = PLANNING_STATE.Initialized;
         this.camera.useFramingBehavior = true;
         this.camera.attachControl(true);
-
         this.encounterManager = new SpaceTruckerEncounterManager(this);
+
+        this.encounterManager.initialize();
     }
 
     update(deltaTime) {

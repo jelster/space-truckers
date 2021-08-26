@@ -5,34 +5,53 @@ const zones = Object.keys(encounterZones);
 
 class SpaceTruckerEncounterManager {
     planningScreen;
-    currentZone = null;
     encounterZones = [];
-    cargoUnit;
+    cargo;
     inAndOut = 0;
     scene;
+
+    get currentZone() {
+        let zidx = this.encounterZones.length - this.inAndOut;
+        return this.encounterZones[zidx];
+    }
     constructor(planningScreen) {
         this.planningScreen = planningScreen;
         this.scene = planningScreen.scene;
-        this.cargoUnit = this.planningScreen.cargoUnit;
+        this.cargo = this.planningScreen.cargo;
         this.encounterZones = zones.map(zone => new SpaceTruckerEncounterZone(encounterZones[zone],this.scene));
+    }
 
+    initialize() {
         this.encounterZones.forEach(zone => {
-            zone.onEnterObservable.add((evt) => this.onIntersectEnter(evt));
-            zone.onExitObservable.add((evt) => this.onIntersectExit(evt));
+            zone.registerZoneIntersectionTrigger(this.cargo.mesh);
+            zone.enterObserver = zone.onEnterObservable.add((evt) => this.onIntersectEnter(evt));
+            zone.exitObserver = zone.onExitObservable.add((evt) => this.onIntersectExit(evt));
+        });        
+    }
+
+    teardown() {
+        this.encounterZones.forEach(zone => {
+            zone.unregisterZoneIntersectionTrigger(this.cargo.mesh);
+            zone.onEnterObservable.remove(zone.enterObserver);
+            zone.onExitObservable.remove(zone.exitObserver);
         });
     }
 
     onIntersectEnter(evt) {
         this.inAndOut++;
+        console.log(evt.name + " entered");
     }
     onIntersectExit(evt) {
-        this.inAndOut--;        
+        this.inAndOut--;     
+        console.log(evt.name + " exited");   
     }
 
     update(delta) {
-        let zidx = zones.length - this.inAndOut;
-        this.currentZone = this.encounterZones[zones[zidx]];
+
+        // TODO: Update cargo trail mesh's vertice colors to match current encounter zone
     }
+
+    
 }
 
 export default SpaceTruckerEncounterManager;
