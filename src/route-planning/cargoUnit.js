@@ -71,7 +71,7 @@ class CargoUnit extends OrbitingGameObject {
             let currentPoint = { 
                 time: this.timeInTransit, 
                 position: this.position.clone(), 
-                rotation: this.mesh.rotationQuaternion?.clone(),
+                rotation: Quaternion.FromEulerVector(this.rotation.clone()),
                 velocity: this.lastVelocity.clone(),
                 gravity: this.lastGravity.clone()
             };
