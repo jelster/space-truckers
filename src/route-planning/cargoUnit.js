@@ -3,6 +3,7 @@ import { Quaternion, Vector3 } from "@babylonjs/core/Maths/math.vector";
 import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
 
 import OrbitingGameObject from "../orbitingGameObject";
+import SpaceTruckerEncounterManager from "./spaceTruckerEncounterManager";
 
 class CargoUnit extends OrbitingGameObject {
     currentGravity = new Vector3(0, 0, 0);
@@ -16,7 +17,12 @@ class CargoUnit extends OrbitingGameObject {
     mass = 0;
     isInFlight = false;
     routePath = [];
+    encounterManager;
 
+    get lastFlightPoint() {
+        return this.routePath[this.routePath.length - 1];
+    }
+    
     get linearVelocity() {
         return this?.physicsImpostor?.getLinearVelocity()?.length() ?? 0;
     }
@@ -29,6 +35,7 @@ class CargoUnit extends OrbitingGameObject {
         this.mass = this.options.cargoMass;
         this.mesh = MeshBuilder.CreateBox("cargo", { width: 1, height: 1, depth: 2 }, this.scene);
         this.mesh.rotation = Vector3.Zero();
+        this.encounterManager = new SpaceTruckerEncounterManager(this, scene);
 
     }
 
@@ -66,6 +73,7 @@ class CargoUnit extends OrbitingGameObject {
             this.timeInTransit += deltaTime;
             this.distanceTraveled += this.lastVelocity.length() * deltaTime;            
             
+            this.encounterManager.update(deltaTime);
             this.rotation = Vector3.Cross(this.mesh.up, linVel);
 
             let currentPoint = { 

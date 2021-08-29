@@ -14,11 +14,12 @@ class SpaceTruckerEncounterManager {
         let zidx = this.encounterZones.length - this.inAndOut;
         return this.encounterZones[zidx];
     }
-    constructor(planningScreen) {
-        this.planningScreen = planningScreen;
-        this.scene = planningScreen.scene;
-        this.cargo = this.planningScreen.cargo;
+    constructor(cargo, scene) {
+        this.scene = scene;
+        this.cargo = cargo;
         this.encounterZones = zones.map(zone => new SpaceTruckerEncounterZone(encounterZones[zone],this.scene));
+
+        this.initialize();
     }
 
     initialize() {

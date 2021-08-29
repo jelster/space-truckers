@@ -68,7 +68,10 @@ class SpaceTruckerPlanningScreen {
     soundManager;
     actionProcessor;
     onStateChangeObservable = new Observable();
-    encounterManager;
+    
+    get encounterManager() {
+        return this.cargo.encounterManager;
+    }
 
     get currentZone() {
         return this.encounterManager.currentZone;
@@ -183,9 +186,7 @@ class SpaceTruckerPlanningScreen {
         this.gameState = PLANNING_STATE.Initialized;
         this.camera.useFramingBehavior = true;
         this.camera.attachControl(true);
-        this.encounterManager = new SpaceTruckerEncounterManager(this);
-
-        this.encounterManager.initialize();
+        
     }
 
     update(deltaTime) {
@@ -210,9 +211,6 @@ class SpaceTruckerPlanningScreen {
 
                 this.cargo.currentGravity = this.updateGravitationalForcesForBox(dT);
                 this.cargo.update(dT);
-
-                this.encounterManager.update(dT);
-
                 break;
             case PLANNING_STATE.CargoArrived:
                 break;
