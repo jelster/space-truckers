@@ -81,7 +81,8 @@ class CargoUnit extends OrbitingGameObject {
                 position: this.position.clone(), 
                 rotation: Quaternion.FromEulerVector(this.rotation.clone()),
                 velocity: this.lastVelocity.clone(),
-                gravity: this.lastGravity.clone()
+                gravity: this.lastGravity.clone(),
+                encounterZone: this.encounterManager.currentZone?.name
             };
             this.routePath.push(currentPoint);
 
