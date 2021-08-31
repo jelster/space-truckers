@@ -76,6 +76,41 @@ const planetData = [
         mass: 7.4e14
     }
 ];
+
+const encounterZones = {
+    innerSystem: {
+        id: "inner_system",
+        name: "Inner System",
+        innerBoundary: 250,
+        outerBoundary: 800,
+        encounterRate: 0.1,
+        colorCode: "#00ff00"
+    },
+    asteroidBelt: {
+        id: "asteroid_belt",
+        name: "Asteroid Belt",
+        innerBoundary: 1000,
+        outerBoundary: 1700,
+        encounterRate: 0.2,
+        colorCode: "#ff0000"
+    },
+    spaceHighway: {
+        id: "space_highway",
+        name: "Space Highway",
+        innerBoundary: 1800,
+        outerBoundary: 2500,
+        encounterRate: 0.3,
+        colorCode: "#ffff00"
+    },
+    outerSystem: {
+        id: "outer_system",
+        name: "Outer System",
+        innerBoundary: 2600,
+        outerBoundary: 5000,
+        encounterRate: 0.4,
+        colorCode: "#ff00ff"
+    }
+};
 const gameData = {
     planetaryInfo: planetData,
     asteroidBeltOptions: {
@@ -103,3 +138,4 @@ const gameData = {
 export default gameData;
 export {primaryReferenceMass};
 export {gravConstant};
+export {encounterZones};

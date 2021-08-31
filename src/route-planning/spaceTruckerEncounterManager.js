@@ -1,7 +1,8 @@
 import SpaceTruckerEncounterZone from '../encounterZone';
-import { encounterZones } from '../encounterZone.js';
+import { encounterZones } from "./route-planning/gameData";
 
 const zones = Object.keys(encounterZones);
+
 
 class SpaceTruckerEncounterManager {
     planningScreen;
@@ -12,29 +13,33 @@ class SpaceTruckerEncounterManager {
 
     get currentZone() {
         let zidx = this.encounterZones.length - this.inAndOut;
-        return this.encounterZones[zidx];
+        return this.encounterZones[zidx]?.zone;
     }
     constructor(cargo, scene) {
         this.scene = scene;
         this.cargo = cargo;
-        this.encounterZones = zones.map(zone => new SpaceTruckerEncounterZone(encounterZones[zone],this.scene));
+        this.encounterZones = zones.map(zone =>({ zone: new SpaceTruckerEncounterZone(encounterZones[zone],this.scene)}));
 
         this.initialize();
     }
 
     initialize() {
-        this.encounterZones.forEach(zone => {
+        this.encounterZones.forEach(ez => {
+            const zone = ez.zone;
             zone.registerZoneIntersectionTrigger(this.cargo.mesh);
-            zone.enterObserver = zone.onEnterObservable.add((evt) => this.onIntersectEnter(evt));
-            zone.exitObserver = zone.onExitObservable.add((evt) => this.onIntersectExit(evt));
+            ez.enterObserver = zone.onEnterObservable.add((evt) => this.onIntersectEnter(evt));
+            ez.exitObserver = zone.onExitObservable.add((evt) => this.onIntersectExit(evt));
+            ez.encounterObserver = zone.onEncounterObservable.add((evt) => this.onEncounter(evt));
         });        
     }
 
     teardown() {
-        this.encounterZones.forEach(zone => {
+        this.encounterZones.forEach(ez => {
+            const zone = ez.zone;
             zone.unregisterZoneIntersectionTrigger(this.cargo.mesh);
-            zone.onEnterObservable.remove(zone.enterObserver);
-            zone.onExitObservable.remove(zone.exitObserver);
+            zone.onEnterObservable.remove(ez.enterObserver);
+            zone.onExitObservable.remove(ez.exitObserver);
+            zone.onEncounterObservable.remove(ez.encounterObserver);
         });
     }
 
@@ -46,10 +51,18 @@ class SpaceTruckerEncounterManager {
         this.inAndOut--;     
         console.log(evt.name + " exited");   
     }
+    onEncounter(encounter) {
+        console.log("Encounter: " + encounter.name);
+    }
 
     update(delta) {
+        const cZone = this.currentZone;
+        if (cZone) {
+            cZone.update(delta);
+        }
 
         // TODO: Update cargo trail mesh's vertice colors to match current encounter zone
+        
     }
 
     
