@@ -76,19 +76,23 @@ class CargoUnit extends OrbitingGameObject {
             this.encounterManager.update(deltaTime);
             this.rotation = Vector3.Cross(this.mesh.up, linVel);
 
-            let currentPoint = { 
-                time: this.timeInTransit, 
-                position: this.position.clone(), 
-                rotation: Quaternion.FromEulerVector(this.rotation.clone()),
-                velocity: this.lastVelocity.clone(),
-                gravity: this.lastGravity.clone(),
-                encounterZone: this.encounterManager.currentZone?.name
-            };
-            this.routePath.push(currentPoint);
+            this.captureRouteData();
 
             this.physicsImpostor.applyImpulse(this.currentGravity.scale(deltaTime), this.mesh.getAbsolutePosition());
             this.currentGravity = Vector3.Zero();
         }
+    }
+
+    captureRouteData() {
+        let currentPoint = {
+            time: this.timeInTransit,
+            position: this.position.clone(),
+            rotation: Quaternion.FromEulerVector(this.rotation.clone()),
+            velocity: this.lastVelocity.clone(),
+            gravity: this.lastGravity.clone(),
+            encounterZone: this.encounterManager.currentZone?.name
+        };
+        this.routePath.push(currentPoint);
     }
 
     destroy() {
