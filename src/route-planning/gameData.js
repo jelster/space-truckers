@@ -18,6 +18,9 @@ import sunTextureUrl from "../../assets/textures/2k_sun.jpg";
 
 import environmentTextureUrl from "../../assets/environment/milkyway-pbr-hdr.env";
 
+import hazard_icon from '../../assets/Space-trucker-ui-asteroid-warning.png';
+
+
 
 const primaryReferenceMass = 4e16;
 const gravConstant = 6.67259e-11; // physical value of 6.67259e-11
@@ -84,7 +87,11 @@ const encounterZones = {
         innerBoundary: 250,
         outerBoundary: 800,
         encounterRate: 0.1,
-        colorCode: "#00ff00"
+        colorCode: "#00ff00",
+        encounters: [
+            { name: 'Solar Flare', id: 'solar_flare', probability: 0.99, image: '' },
+            { name: '', id: 'no_encounter', probability: 0.01, image: '' }
+        ]
     },
     asteroidBelt: {
         id: "asteroid_belt",
@@ -92,7 +99,11 @@ const encounterZones = {
         innerBoundary: 1000,
         outerBoundary: 1700,
         encounterRate: 0.2,
-        colorCode: "#ff0000"
+        colorCode: "#ff0000",
+        encounters: [
+            { id: 'rock_hazard', name: 'Rock Hazard', image: hazard_icon, probability: 0.90 },
+            { name: '', id: 'no_encounter', probability: 0.1, image: '' }
+        ]
     },
     spaceHighway: {
         id: "space_highway",
@@ -100,7 +111,8 @@ const encounterZones = {
         innerBoundary: 1800,
         outerBoundary: 2500,
         encounterRate: 0.3,
-        colorCode: "#ffff00"
+        colorCode: "#ffff00",
+        encounters: [ { name: '', id: 'no_encounter', probability: 0.01, image: '' }]
     },
     outerSystem: {
         id: "outer_system",
@@ -108,7 +120,8 @@ const encounterZones = {
         innerBoundary: 2600,
         outerBoundary: 5000,
         encounterRate: 0.4,
-        colorCode: "#ff00ff"
+        colorCode: "#ff00ff",
+        encounters: [ { name: '', id: 'no_encounter', probability: 0.01, image: '' }]
     }
 };
 const gameData = {
@@ -136,6 +149,6 @@ const gameData = {
 };
 
 export default gameData;
-export {primaryReferenceMass};
-export {gravConstant};
-export {encounterZones};
+export { primaryReferenceMass };
+export { gravConstant };
+export { encounterZones };

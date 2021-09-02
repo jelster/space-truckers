@@ -19,7 +19,8 @@ class SpaceTruckerEncounterZone extends BaseGameObject {
     onEncounterObservable = new Observable();
     torusDiameter = 0.0;
     torusThickness = 0.0;
-    encounterTable = {};
+    encounterTable = [];
+    cumulativeDistribution = [];
 
     constructor(definition, scene) {
         super(scene);
@@ -40,16 +41,16 @@ class SpaceTruckerEncounterZone extends BaseGameObject {
         }, scene);
         this.mesh.visibility = 0;
 
-        this.loadEncounterTable(this.id);
-    }
-
-    loadEncounterTable(zoneId) {
-        this.encounterTable = {};
-        const importPath = './encounters'
-
-        import(importPath).then(module => {
-            this.encounterTable = module.default[zoneId];
+        var total = 0;
+        definition.encounters.forEach((e, i) => {
+            total += e.probability;
+            this.encounterTable.push(e);
         });
+
+        this.cumulativeDistribution[0] = this.encounterTable[0].probability / total;
+        for (var i = 1; i < definition.encounters.length; i++) {
+            this.cumulativeDistribution[i] = this.cumulativeDistribution[i - 1] + definition.encounters[i].probability / total;
+        }
     }
 
     isWithinZone(position) {
@@ -62,15 +63,22 @@ class SpaceTruckerEncounterZone extends BaseGameObject {
         const encounterProbability = this.encounterRate * deltaTime;
         if (Math.random() < encounterProbability) {
             let encounter = this.getEncounter();
-            console.log('encounter ' + encounter.name);
+            console.log('encounter ' + encounter?.name);
             this.onEncounterObservable.notifyObservers(encounter);
         }
     }
 
     getEncounter() {
         let diceRoll = Math.random();
-        const et = this.encounterTable.find(e => e.chance <= diceRoll);
-        return et.encounter;        
+        
+        for (var i = 0; i < this.cumulativeDistribution.length && (diceRoll > this.cumulativeDistribution[i]); i++) {};
+
+        let et = this.encounterTable[i];
+
+        if (!et) {
+            console.log('no encounter found', diceRoll, this.encounterTable);
+        }
+        return et;
     }
 
     registerZoneIntersectionTrigger(meshToWatch) {
@@ -120,4 +128,3 @@ class SpaceTruckerEncounterZone extends BaseGameObject {
 }
 
 export default SpaceTruckerEncounterZone;
-export { encounterZones };

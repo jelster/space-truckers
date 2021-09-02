@@ -1,5 +1,5 @@
 import SpaceTruckerEncounterZone from '../encounterZone';
-import { encounterZones } from "./route-planning/gameData";
+import { encounterZones } from "./gameData";
 
 const zones = Object.keys(encounterZones);
 
@@ -52,7 +52,7 @@ class SpaceTruckerEncounterManager {
         console.log(evt.name + " exited");   
     }
     onEncounter(encounter) {
-        console.log("Encounter: " + encounter.name);
+        console.log("Encounter: " + encounter?.name);
     }
 
     update(delta) {
