@@ -283,9 +283,14 @@ class SpaceTruckerPlanningScreen {
     togglePause() {
         if (this.gameState === PLANNING_STATE.Paused) {
             this.gameState = this._previousState;
+            if (this.gameState === PLANNING_STATE.InFlight) {
+                this.cargo.isInFlight = true;
+            }
+            
             this.cargo.physicsImpostor.wakeUp();
         }
         else {
+            this.cargo.isInFlight = false;
             this.cargo.physicsImpostor.sleep();
             this.gameState = PLANNING_STATE.Paused;
         }
