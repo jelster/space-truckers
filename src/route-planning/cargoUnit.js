@@ -1,4 +1,4 @@
-import { TrailMesh } from "@babylonjs/core";
+import { TrailMesh, TransformNode } from "@babylonjs/core";
 import { Quaternion, Vector3 } from "@babylonjs/core/Maths/math.vector";
 import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
 
@@ -84,15 +84,23 @@ class CargoUnit extends OrbitingGameObject {
     }
 
     captureRouteData() {
-        let currentPoint = {
-            time: this.timeInTransit,
-            position: this.position.clone(),
-            rotation: Quaternion.FromEulerVector(this.rotation.clone()),
-            velocity: this.lastVelocity.clone(),
-            gravity: this.lastGravity.clone(),
-            encounterZone: this.encounterManager.currentZone?.name
-        };
-        this.routePath.push(currentPoint);
+        let node = new TransformNode("cargoNode", this.scene, true);
+        node.position = this.mesh.position.clone();
+        node.rotationQuaternion = this.mesh.rotationQuaternion?.clone() ?? Quaternion.FromEulerVector(this.rotation.clone());
+        node.scaling = this.lastVelocity.clone();
+        node.velocity = this.lastVelocity.clone();
+        node.gravity = this.lastGravity.clone();
+        node.time = this.timeInTransit;
+        node.encounterZone = this.encounterManager.currentZone?.name;
+        // let currentPoint = {
+        //     time: this.timeInTransit,
+        //     position: this.position.clone(),
+        //     rotation: Quaternion.FromEulerVector(this.rotation.clone()),
+        //     velocity: this.lastVelocity.clone(),
+        //     gravity: this.lastGravity.clone(),
+        //     encounterZone: this.encounterManager.currentZone?.name
+        // };
+        this.routePath.push(node);
     }
 
     destroy() {
