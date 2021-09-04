@@ -1,3 +1,4 @@
+import { Observable } from '@babylonjs/core';
 import SpaceTruckerEncounterZone from '../encounterZone';
 import { encounterZones } from "./gameData";
 
@@ -7,9 +8,11 @@ const zones = Object.keys(encounterZones);
 class SpaceTruckerEncounterManager {
     planningScreen;
     encounterZones = [];
+    encounterEvents = [];
     cargo;
     inAndOut = 0;
     scene;
+    onNewEncounterObservable = new Observable();
 
     get currentZone() {
         let zidx = this.encounterZones.length - this.inAndOut;
@@ -18,7 +21,7 @@ class SpaceTruckerEncounterManager {
     constructor(cargo, scene) {
         this.scene = scene;
         this.cargo = cargo;
-        this.encounterZones = zones.map(zone =>({ zone: new SpaceTruckerEncounterZone(encounterZones[zone],this.scene)}));
+        this.encounterZones = zones.map(zone => ({ zone: new SpaceTruckerEncounterZone(encounterZones[zone], this.scene) }));
 
         this.initialize();
     }
@@ -30,7 +33,7 @@ class SpaceTruckerEncounterManager {
             ez.enterObserver = zone.onEnterObservable.add((evt) => this.onIntersectEnter(evt));
             ez.exitObserver = zone.onExitObservable.add((evt) => this.onIntersectExit(evt));
             ez.encounterObserver = zone.onEncounterObservable.add((evt) => this.onEncounter(evt));
-        });        
+        });
     }
 
     teardown() {
@@ -48,11 +51,17 @@ class SpaceTruckerEncounterManager {
         console.log(evt.name + " entered");
     }
     onIntersectExit(evt) {
-        this.inAndOut--;     
-        console.log(evt.name + " exited");   
+        this.inAndOut--;
+        console.log(evt.name + " exited");
     }
     onEncounter(encounter) {
         console.log("Encounter: " + encounter?.name);
+        if (!encounter) {
+            return;
+        }
+        const cargoData = this.cargo.lastFlightPoint;
+        const idx = this.encounterEvents.push({ encounter, cargoData });
+        this.onNewEncounterObservable.notifyObservers(idx - 1);
     }
 
     update(delta) {
@@ -62,10 +71,13 @@ class SpaceTruckerEncounterManager {
         }
 
         // TODO: Update cargo trail mesh's vertice colors to match current encounter zone
-        
     }
 
-    
+    dispose() {
+        this.teardown();
+        super.dispose();
+    }
+
 }
 
 export default SpaceTruckerEncounterManager;

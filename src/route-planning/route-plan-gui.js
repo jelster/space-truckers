@@ -1,10 +1,21 @@
 import { Rectangle } from "@babylonjs/gui/2D/controls/rectangle";
-
+import { Animation } from "@babylonjs/core/Animations/animation";
 import { AdvancedDynamicTexture } from "@babylonjs/gui/2D/advancedDynamicTexture";
 import { TextBlock } from "@babylonjs/gui/2D/controls/textBlock";
 import { Control } from "@babylonjs/gui/2D/controls/control";
 import SpaceTruckerPlanningScreen, { PLAN_STATE_KEYS, PLANNING_STATE } from "./spaceTruckerPlanningScreen";
-import { Grid, Slider, StackPanel } from "@babylonjs/gui";
+import { Grid, Image, Slider, StackPanel } from "@babylonjs/gui";
+import { AnimationGroup } from "@babylonjs/core";
+
+const panelShrinkX = new Animation("shrinkImageAnimationX", "scaleX", 60, Animation.ANIMATIONTYPE_FLOAT, Animation.ANIMATIONLOOPMODE_CONSTANT);
+const panelShrinkY = new Animation("shrinkImageAnimationY", "scaleY", 60, Animation.ANIMATIONTYPE_FLOAT, Animation.ANIMATIONLOOPMODE_CONSTANT);
+const keys = [];
+keys.push({ frame: 0, value: 1.0});
+keys.push({ frame: 120, value: 0.40 });
+keys.push({ frame: 180, value: 0.05375 });
+panelShrinkX.setKeys(keys);
+panelShrinkY.setKeys(keys);
+
 
 
 class PlanningScreenGui {
@@ -14,11 +25,12 @@ class PlanningScreenGui {
     transitTime;
     transitDistance;
     gameStage;
+    encounterPanels = [];
 
     constructor(planningScreen) {
         this.scene = planningScreen.scene;
         //this.scene.autoClear = false;
-
+       
         this.planningScreen = planningScreen;
         this.gui = AdvancedDynamicTexture.CreateFullscreenUI("ui", true, this.planningScreen.scene);
 
@@ -31,7 +43,29 @@ class PlanningScreenGui {
         this.scene.onBeforeRenderObservable.add(() => {
             this.update();
         });
+
+        this.planningScreen.encounterManager.onNewEncounterObservable.add(encounterIdx => {
+            let evt = this.planningScreen.encounterManager.encounterEvents[encounterIdx];
+            console.log('encounter gui', evt);
+            if (evt && evt.encounter?.id) {
+                const encounter = evt.encounter;
+                let panel = new Rectangle("panel-" + encounter.name);
+                let image = new Image("image-" + encounter.name, encounter.image);
+                image.alpha = 0.68;
+                panel.addControl(image);
+                panel.thickness = 0;
+                this.gui.addControl(panel);
+                this.encounterPanels.push(panel);
+                panel.linkWithMesh(evt.cargoData);
+                let animationGroup = new AnimationGroup("shrinkAnimationGroup-"+ encounter.name, this.scene);
+                animationGroup.addTargetedAnimation(panelShrinkX, panel);
+                animationGroup.addTargetedAnimation(panelShrinkY, panel);
+                animationGroup.start(false, 1.0, 0, 180, true);                
+            }
+           
+        });
     }
+
 
     update() {
         if (this.planningScreen.gameState === PLANNING_STATE.Initialized) {
@@ -70,6 +104,10 @@ class PlanningScreenGui {
 
                 this.launchForce.isVisible = true;
                 this.launchSlider.isVisible = true;
+                this.encounterPanels.forEach(panel => {
+                    panel.children.forEach(child => child.dispose());
+                    panel.dispose();
+                });
                 break;
             case PLANNING_STATE.InFlight:
                 this.gameStage.color = "lightblue";
