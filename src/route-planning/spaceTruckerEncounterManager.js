@@ -29,6 +29,7 @@ class SpaceTruckerEncounterManager {
     }
 
     initialize() {
+        this.encounterEvents = [];
         this.encounterZones.forEach(ez => {
             const zone = ez.zone;
             zone.registerZoneIntersectionTrigger(this.cargo.mesh);
