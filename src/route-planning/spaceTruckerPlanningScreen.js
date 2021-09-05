@@ -97,7 +97,6 @@ class SpaceTruckerPlanningScreen {
         engine.loadingUIText = 'Loading Route Planning Simulation...';
 
         this.scene = new Scene(engine);
-
         this.config = config;
 
         this.soundManager = new SpaceTruckerSoundManager(this.scene, overworldMusic, ambientSound);
@@ -329,7 +328,7 @@ class SpaceTruckerPlanningScreen {
     setReadyToLaunchState() {
         console.log('setting state to ReadyToLaunch');
         const muzak = this.soundManager.sound(overworldMusic);
-        const ambient = this.soundManager.sound(ambientMusic);
+        const ambient = this.soundManager.sound(ambientSound);
         if (muzak && !(muzak.isPlaying || muzak.isPaused)) {
             muzak.play();
         }

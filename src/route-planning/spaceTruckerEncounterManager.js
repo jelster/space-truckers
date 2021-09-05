@@ -1,9 +1,10 @@
 import { Observable } from '@babylonjs/core';
 import SpaceTruckerEncounterZone from '../encounterZone';
+import SpaceTruckerSoundManager from '../spaceTruckerSoundManager';
 import { encounterZones } from "./gameData";
 
 const zones = Object.keys(encounterZones);
-
+const encounterSound = "encounter";
 
 class SpaceTruckerEncounterManager {
     planningScreen;
@@ -13,6 +14,7 @@ class SpaceTruckerEncounterManager {
     inAndOut = 0;
     scene;
     onNewEncounterObservable = new Observable();
+    soundManager;
 
     get currentZone() {
         let zidx = this.encounterZones.length - this.inAndOut;
@@ -22,7 +24,7 @@ class SpaceTruckerEncounterManager {
         this.scene = scene;
         this.cargo = cargo;
         this.encounterZones = zones.map(zone => ({ zone: new SpaceTruckerEncounterZone(encounterZones[zone], this.scene) }));
-
+        this.soundManager = new SpaceTruckerSoundManager(this.scene, encounterSound);
         this.initialize();
     }
 
@@ -62,6 +64,7 @@ class SpaceTruckerEncounterManager {
         const cargoData = this.cargo.lastFlightPoint;
         const idx = this.encounterEvents.push({ encounter, cargoData });
         this.onNewEncounterObservable.notifyObservers(idx - 1);
+        this.soundManager.sound(encounterSound).play();
     }
 
     update(delta) {
