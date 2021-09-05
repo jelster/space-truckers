@@ -39,6 +39,8 @@ const preFlightActionList = [
     { action: 'PAUSE', shouldBounce: () => true }
 ];
 const overworldMusic = "overworld";
+const ambientSound = "ambient";
+
 const PLANNING_STATE = Object.freeze({
     Created: 0,
     Initialized: 1,
@@ -98,7 +100,7 @@ class SpaceTruckerPlanningScreen {
 
         this.config = config;
 
-        this.soundManager = new SpaceTruckerSoundManager(this.scene, overworldMusic);
+        this.soundManager = new SpaceTruckerSoundManager(this.scene, overworldMusic, ambientSound);
 
         this.scene.clearColor = new Color3(0.1, 0.1, 0.1);
 
@@ -327,8 +329,12 @@ class SpaceTruckerPlanningScreen {
     setReadyToLaunchState() {
         console.log('setting state to ReadyToLaunch');
         const muzak = this.soundManager.sound(overworldMusic);
+        const ambient = this.soundManager.sound(ambientMusic);
         if (muzak && !(muzak.isPlaying || muzak.isPaused)) {
             muzak.play();
+        }
+        if (ambient && !(ambient.isPlaying || ambient.isPaused)) {
+            ambient.play();
         }
         this.cargo.reset();
         this.launchArrow.parent = this.cargo.mesh;
