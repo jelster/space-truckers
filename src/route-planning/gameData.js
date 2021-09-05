@@ -90,7 +90,9 @@ const encounterZones = {
         colorCode: "#00ff00",
         encounters: [
             { name: 'Solar Flare', id: 'solar_flare', probability: 0.99, image: hazard_icon },
-            { name: '', id: 'no_encounter', probability: 0.01, image: '' }
+            { name: 'Coronal Mass Ejection', id: 'cme', probability: 0.015, image: '' },
+            { name: '', id: 'no_encounter', probability: 0.01, image: '' },
+            { name: 'Magnetic Reconnection', id: 'magnetic_reconnect', probability: 0.01, image: '' }
         ]
     },
     asteroidBelt: {
@@ -101,8 +103,10 @@ const encounterZones = {
         encounterRate: 0.15,
         colorCode: "#ff0000",
         encounters: [
-            { id: 'rock_hazard', name: 'Rock Hazard', image: hazard_icon, probability: 0.90 },
-            { name: '', id: 'no_encounter', probability: 0.1, image: '' }
+            { name: 'Rock Hazard',  id: 'rock_hazard', image: hazard_icon, probability: 0.89 },
+            { name: 'Rock Monster', id: 'rock_monster', image: '', probability: 0.01 },
+            { name: '', id: 'no_encounter', probability: 0.1, image: '' },
+            { name: 'Momentum Tether', id: 'momentum_tether', probability: 0.01, image: '' }
         ]
     },
     spaceHighway: {
@@ -112,7 +116,12 @@ const encounterZones = {
         outerBoundary: 2500,
         encounterRate: 0.0,
         colorCode: "#ffff00",
-        encounters: [ { name: '', id: 'no_encounter', probability: 0.01, image: '' }]
+        encounters: [
+            { name: '', id: 'no_encounter', probability: 0.01, image: '' },
+            { name: 'Lane Closure', id: 'road_construction', probability: 0.99, image: ''},
+            { name: 'Detour', id: 'space_detour', probability: 0.18, image: '' },
+            { name: 'Nav Flagger', id: 'nav_flagger', probability: 0.01, image: ''}
+        ]
     },
     outerSystem: {
         id: "outer_system",
@@ -121,7 +130,12 @@ const encounterZones = {
         outerBoundary: 5000,
         encounterRate: 0.0,
         colorCode: "#ff00ff",
-        encounters: [ { name: '', id: 'no_encounter', probability: 0.01, image: '' }]
+        encounters: [
+            { name: '', id: 'no_encounter', probability: 0.01, image: '' },
+            { name: 'Wandering Space-Herd', id: 'space_herd', probability: 0.79, image: ''},
+            { name: 'Primordial Black Hole', id: 'black_hole', probability: 0.01, image: ''},
+            { name: 'Space-Porta-Potty', id: 'space_potty', probability: 0.1, image: '' }
+        ]
     }
 };
 const gameData = {
