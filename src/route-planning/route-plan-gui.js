@@ -7,10 +7,14 @@ import SpaceTruckerPlanningScreen, { PLAN_STATE_KEYS, PLANNING_STATE } from "./s
 import { Grid, Image, Slider, StackPanel } from "@babylonjs/gui";
 import { AnimationGroup } from "@babylonjs/core";
 
-const panelShrinkX = new Animation("shrinkImageAnimationX", "scaleX", 60, Animation.ANIMATIONTYPE_FLOAT, Animation.ANIMATIONLOOPMODE_CONSTANT);
-const panelShrinkY = new Animation("shrinkImageAnimationY", "scaleY", 60, Animation.ANIMATIONTYPE_FLOAT, Animation.ANIMATIONLOOPMODE_CONSTANT);
+const panelShrinkX = new Animation("shrinkImageAnimationX", "scaleX", 60,
+    Animation.ANIMATIONTYPE_FLOAT, Animation.ANIMATIONLOOPMODE_CONSTANT);
+
+const panelShrinkY = new Animation("shrinkImageAnimationY", "scaleY", 60,
+    Animation.ANIMATIONTYPE_FLOAT, Animation.ANIMATIONLOOPMODE_CONSTANT);
+
 const keys = [];
-keys.push({ frame: 0, value: 1.0});
+keys.push({ frame: 0, value: 1.0 });
 keys.push({ frame: 120, value: 0.40 });
 keys.push({ frame: 180, value: 0.05375 });
 panelShrinkX.setKeys(keys);
@@ -30,7 +34,7 @@ class PlanningScreenGui {
     constructor(planningScreen) {
         this.scene = planningScreen.scene;
         //this.scene.autoClear = false;
-       
+
         this.planningScreen = planningScreen;
         this.gui = AdvancedDynamicTexture.CreateFullscreenUI("ui", true, this.planningScreen.scene);
 
@@ -44,7 +48,9 @@ class PlanningScreenGui {
             this.update();
         });
 
-        this.planningScreen.encounterManager.onNewEncounterObservable.add(encounterIdx => {
+
+        em.onNewEncounterObservable.add(encounterIdx => {
+            const em = this.planningScreen.encounterManager;
             let evt = this.planningScreen.encounterManager.encounterEvents[encounterIdx];
             console.log('encounter gui', evt);
             if (evt && evt.encounter?.id) {
@@ -54,15 +60,15 @@ class PlanningScreenGui {
                 image.alpha = 0.68;
                 panel.addControl(image);
                 panel.thickness = 0;
-                this.gui.addControl(panel);
-                this.encounterPanels.push(panel);
+                this.gui.addControl(panel);                
                 panel.linkWithMesh(evt.cargoData);
-                let animationGroup = new AnimationGroup("shrinkAnimationGroup-"+ encounter.name, this.scene);
+                let animationGroup = new AnimationGroup("shrinkAnimationGroup-" + encounter.name, this.scene);
                 animationGroup.addTargetedAnimation(panelShrinkX, panel);
                 animationGroup.addTargetedAnimation(panelShrinkY, panel);
-                animationGroup.start(false, 1.0, 0, 180, true);                
+                animationGroup.start(false, 1.0, 0, 180, true);
+
+                this.encounterPanels.push(panel);
             }
-           
         });
     }
 
@@ -78,17 +84,17 @@ class PlanningScreenGui {
             currentVelocity = this.planningScreen.cargo.lastVelocity.length(),
             currentGravity = this.planningScreen.cargo.lastGravity,
             encounterManager = this.planningScreen.encounterManager;
-        
+
         this.launchSlider.value = launchForce;
         this.launchForce.text = `Launch Force: ${launchForce.toFixed(2)} N`;
-        
+
         this.transitTime.text = `Time in transit: ${transitTime.toFixed(2)} s`;
         this.transitDistance.text = `Transit distance: ${transitDistance.toFixed(2)} m`;
         this.currentVelocity.text = `Current velocity: ${currentVelocity.toFixed(2)} m/s`;
         this.gameStage.text = `Current State: ${gameStage}`;
         this.currentGravity.text = `Grav. Accel.: ${currentGravity.length().toFixed(3)} m/s^2`;
         this.currentZone.text = `Current Zone (in/out): ${encounterManager.currentZone?.name}`;
-        
+
         this.planningScreen.launchArrow.scaling.setAll(launchForce * 0.05);
 
     }
@@ -137,12 +143,12 @@ class PlanningScreenGui {
         const cargoDisplay = this.createDisplayCageUi(cargo.mesh.name);
         cargoDisplay.color = "green";
         cargoDisplay.linkWithMesh(cargo.mesh);
-        
+
         planets.forEach(p => {
             let marker = this.createDisplayCageUi(p.mesh.name);
-            
+
             let planetRec = marker.children[0];
-          
+
             if (this.planningScreen.origin === p) {
                 planetRec.color = "blue";
             }
@@ -153,7 +159,7 @@ class PlanningScreenGui {
             marker.linkOffsetY = "6px";
         });
 
-        this.screenUi = new Grid("screen-ui");        
+        this.screenUi = new Grid("screen-ui");
         this.screenUi.setPadding(20, 20, 20, 20);
         this.screenUi.addRowDefinition(0.2, false);
         this.screenUi.addRowDefinition(0.4, false);
@@ -166,11 +172,11 @@ class PlanningScreenGui {
         this.bottomDisplayPanel.height = "100%";
         this.bottomDisplayPanel.isVertical = false;
         this.bottomDisplayPanel.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
-        this.screenUi.addControl(this.bottomDisplayPanel, 2);       
+        this.screenUi.addControl(this.bottomDisplayPanel, 2);
 
         this.topDisplayPanel = new StackPanel("top-display-panel");
         this.topDisplayPanel.width = "100%";
-        this.screenUi.addControl(this.topDisplayPanel, 0);        
+        this.screenUi.addControl(this.topDisplayPanel, 0);
 
         this.gameStage = new TextBlock("route-planning-stage", "Current State: Unknown");
         this.gameStage.fontSize = "48pt";
@@ -196,7 +202,7 @@ class PlanningScreenGui {
         this.launchForce.fontSize = "36pt";
         this.launchForce.color = "white";
         this.launchForce.height = "40px";
-        
+
         this.topDisplayPanel.addControl(this.launchForce);
 
         this.currentVelocity = new TextBlock("current-velocity", "Current velocity: 0 m/s");
@@ -235,16 +241,16 @@ class PlanningScreenGui {
         this.launchSlider.step = this.planningScreen.launchIncrement;
         this.launchSlider.value = this.planningScreen.launchForce;
         this.launchSlider.onValueChangedObservable.add((ev, es) => {
-            this.planningScreen.launchForce = ev;            
+            this.planningScreen.launchForce = ev;
         });
         this.bottomDisplayPanel.addControl(this.launchSlider);
-        
+
     }
 
     createDisplayCageUi(name) {
         name = name || "unknown";
         let markerContainer = new StackPanel("panel-" + name);
-         
+
         let startRectangle = new Rectangle("marker-" + name);
         startRectangle.height = "100px";
         startRectangle.width = "100px";
