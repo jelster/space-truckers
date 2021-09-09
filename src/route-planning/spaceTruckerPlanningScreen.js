@@ -40,6 +40,7 @@ const preFlightActionList = [
 ];
 const overworldMusic = "overworld";
 const ambientSound = "ambient";
+const encounterSound = "encounter";
 
 const PLANNING_STATE = Object.freeze({
     Created: 0,
@@ -188,6 +189,7 @@ class SpaceTruckerPlanningScreen {
         this.camera.useFramingBehavior = true;
         this.camera.attachControl(true);
         
+        this.encounterManager.onNewEncounterObservable.add(encounter =>  this.soundManager.sound(encounterSound).play());
     }
 
     update(deltaTime) {
