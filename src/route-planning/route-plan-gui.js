@@ -48,9 +48,8 @@ class PlanningScreenGui {
             this.update();
         });
 
-
-        em.onNewEncounterObservable.add(encounterIdx => {
-            const em = this.planningScreen.encounterManager;
+        const em = this.planningScreen.encounterManager;
+        em.onNewEncounterObservable.add(encounterIdx => {            
             let evt = this.planningScreen.encounterManager.encounterEvents[encounterIdx];
             console.log('encounter gui', evt);
             if (evt && evt.encounter?.id) {
