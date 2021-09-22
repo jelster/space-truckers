@@ -15,6 +15,11 @@ import SpaceTruckerInputProcessor from "./spaceTruckerInputProcessor";
 import menuBackground from "../assets/menuBackground.png";
 
 import selectionIcon from "../assets/ui-selection-icon.PNG";
+import SpaceTruckerSoundManager from "./spaceTruckerSoundManager";
+
+const menuSoundKey = "menu-slide";
+const menuClickSoundKey = "click";
+const menuWhooshSoundKey = "whoosh";
 
 const menuActionList = [
     { action: 'ACTIVATE', shouldBounce: () => true },
@@ -80,6 +85,7 @@ class MainMenuScene {
         });
 
         this.actionProcessor = new SpaceTruckerInputProcessor(this, inputManager, menuActionList);
+        this.soundManager = new SpaceTruckerSoundManager(this.scene, menuClickSoundKey, menuWhooshSoundKey, menuSoundKey);
     }
 
     update() {
@@ -91,10 +97,10 @@ class MainMenuScene {
     MOVE_UP(state) {
         logger.logInfo("MOVE_UP");
         if (!state) {
+            this.soundManager.sound(menuClickSoundKey).play();
             const oldIdx = this.selectedItemIndex;
             const newIdx = oldIdx - 1;
             this.selectedItemIndex = newIdx;
-
         }
         return true;
 
@@ -102,6 +108,7 @@ class MainMenuScene {
 
     MOVE_DOWN(state) {
         if (!state) {
+            this.soundManager.sound(menuClickSoundKey).play();
             const oldIdx = this.selectedItemIndex;
             const newIdx = oldIdx + 1;
             logger.logInfo("MOVE_DOWN " + newIdx);
@@ -118,6 +125,7 @@ class MainMenuScene {
             console.log("ACIVATE - " + this.selectedItemIndex);
             const selectedItem = this.selectedItem;
             if (selectedItem) {
+                this.soundManager.sound(menuWhooshSoundKey).play();
                 selectedItem.onPointerClickObservable.notifyObservers();
             }
 

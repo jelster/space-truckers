@@ -27,6 +27,7 @@ import { Ray } from "@babylonjs/core/Culling/ray"; // used by ActionManager
 import { ExecuteCodeAction } from "@babylonjs/core/Actions/directActions";
 import { Axis, Scalar, Space } from "@babylonjs/core";
 import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
+import SpaceTruckerEncounterManager from "./spaceTruckerEncounterManager";
 
 const preFlightActionList = [
     { action: 'ACTIVATE', shouldBounce: () => true },
@@ -38,6 +39,9 @@ const preFlightActionList = [
     { action: 'PAUSE', shouldBounce: () => true }
 ];
 const overworldMusic = "overworld";
+const ambientSound = "ambient";
+const encounterSound = "encounter";
+
 const PLANNING_STATE = Object.freeze({
     Created: 0,
     Initialized: 1,
@@ -52,9 +56,10 @@ const PLANNING_STATE = Object.freeze({
 class SpaceTruckerPlanningScreen {
     scene;
     config;
-    launchForce = 150.0;
-    launchForceIncrement = 1.0;
-    launchForceMax = 500;
+    launchForce = 100.0;
+    launchForceIncrement = 5.0;;
+    launchForceMax = 120;
+    launchRotationSpeed = 0.1;
     planets = [];
     origin;
     destination;
@@ -66,8 +71,14 @@ class SpaceTruckerPlanningScreen {
     soundManager;
     actionProcessor;
     onStateChangeObservable = new Observable();
+    
+    get encounterManager() {
+        return this.cargo.encounterManager;
+    }
 
-
+    get currentZone() {
+        return this.encounterManager.currentZone;
+    }
 
     get gameState() {
         return this._state;
@@ -87,10 +98,9 @@ class SpaceTruckerPlanningScreen {
         engine.loadingUIText = 'Loading Route Planning Simulation...';
 
         this.scene = new Scene(engine);
-
         this.config = config;
 
-        this.soundManager = new SpaceTruckerSoundManager(this.scene, overworldMusic);
+        this.soundManager = new SpaceTruckerSoundManager(this.scene, overworldMusic, ambientSound, encounterSound);
 
         this.scene.clearColor = new Color3(0.1, 0.1, 0.1);
 
@@ -168,6 +178,7 @@ class SpaceTruckerPlanningScreen {
         this.scene.onReadyObservable.add(() => {
             this.ui = new PlanningScreenGui(this);
             this.ui.bindToScreen();
+
         });
         ammoReadyPromise.then(res => {
             console.log("ammo ready");
@@ -177,6 +188,8 @@ class SpaceTruckerPlanningScreen {
         this.gameState = PLANNING_STATE.Initialized;
         this.camera.useFramingBehavior = true;
         this.camera.attachControl(true);
+        
+        this.encounterManager.onNewEncounterObservable.add(encounter =>  this.soundManager.sound(encounterSound).play());
     }
 
     update(deltaTime) {
@@ -191,7 +204,7 @@ class SpaceTruckerPlanningScreen {
                 this.planets.forEach(p => p.update(dT));
                 this.asteroidBelt.update(dT);
                 this.cargo.update(dT);
-                this.cargo.position = this.origin.position.clone().scaleInPlace(1.1, 1, 1);
+                this.cargo.position.copyFrom(this.origin.position).scaleInPlace(1.1, 1, 1);
 
                 break;
             case PLANNING_STATE.InFlight:
@@ -201,7 +214,6 @@ class SpaceTruckerPlanningScreen {
 
                 this.cargo.currentGravity = this.updateGravitationalForcesForBox(dT);
                 this.cargo.update(dT);
-
                 break;
             case PLANNING_STATE.CargoArrived:
                 break;
@@ -254,13 +266,13 @@ class SpaceTruckerPlanningScreen {
 
     MOVE_LEFT(state) {
         if (this.gameState === PLANNING_STATE.ReadyToLaunch) {
-            this.cargo.mesh.rotate(Axis.Y, -0.02, Space.World);
+            this.cargo.mesh.rotate(Axis.Y, -this.launchRotationSpeed, Space.World);
         }
     }
 
     MOVE_RIGHT(state) {
         if (this.gameState === PLANNING_STATE.ReadyToLaunch) {
-            this.cargo.mesh.rotate(Axis.Y, 0.02, Space.World);
+            this.cargo.mesh.rotate(Axis.Y, this.launchRotationSpeed, Space.World);
         }
     }
 
@@ -274,10 +286,18 @@ class SpaceTruckerPlanningScreen {
     togglePause() {
         if (this.gameState === PLANNING_STATE.Paused) {
             this.gameState = this._previousState;
+            if (this.gameState === PLANNING_STATE.InFlight) {
+                this.cargo.isInFlight = true;
+                this.cargo.position.copyFrom(this.cargo.lastFlightPoint.position);
+                this.cargo.physicsImpostor.setLinearVelocity(this.cargo.lastFlightPoint.velocity);
+            }
+            
             this.cargo.physicsImpostor.wakeUp();
         }
         else {
+            this.cargo.isInFlight = false;
             this.cargo.physicsImpostor.sleep();
+            this.cargo.physicsImpostor.setLinearVelocity(Vector3.Zero());
             this.gameState = PLANNING_STATE.Paused;
         }
     }
@@ -310,8 +330,12 @@ class SpaceTruckerPlanningScreen {
     setReadyToLaunchState() {
         console.log('setting state to ReadyToLaunch');
         const muzak = this.soundManager.sound(overworldMusic);
+        const ambient = this.soundManager.sound(ambientSound);
         if (muzak && !(muzak.isPlaying || muzak.isPaused)) {
             muzak.play();
+        }
+        if (ambient && !(ambient.isPlaying || ambient.isPaused)) {
+            ambient.play();
         }
         this.cargo.reset();
         this.launchArrow.parent = this.cargo.mesh;

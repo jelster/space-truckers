@@ -82,7 +82,7 @@ class AsteroidBelt extends OrbitingGameObject {
     };
 
     update(deltaTime) {
-        this.rotation.y = Scalar.Repeat(this.rotation.y + 0.0001, Scalar.TwoPi);
+        this.rotation.y = Scalar.Repeat(this.rotation.y + 0.0009, Scalar.TwoPi);
 
         for (let i = 0; i < this.numAsteroids; ++i) {
             this.rotations[i].x += Math.random() * 0.01;

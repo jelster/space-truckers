@@ -1,8 +1,9 @@
-import { TrailMesh } from "@babylonjs/core";
+import { TrailMesh, TransformNode } from "@babylonjs/core";
 import { Quaternion, Vector3 } from "@babylonjs/core/Maths/math.vector";
 import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
 
 import OrbitingGameObject from "../orbitingGameObject";
+import SpaceTruckerEncounterManager from "./spaceTruckerEncounterManager";
 
 class CargoUnit extends OrbitingGameObject {
     currentGravity = new Vector3(0, 0, 0);
@@ -15,7 +16,13 @@ class CargoUnit extends OrbitingGameObject {
     trailMesh;
     mass = 0;
     isInFlight = false;
+    routePath = [];
+    encounterManager;
 
+    get lastFlightPoint() {
+        return this.routePath[this.routePath.length - 1];
+    }
+    
     get linearVelocity() {
         return this?.physicsImpostor?.getLinearVelocity()?.length() ?? 0;
     }
@@ -28,6 +35,7 @@ class CargoUnit extends OrbitingGameObject {
         this.mass = this.options.cargoMass;
         this.mesh = MeshBuilder.CreateBox("cargo", { width: 1, height: 1, depth: 2 }, this.scene);
         this.mesh.rotation = Vector3.Zero();
+        this.encounterManager = new SpaceTruckerEncounterManager(this, scene);
 
     }
 
@@ -38,6 +46,8 @@ class CargoUnit extends OrbitingGameObject {
     }
 
     reset() {
+        this.routePath.forEach(node => node.dispose());
+        this.routePath = [];
         this.timeInTransit = 0;
         this.distanceTraveled = 0;
         if (this.trailMesh) {
@@ -62,12 +72,39 @@ class CargoUnit extends OrbitingGameObject {
             linVel.normalize();
 
             this.timeInTransit += deltaTime;
-            this.distanceTraveled += this.lastVelocity.length() * deltaTime;            
-            
+            this.distanceTraveled += this.lastVelocity.length() * deltaTime;           
             this.rotation = Vector3.Cross(this.mesh.up, linVel);
+
+            this.captureRouteData();
+            this.encounterManager.update(deltaTime);
             this.physicsImpostor.applyImpulse(this.currentGravity.scale(deltaTime), this.mesh.getAbsolutePosition());
             this.currentGravity = Vector3.Zero();
         }
+    }
+
+    captureRouteData() {
+        const node = new TransformNode("cargoNode", this.scene, true);
+        node.position.copyFrom(this.mesh.position);
+        node.rotationQuaternion = new Quaternion();
+        if(this.mesh.rotationQuaternion) {
+            node.rotationQuaternion.copyFrom(this.mesh.rotationQuaternion);
+        } else {
+            Quaternion.FromEulerVectorToRef(this.rotation, node.rotationQuaternion);
+        }
+        node.scaling.copyFrom(this.lastVelocity);
+        node.velocity = this.lastVelocity.clone();
+        node.gravity = this.lastGravity.clone();
+        node.time = this.timeInTransit;
+        node.encounterZone = this.encounterManager.currentZone?.name;
+        // let currentPoint = {
+        //     time: this.timeInTransit,
+        //     position: this.position.clone(),
+        //     rotation: Quaternion.FromEulerVector(this.rotation.clone()),
+        //     velocity: this.lastVelocity.clone(),
+        //     gravity: this.lastGravity.clone(),
+        //     encounterZone: this.encounterManager.currentZone?.name
+        // };
+        this.routePath.push(node);
     }
 
     destroy() {

@@ -18,6 +18,9 @@ import sunTextureUrl from "../../assets/textures/2k_sun.jpg";
 
 import environmentTextureUrl from "../../assets/environment/milkyway-pbr-hdr.env";
 
+import hazard_icon from '../../assets/Space-trucker-ui-asteroid-warning.png';
+
+
 
 const primaryReferenceMass = 4e16;
 const gravConstant = 6.67259e-11; // physical value of 6.67259e-11
@@ -76,6 +79,65 @@ const planetData = [
         mass: 7.4e14
     }
 ];
+
+const encounterZones = {
+    innerSystem: {
+        id: "inner_system",
+        name: "Inner System",
+        innerBoundary: 250,
+        outerBoundary: 800,
+        encounterRate: 0.1,
+        colorCode: "#00ff00",
+        encounters: [
+            { name: 'Solar Flare', id: 'solar_flare', probability: 0.99, image: hazard_icon },
+            { name: 'Coronal Mass Ejection', id: 'cme', probability: 0.015, image: '' },
+            { name: '', id: 'no_encounter', probability: 0.01, image: '' },
+            { name: 'Magnetic Reconnection', id: 'magnetic_reconnect', probability: 0.01, image: '' }
+        ]
+    },
+    asteroidBelt: {
+        id: "asteroid_belt",
+        name: "Asteroid Belt",
+        innerBoundary: 1000,
+        outerBoundary: 1700,
+        encounterRate: 0.15,
+        colorCode: "#ff0000",
+        encounters: [
+            { name: 'Rock Hazard',  id: 'rock_hazard', image: hazard_icon, probability: 0.89 },
+            { name: 'Rock Monster', id: 'rock_monster', image: '', probability: 0.01 },
+            { name: '', id: 'no_encounter', probability: 0.1, image: '' },
+            { name: 'Momentum Tether', id: 'momentum_tether', probability: 0.01, image: '' }
+        ]
+    },
+    spaceHighway: {
+        id: "space_highway",
+        name: "Space Highway",
+        innerBoundary: 1800,
+        outerBoundary: 2500,
+        encounterRate: 0.0,
+        colorCode: "#ffff00",
+        encounters: [
+            { name: '', id: 'no_encounter', probability: 0.01, image: '' },
+            { name: 'Lane Closure', id: 'road_construction', probability: 0.99, image: ''},
+            { name: 'Detour', id: 'space_detour', probability: 0.18, image: '' },
+            { name: 'Nav Flagger', id: 'nav_flagger', probability: 0.01, image: ''}
+        ]
+    },
+    outerSystem: {
+        id: "outer_system",
+        name: "Outer System",
+        innerBoundary: 2600,
+        outerBoundary: 5000,
+        encounterRate: 0.0,
+        colorCode: "#ff00ff",
+        encounters: [
+            { name: '', id: 'no_encounter', probability: 0.01, image: '' },
+            { name: 'Wandering Space-Herd', id: 'space_herd', probability: 0.79, image: ''},
+            { name: 'Primordial Black Hole', id: 'black_hole', probability: 0.01, image: ''},
+            { name: 'Space-Porta-Potty', id: 'space_potty', probability: 0.1, image: '' }
+        ]
+    }
+};
 const gameData = {
     planetaryInfo: planetData,
     asteroidBeltOptions: {
@@ -101,5 +163,6 @@ const gameData = {
 };
 
 export default gameData;
-export {primaryReferenceMass};
-export {gravConstant};
+export { primaryReferenceMass };
+export { gravConstant };
+export { encounterZones };

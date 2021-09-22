@@ -63,7 +63,8 @@ class OrbitingGameObject extends BaseGameObject {
         const w = this.angularVelocity * (deltaTime ?? 0.016);
         const posRadius = this.orbitalRadius;
 
-        this.angularPosition = Scalar.NormalizeRadians(angPos + w, Scalar.TwoPi);
+        this.angularPosition = (angPos + w) % Scalar.TwoPi;
+        
         // TODO: support inclined orbits by calculating the z-coordinate using the correct trig fn
         this.position.x = posRadius * Math.sin(this.angularPosition);
         this.position.z = posRadius * Math.cos(this.angularPosition);
