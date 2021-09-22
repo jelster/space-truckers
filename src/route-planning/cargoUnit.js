@@ -46,6 +46,7 @@ class CargoUnit extends OrbitingGameObject {
     }
 
     reset() {
+        this.routePath.forEach(node => node.dispose());
         this.routePath = [];
         this.timeInTransit = 0;
         this.distanceTraveled = 0;
