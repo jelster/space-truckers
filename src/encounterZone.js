@@ -1,4 +1,7 @@
-import { ActionManager, Color3, ExecuteCodeAction, PredicateCondition } from "@babylonjs/core";
+import { ActionManager } from "@babylonjs/core/Actions/actionManager";
+import { Color3 } from "@babylonjs/core/Maths/math.color";
+import { ExecuteCodeAction } from "@babylonjs/core/Actions/directActions";
+import { PredicateCondition } from "@babylonjs/core/Actions/condition";
 import { Observable } from "@babylonjs/core/Misc/observable";
 import { TorusBuilder } from "@babylonjs/core/Meshes/Builders/torusBuilder";
 
@@ -70,8 +73,8 @@ class SpaceTruckerEncounterZone extends BaseGameObject {
 
     getEncounter() {
         let diceRoll = Math.random();
-        
-        for (var i = 0; i < this.cumulativeDistribution.length && (diceRoll > this.cumulativeDistribution[i]); i++) {};
+
+        for (var i = 0; i < this.cumulativeDistribution.length && (diceRoll > this.cumulativeDistribution[i]); i++) { };
 
         let et = this.encounterTable[i];
 
