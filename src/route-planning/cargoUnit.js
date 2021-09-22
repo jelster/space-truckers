@@ -84,7 +84,12 @@ class CargoUnit extends OrbitingGameObject {
     captureRouteData() {
         let node = new TransformNode("cargoNode", this.scene, true);
         node.position = this.mesh.position.clone();
-        node.rotationQuaternion = this.mesh.rotationQuaternion?.clone() ?? Quaternion.FromEulerVector(this.rotation.clone());
+        node.rotationQuaternion = new Quaternion();
+        if(this.mesh.rotationQuaternion) {
+            node.rotationQuaternion.copyFrom(this.mesh.rotationQuaternion);
+        } else {
+            Quaternion.FromEulerVectorToRef(this.rotation, node.rotationQuaternion);
+        }
         node.scaling = this.lastVelocity.clone();
         node.velocity = this.lastVelocity.clone();
         node.gravity = this.lastGravity.clone();
