@@ -204,7 +204,7 @@ class SpaceTruckerPlanningScreen {
                 this.planets.forEach(p => p.update(dT));
                 this.asteroidBelt.update(dT);
                 this.cargo.update(dT);
-                this.cargo.position = this.origin.position.clone().scaleInPlace(1.1, 1, 1);
+                this.cargo.position.copyFrom(this.origin.position).scaleInPlace(1.1, 1, 1);
 
                 break;
             case PLANNING_STATE.InFlight:
