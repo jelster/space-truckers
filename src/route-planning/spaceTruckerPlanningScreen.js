@@ -288,8 +288,8 @@ class SpaceTruckerPlanningScreen {
             this.gameState = this._previousState;
             if (this.gameState === PLANNING_STATE.InFlight) {
                 this.cargo.isInFlight = true;
-                this.cargo.position = this.cargo.lastFlightPoint.position.clone();
-                this.cargo.physicsImpostor.setLinearVelocity(this.cargo.lastFlightPoint.velocity.clone());
+                this.cargo.position.copyFrom(this.cargo.lastFlightPoint.position);
+                this.cargo.physicsImpostor.setLinearVelocity(this.cargo.lastFlightPoint.velocity);
             }
             
             this.cargo.physicsImpostor.wakeUp();
