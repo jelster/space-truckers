@@ -7,11 +7,11 @@ const devConfig = {
     mode: "development",
     devtool: "inline-source-map",
     devServer:  {
-        contentBase: path.resolve(appDirectory, "public"),
-        compress: true,
+        static: {
+            directory: path.join(appDirectory, 'public')
+        },
         hot: true,
-        open: true,
-        publicPath: "/"
+        open: true
     }
 };
 module.exports = merge(common, devConfig);
