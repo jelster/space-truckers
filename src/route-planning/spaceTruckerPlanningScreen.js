@@ -36,7 +36,9 @@ const preFlightActionList = [
     { action: 'GO_BACK', shouldBounce: () => true },
     { action: 'MOVE_LEFT', shouldBounce: () => false },
     { action: 'MOVE_RIGHT', shouldBounce: () => false },
-    { action: 'PAUSE', shouldBounce: () => true }
+    { action: 'PAUSE', shouldBounce: () => true },
+    { action: 'MOVE_UP', shouldBounce: () => false },
+    { action: 'MOVE_DOWN', shouldBounce: () => false }
 ];
 const overworldMusic = "overworld";
 const ambientSound = "ambient";
@@ -59,7 +61,7 @@ class SpaceTruckerPlanningScreen {
     launchForce = 100.0;
     launchForceIncrement = 5.0;;
     launchForceMax = 120;
-    launchRotationSpeed = 0.1;
+    launchRotationSpeed = 0.0891;
     planets = [];
     origin;
     destination;
@@ -273,6 +275,18 @@ class SpaceTruckerPlanningScreen {
     MOVE_RIGHT(state) {
         if (this.gameState === PLANNING_STATE.ReadyToLaunch) {
             this.cargo.mesh.rotate(Axis.Y, this.launchRotationSpeed, Space.World);
+        }
+    }
+
+    MOVE_UP(state) {
+        if (this.gameState === PLANNING_STATE.ReadyToLaunch) {
+            this.cargo.mesh.rotate(Axis.X, -this.launchRotationSpeed, Space.World);
+        }
+    }
+
+    MOVE_DOWN(state) {
+        if (this.gameState === PLANNING_STATE.ReadyToLaunch) {
+            this.cargo.mesh.rotate(Axis.X, this.launchRotationSpeed, Space.World);
         }
     }
 
