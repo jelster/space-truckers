@@ -100,7 +100,7 @@ const encounterZones = {
         name: "Asteroid Belt",
         innerBoundary: 1000,
         outerBoundary: 1700,
-        encounterRate: 0.15,
+        encounterRate: 0.1,
         colorCode: "#ff0000",
         encounters: [
             { name: 'Rock Hazard',  id: 'rock_hazard', image: hazard_icon, probability: 0.89 },
@@ -120,7 +120,8 @@ const encounterZones = {
             { name: '', id: 'no_encounter', probability: 0.01, image: '' },
             { name: 'Lane Closure', id: 'road_construction', probability: 0.99, image: ''},
             { name: 'Detour', id: 'space_detour', probability: 0.18, image: '' },
-            { name: 'Nav Flagger', id: 'nav_flagger', probability: 0.01, image: ''}
+            { name: 'Nav Flagger', id: 'nav_flagger', probability: 0.01, image: ''},
+            { name: 'Momentum Tether', id: 'momentum_tether', probability: 0.01, image: '' }
         ]
     },
     outerSystem: {
