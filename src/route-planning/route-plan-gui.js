@@ -15,8 +15,8 @@ const panelShrinkY = new Animation("shrinkImageAnimationY", "scaleY", 60,
 
 const keys = [];
 keys.push({ frame: 0, value: 1.0 });
-keys.push({ frame: 120, value: 0.40 });
-keys.push({ frame: 180, value: 0.05375 });
+keys.push({ frame: 90, value: 0.04 });
+
 panelShrinkX.setKeys(keys);
 panelShrinkY.setKeys(keys);
 
@@ -64,7 +64,7 @@ class PlanningScreenGui {
                 let animationGroup = new AnimationGroup("shrinkAnimationGroup-" + encounter.name, this.scene);
                 animationGroup.addTargetedAnimation(panelShrinkX, panel);
                 animationGroup.addTargetedAnimation(panelShrinkY, panel);
-                animationGroup.start(false, 1.0, 0, 180, true);
+                animationGroup.start(false, 1.0);
 
                 this.encounterPanels.push(panel);
             }
