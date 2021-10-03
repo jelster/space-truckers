@@ -18,11 +18,11 @@ class CargoUnit extends OrbitingGameObject {
     isInFlight = false;
     routePath = [];
     encounterManager;
-
+    samplingFrequency = 10; //Hz
     get lastFlightPoint() {
         return this.routePath[this.routePath.length - 1];
     }
-    
+
     get linearVelocity() {
         return this?.physicsImpostor?.getLinearVelocity()?.length() ?? 0;
     }
@@ -46,7 +46,8 @@ class CargoUnit extends OrbitingGameObject {
     }
 
     reset() {
-        this.routePath.forEach(node => node.dispose());
+        console.log('clearing route path of ', this.routePath.length, 'points');
+        this.routePath.forEach(node => node = null);
         this.routePath = [];
         this.timeInTransit = 0;
         this.distanceTraveled = 0;
@@ -72,10 +73,11 @@ class CargoUnit extends OrbitingGameObject {
             linVel.normalize();
 
             this.timeInTransit += deltaTime;
-            this.distanceTraveled += this.lastVelocity.length() * deltaTime;           
+            this.distanceTraveled += this.lastVelocity.length() * deltaTime;
             this.rotation = Vector3.Cross(this.mesh.up, linVel);
 
             this.captureRouteData();
+
             this.encounterManager.update(deltaTime);
             this.physicsImpostor.applyImpulse(this.currentGravity.scale(deltaTime), this.mesh.getAbsolutePosition());
             this.currentGravity = Vector3.Zero();
@@ -83,27 +85,19 @@ class CargoUnit extends OrbitingGameObject {
     }
 
     captureRouteData() {
-        const node = new TransformNode("cargoNode", this.scene, true);
-        node.position.copyFrom(this.mesh.position);
+        const node = {};
+        node.position = this.mesh.position.clone();
         node.rotationQuaternion = new Quaternion();
-        if(this.mesh.rotationQuaternion) {
+        if (this.mesh.rotationQuaternion) {
             node.rotationQuaternion.copyFrom(this.mesh.rotationQuaternion);
         } else {
             Quaternion.FromEulerVectorToRef(this.rotation, node.rotationQuaternion);
         }
-        node.scaling.copyFrom(this.lastVelocity);
-        node.velocity = this.lastVelocity.clone();
+        node.scaling = this.lastVelocity.clone();
+        node.velocity = node.scaling;
         node.gravity = this.lastGravity.clone();
         node.time = this.timeInTransit;
-        node.encounterZone = this.encounterManager.currentZone?.name;
-        // let currentPoint = {
-        //     time: this.timeInTransit,
-        //     position: this.position.clone(),
-        //     rotation: Quaternion.FromEulerVector(this.rotation.clone()),
-        //     velocity: this.lastVelocity.clone(),
-        //     gravity: this.lastGravity.clone(),
-        //     encounterZone: this.encounterManager.currentZone?.name
-        // };
+        node.encounterZone = this.encounterManager.currentZone?.id;
         this.routePath.push(node);
     }
 

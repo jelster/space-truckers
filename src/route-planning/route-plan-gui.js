@@ -60,7 +60,7 @@ class PlanningScreenGui {
                 panel.addControl(image);
                 panel.thickness = 0;
                 this.gui.addControl(panel);                
-                panel.linkWithMesh(evt.cargoData);
+                panel.moveToVector3(evt.cargoData.position, this.scene);
                 let animationGroup = new AnimationGroup("shrinkAnimationGroup-" + encounter.name, this.scene);
                 animationGroup.addTargetedAnimation(panelShrinkX, panel);
                 animationGroup.addTargetedAnimation(panelShrinkY, panel);

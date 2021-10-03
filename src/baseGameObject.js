@@ -23,7 +23,7 @@ class BaseGameObject {
     }
 
     update(deltaTime) {
-        this.lastSceneTime = deltaTime;
+        this.lastSceneTime += deltaTime;
     }
 
     dispose() {
