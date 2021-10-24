@@ -57,7 +57,10 @@ class SpaceTruckerEncounterZone extends BaseGameObject {
     }
 
     isWithinZone(position) {
-        return true;
+        return (position.x >= this.innerBoundary || 
+            position.x <= this.outerBoundary) && 
+            (position.z >= this.innerBoundary && 
+            position.z <= this.outerBoundary);
     }
 
     update(deltaTime) {
@@ -92,7 +95,7 @@ class SpaceTruckerEncounterZone extends BaseGameObject {
         const zam = this.mesh.actionManager;
         const zact = this.intersectionEnterAction = new ExecuteCodeAction({
             trigger: ActionManager.OnIntersectionEnterTrigger,
-            parameter: { mesh: meshToWatch, usePreciseIntersections: true }
+            parameter: { mesh: meshToWatch, usePreciseIntersections: false }
         },
             (c1) => {
                 this.onEnterObservable.notifyObservers(this);
@@ -103,7 +106,7 @@ class SpaceTruckerEncounterZone extends BaseGameObject {
 
         const zext = this.intersectionExitAction = new ExecuteCodeAction({
             trigger: ActionManager.OnIntersectionExitTrigger,
-            parameter: { mesh: meshToWatch, usePreciseIntersections: true }
+            parameter: { mesh: meshToWatch, usePreciseIntersections: false }
         },
             (c1) => {
                 this.onExitObservable.notifyObservers(this);
