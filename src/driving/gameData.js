@@ -1,5 +1,5 @@
-import truckModelUrl from './assets/models/Semi truck.glb';
-import envTextureUrl from './assets/environment/milkyway-pbr-hdr.env';
+import truckModelUrl from '../../assets/models/Semi truck.glb';
+import envTextureUrl from '../../assets/environment/milkyway-pbr-hdr.env';
 
 import { Vector3 } from '@babylonjs/core/Maths/math.vector';
 
@@ -35,8 +35,6 @@ const truckSetup = {
 const environmentConfig = {
     envTextureUrl: envTextureUrl,
     skyBoxSize: 20000,
-
-
 }
 
-export default { screenConfig, truckSetup };
+export {screenConfig, truckSetup, environmentConfig};
