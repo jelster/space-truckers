@@ -3,6 +3,8 @@ export default Object.freeze({
     INITIALIZING: 2,
     CUTSCENE: 3,
     MENU: 4,
-    RUNNING: 5,
-    EXITING: 6
+    PLANNING: 5,
+    DRIVING: 6,
+    SCORING: 7,
+    EXITING: 8
 });

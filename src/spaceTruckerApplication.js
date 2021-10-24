@@ -85,7 +85,7 @@ class SpaceTruckerApplication {
     onRender() {
         // update loop. Inputs are routed to the active state's scene.
         let state = this.currentState;
-        const gameTime = this._engine.getDeltaTime() / 1000
+        const gameTime = this._engine.getDeltaTime() / 1000;
         switch (state) {
             case AppStates.CREATED:
             case AppStates.INITIALIZING:
@@ -102,8 +102,10 @@ class SpaceTruckerApplication {
                 this._mainMenu.update();
 
                 break;
-            case AppStates.RUNNING:
+            case AppStates.PLANNING:
                 this?._routePlanningScene.update(gameTime);
+                break;
+            case AppStates.DRIVING:
 
                 break;
             case AppStates.EXITING:
@@ -139,11 +141,21 @@ class SpaceTruckerApplication {
         
         this._currentScene = this._routePlanningScene;
 
-        this.moveNextAppState(AppStates.RUNNING);        
+        this.moveNextAppState(AppStates.PLANNING);        
         this._currentScene.actionProcessor.attachControl();
-        this._routePlanningScene.setReadyToLaunchState();
+        this._routePlanningScene.setReadyToLaunchState();        
+    }
 
-        
+    goToDrivingState() {
+        // extract route data from planning scene
+        const routeData = this._routePlanningScene.routePath;
+        // create new driving scene with route data
+
+        // set current scene to driving scene
+        this._currentScene.actionProcessor.detachControl();
+
+        // go to driving state
+        this.moveNextAppState(AppStates.DRIVING);
     }
 
     exit() {

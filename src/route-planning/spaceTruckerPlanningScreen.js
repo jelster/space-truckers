@@ -51,7 +51,6 @@ const PLANNING_STATE = Object.freeze({
     InFlight: 3,
     CargoArrived: 4,
     RouteAccepted: 5,
-    GeneratingCourse: 6,
     CargoDestroyed: 7,
     Paused: 8
 });
@@ -73,7 +72,11 @@ class SpaceTruckerPlanningScreen {
     soundManager;
     actionProcessor;
     onStateChangeObservable = new Observable();
-    
+    routeAcceptedObservable = new Observable();
+
+    get routePath() {
+        return this.cargo.routePath;
+    }
     get encounterManager() {
         return this.cargo.encounterManager;
     }
@@ -223,6 +226,8 @@ class SpaceTruckerPlanningScreen {
                 break;
             case PLANNING_STATE.Paused:
                 break;
+            case PLANNING_STATE.RouteAccepted:
+                break;
             default:
                 break;
         }
@@ -319,6 +324,11 @@ class SpaceTruckerPlanningScreen {
     cargoArrived() {
         this.gameState = PLANNING_STATE.CargoArrived;
         this.cargo.physicsImpostor.setLinearVelocity(new Vector3(0, 0, 0));
+        
+        // temporary
+        this.routeAcceptedObservable.notifyObservers();
+        this.gameState = PLANNING_STATE.RouteAccepted
+        
     }
 
 
