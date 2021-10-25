@@ -103,7 +103,7 @@ class SpaceTruckerPlanningScreen {
         this.scene = new Scene(engine);
         this.config = config;
 
-        this.soundManager = new SpaceTruckerSoundManager(this.scene, overworldMusic, ambientSound, encounterSound);
+        this.soundManager = new SpaceTruckerSoundManager(this.scene, overworldMusic, ambientSound);
 
         this.scene.clearColor = new Color3(0.1, 0.1, 0.1);
 
