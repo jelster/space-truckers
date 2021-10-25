@@ -1,4 +1,4 @@
-import truckModelUrl from '../../assets/models/Semi truck.glb';
+import truckModelUrl from '../../assets/models/semi-truck.glb';
 import envTextureUrl from '../../assets/environment/milkyway-pbr-hdr.env';
 
 import { Vector3 } from '@babylonjs/core/Maths/math.vector';
