@@ -13,10 +13,7 @@ import { CreateSphere } from "@babylonjs/core/Meshes/Builders/sphereBuilder";
 import { CreateCylinder } from "@babylonjs/core/Meshes/Builders/cylinderBuilder";
 import { CreateTorus } from "@babylonjs/core/Meshes/Builders/torusBuilder";
 import { SceneLoader } from "@babylonjs/core/Loading/sceneLoader";
-import { UniversalCamera } from "@babylonjs/core/Cameras/universalCamera";
-import { HemisphericLight } from "@babylonjs/core/Lights/hemisphericLight";
 import { ArcRotateCamera } from "@babylonjs/core/Cameras/arcRotateCamera";
-import { CubeTexture } from "@babylonjs/core/Materials/Textures/cubeTexture";
 import { GridMaterial } from "@babylonjs/materials/grid";
 import initializeGui from "./driving-gui.js";
 import initializeEnvironment from "./environment.js";
@@ -62,7 +59,7 @@ class SpaceTruckerDrivingScreen {
 
     async initialize() {
         this.environment = initializeEnvironment(this.scene);
-        this.truck = await this.loadTruck();
+        this.truck = await Truck.loadTruck();
         this.gui = await initializeGui(this.scene);
     }
 
