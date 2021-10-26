@@ -9,6 +9,9 @@ import appData from "./route-planning/gameData";
 import SpaceTruckerPlanningScreen from "./route-planning/spaceTruckerPlanningScreen";
 import SpaceTruckerDrivingScreen from "./driving/spaceTruckerDrivingScreen";
 
+// TODO: conditionally include sample data in the build
+import sampleRoute from "./driving/sample-route.json";
+
 class SpaceTruckerApplication {
     *appStateMachine() {
         let previousState = null;
@@ -81,6 +84,8 @@ class SpaceTruckerApplication {
             const routeData = this._routePlanningScene.routePath;
             this.goToDrivingState(routeData);
         });
+
+
     }
 
     run() {
@@ -98,21 +103,27 @@ class SpaceTruckerApplication {
                 break;
             case AppStates.CUTSCENE:
                 if (this._splashScreen.skipRequested) {
-                    this.goToMainMenu();
+                    // for debugging driving phase
+                    const queryString = window.location.search;
+                    if (queryString.includes("testDrive")) {
+                        this.goToDrivingState(sampleRoute);
+                    }
+                    else {
+                        this.goToMainMenu();
+                    }
+
                     logger.logInfo("in application onRender - skipping splash screen message");
                 }
-                this._splashScreen.update();
-
+                this._splashScreen.update(gameTime);
                 break;
             case AppStates.MENU:
-                this._mainMenu.update();
-
+                this._mainMenu.update(gameTime);
                 break;
             case AppStates.PLANNING:
                 this?._routePlanningScene.update(gameTime);
                 break;
             case AppStates.DRIVING:
-
+                this._drivingScene.update(gameTime);
                 break;
             case AppStates.EXITING:
 
@@ -152,9 +163,9 @@ class SpaceTruckerApplication {
         this._routePlanningScene.setReadyToLaunchState();
     }
 
-    goToDrivingState(routeData) {        
+    goToDrivingState(routeData) {
         routeData = routeData ?? this._routePlanningScene.routePath;
-        this._currentScene.actionProcessor.detachControl();
+        this._currentScene?.actionProcessor?.detachControl();
         // create new driving scene with route data
         this._drivingScene = new SpaceTruckerDrivingScreen(this._engine, this.inputManager, routeData);
         // set current scene to driving scene       
