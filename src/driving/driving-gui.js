@@ -10,9 +10,10 @@ import { UniversalCamera } from '@babylonjs/core/Cameras/universalCamera';
 import { NodeMaterial } from "@babylonjs/core/Materials/Node/nodeMaterial";
 
 const { GUI_MASK } = screenConfig;
-const initializeGui = async (scene) => {
-    const { guiViewportSize, radarTextureResolution } = gameData;
-    let radarTexture = await NodeMaterial.ParseFromSnippetAsync(radarNodeMaterial, scene, document.baseURI);
+const initializeGui = async (screen) => {
+    const { scene } = screen;
+    const { guiViewportSize, radarTextureResolution } = screenConfig;
+    let radarTexture = NodeMaterial.Parse(radarNodeMaterial, scene, document.baseURI);
     let guiCamera = new UniversalCamera("guiCam", new Vector3(0, 50, 0), scene);
     guiCamera.layerMask = GUI_MASK;
     guiCamera.viewport = new Viewport(0, 0, 1 - 0.6, 1 - 0.6);
@@ -44,4 +45,4 @@ const initializeGui = async (scene) => {
     return { radarGui, radarMesh };
 };
 
-export default { initializeGui };
+export default initializeGui;

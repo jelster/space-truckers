@@ -15,9 +15,14 @@ import { CreateTorus } from "@babylonjs/core/Meshes/Builders/torusBuilder";
 import { SceneLoader } from "@babylonjs/core/Loading/sceneLoader";
 import { ArcRotateCamera } from "@babylonjs/core/Cameras/arcRotateCamera";
 import { GridMaterial } from "@babylonjs/materials/grid";
-import initializeGui from "./driving-gui.js";
-import initializeEnvironment from "./environment.js";
+
 import { screenConfig } from "./gameData.js";
+import SpaceTruckerInputProcessor from "../spaceTruckerInputProcessor.js";
+import Truck from "./truck.js";
+
+import initializeGui  from "./driving-gui.js";
+import initializeEnvironment from "./environment.js";
+
 
 const { GUI_MASK, SCENE_MASK } = screenConfig;
 const { followCamSetup } = screenConfig;
@@ -27,25 +32,27 @@ class SpaceTruckerDrivingScreen {
     inputManager;
     gui;
     truck;
-    ground;
+    ground = {};
     environment;
     cameraDolly;
     followCamera;
+    actionProcessor;
+
+    isLoaded = false;
 
     constructor(engine, inputManager, routeData) {
         this.engine = engine;
         this.scene = new Scene(engine);
         this.inputManager = inputManager;
+        this.actionProcessor = new SpaceTruckerInputProcessor(this, inputManager, []);
         this.scene.clearColor = new Color3(0, 0, 0);
         this.cameraDolly = new TransformNode("cameraDolly", this.scene);
         this.followCamera = new ArcRotateCamera("followCam", 4.712, 1.078, 80, Vector3.Zero(), this.scene);
         //followCamera = new FollowCamera("followCam", new Vector3(0, 500, -1000), scene);
-        this.cameraDolly.position.z = truckModel.position.z + 30;
-        this.cameraDolly.position.y = 10;
-        this.cameraDolly.parent = truck;
+
 
         for (var k in followCamSetup) {
-            followCamera[k] = followCamSetup[k];
+            this.followCamera[k] = followCamSetup[k];
         }
         this.followCamera.lockedTarget = this.cameraDolly;
         this.followCamera.viewport = new Viewport(0, 0, 1, 1);
@@ -54,18 +61,42 @@ class SpaceTruckerDrivingScreen {
 
         this.scene.activeCameras.push(this.followCamera);
 
+
+        var groundMat = new GridMaterial("roadMat", this.scene);
+        this.ground = MeshBuilder.CreateGround("ground", {
+            width: 50,
+            height: routeData.length,
+            subdivisionsX: 64,
+            subdivisionsY: 64,
+            updateable: true
+        }, this.scene);
+        this.ground.layerMask = SCENE_MASK;
+        this.ground.material = groundMat;
+
         this.scene.onReadyObservable.addOnce(() => this.initialize());
     }
 
     async initialize() {
-        this.environment = initializeEnvironment(this.scene);
-        this.truck = await Truck.loadTruck();
-        this.gui = await initializeGui(this.scene);
+        initializeEnvironment(this);
+        this.truck = await Truck.loadTruck(this.scene);
+        this.cameraDolly.position.z = this.truck.position.z + 30;
+        this.cameraDolly.position.y = 10;
+        this.cameraDolly.parent = this.truck.mesh;
+
+        this.gui = await initializeGui(this);
+        this.isLoaded = true;
     }
 
     update(deltaTime) {
         const dT = deltaTime ?? (this.scene.getEngine().getDeltaTime() / 1000);
         this.actionProcessor?.update();
+
+        if (this.isLoaded) {
+            this.truck.update(deltaTime);
+
+
+        }
+
 
     }
 

@@ -1,14 +1,15 @@
 import { Texture } from "@babylonjs/core/Materials/Textures/texture";
 import { CubeTexture } from "@babylonjs/core/Materials/Textures/cubeTexture";
 import { Vector3 } from "@babylonjs/core/Maths/math";
-import { screenConfig, environmentConfig} from "./gameData.js";
+import { HemisphericLight } from "@babylonjs/core/Lights/hemisphericLight";
+import { screenConfig, environmentConfig } from "./gameData.js";
 
 
 const { SCENE_MASK } = screenConfig;
 const { environmentTextureUrl, skyBoxSize } = environmentConfig;
 
-const initializeEnvironment = (scene) => {
-    
+const initializeEnvironment = (screen) => {
+    const { scene } = screen;
     var light = new HemisphericLight("light", new Vector3(0, 0, -1), scene);
     light.intensity = 1000;
     var skyTexture = CubeTexture.CreateFromPrefilteredData(environmentTextureUrl, scene, null, true);
@@ -16,8 +17,8 @@ const initializeEnvironment = (scene) => {
     scene.reflectionTexture = skyTexture;
     var skyBox = scene.createDefaultSkybox(skyTexture, false, skyBoxSize);
     skyBox.layerMask = SCENE_MASK;
-
-    return { skyBox, light, skyTexture }
+    screen.environment = { skyBox, light, skyTexture };
+    return screen.environment;
 };
 
-export default { initializeEnvironment };
+export default initializeEnvironment;
