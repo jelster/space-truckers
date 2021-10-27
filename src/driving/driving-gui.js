@@ -13,6 +13,7 @@ import { NodeMaterial } from "@babylonjs/core/Materials/Node/nodeMaterial";
 import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
 import { CreatePlane } from "@babylonjs/core/Meshes/Builders/planeBuilder";
 import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial";
+import { GlowLayer } from '@babylonjs/core/Layers/glowLayer';
 
 
 
@@ -51,7 +52,7 @@ const initializeGui = async (screen) => {
     radarTexture.TextureMode = Texture.PLANAR_MODE;
 
     guiCamera.lockedTarget = radarMesh;
-
+    var gl = new GlowLayer("gl", scene, { blurKernelSize: 4, camera: guiCamera });
     return { radarGui, radarMesh, radarMaterial, radarTexture, guiCamera };
 };
 
