@@ -6,13 +6,13 @@ import { screenConfig, environmentConfig } from "./gameData.js";
 
 
 const { SCENE_MASK } = screenConfig;
-const { environmentTextureUrl, skyBoxSize } = environmentConfig;
+const { envTextureUrl, skyBoxSize } = environmentConfig;
 
 const initializeEnvironment = (screen) => {
     const { scene } = screen;
     var light = new HemisphericLight("light", new Vector3(0, 0, -1), scene);
     light.intensity = 1000;
-    var skyTexture = CubeTexture.CreateFromPrefilteredData(environmentTextureUrl, scene, null, true);
+    var skyTexture = new CubeTexture(envTextureUrl, scene);
     skyTexture.coordinatesMode = Texture.SKYBOX_MODE;
     scene.reflectionTexture = skyTexture;
     var skyBox = scene.createDefaultSkybox(skyTexture, false, skyBoxSize);

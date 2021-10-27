@@ -6,14 +6,21 @@ import { Texture } from '@babylonjs/core/Materials/Textures/texture';
 import radarNodeMaterial from '../nme/proceduralTextures/radarSweep.json';
 import {screenConfig}  from './gameData';
 import { Color3 } from '@babylonjs/core/Maths/math.color';
+import { Vector3 } from '@babylonjs/core/Maths/math.vector';
+import { Viewport } from '@babylonjs/core/Maths/math.viewport';
 import { UniversalCamera } from '@babylonjs/core/Cameras/universalCamera';
 import { NodeMaterial } from "@babylonjs/core/Materials/Node/nodeMaterial";
+import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
+import { CreatePlane } from "@babylonjs/core/Meshes/Builders/planeBuilder";
+import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial";
+
+
 
 const { GUI_MASK } = screenConfig;
 const initializeGui = async (screen) => {
     const { scene } = screen;
     const { guiViewportSize, radarTextureResolution } = screenConfig;
-    let radarTexture = NodeMaterial.Parse(radarNodeMaterial, scene, document.baseURI);
+    
     let guiCamera = new UniversalCamera("guiCam", new Vector3(0, 50, 0), scene);
     guiCamera.layerMask = GUI_MASK;
     guiCamera.viewport = new Viewport(0, 0, 1 - 0.6, 1 - 0.6);
@@ -31,7 +38,10 @@ const initializeGui = async (screen) => {
     radarGui.background = "black";
 
     radarMesh.rotation.x = Math.PI / 4;
-
+    let radarMaterial = new StandardMaterial("radMat", scene);
+    let nodeMat = new NodeMaterial("radarNodeMat", scene);
+    await NodeMaterial.ParseFromSnippetAsync("XB8WRJ#7", scene, document.baseURI, nodeMat);
+    let radarTexture = nodeMat.createProceduralTexture(radarTextureResolution, scene);
     radarMesh.material = radarMaterial;
     radarMaterial.diffuseTexture = radarGui;
     radarMaterial.specularColor = Color3.Black();
@@ -42,7 +52,7 @@ const initializeGui = async (screen) => {
 
     guiCamera.lockedTarget = radarMesh;
 
-    return { radarGui, radarMesh };
+    return { radarGui, radarMesh, radarMaterial, radarTexture, guiCamera };
 };
 
 export default initializeGui;
