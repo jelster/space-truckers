@@ -1,14 +1,17 @@
 import { SceneLoader } from "@babylonjs/core/Loading/sceneLoader";
 import { Vector3 } from "@babylonjs/core/Maths/math.vector";
+import { PhysicsImpostor } from "@babylonjs/core/Physics/physicsImpostor";
 
 import BaseGameObject from "../baseGameObject";
 import { truckSetup, screenConfig } from "./gameData.js";
 
 const { SCENE_MASK } = screenConfig;
 class Truck extends BaseGameObject {
+    currentVelocity = truckSetup.initialVelocity.clone();
+    currentAcceleration = truckSetup.maxAcceleration;
 
     static async loadTruck(scene) {
-        const { modelUrl } = truckSetup;
+        const { modelUrl, physicsConfig } = truckSetup;
 
         let truck = new Truck(scene);
         let engine = scene.getEngine();
@@ -25,17 +28,30 @@ class Truck extends BaseGameObject {
         imported.meshes[0].dispose();
 
         truck.mesh = truckMesh;
+        truck.physicsImpostor = new PhysicsImpostor(truckMesh, PhysicsImpostor.BoxImpostor, physicsConfig, scene);
         engine.hideLoadingUI();
         return truck;
     }
 
     constructor(scene) {
-        super(scene);        
+        super(scene);
 
     }
 
     update(deltaTime) {
         super.update(deltaTime);
+        let linVel = this.physicsImpostor.getLinearVelocity();
+        let currAccel = this.currentAcceleration * deltaTime;
+        let currDir = this.forward;
+
+        linVel.addInPlace(this.currentVelocity);
+        this.physicsImpostor.setLinearVelocity(linVel);
+        this.currentVelocity.setAll(0);
+
+        // dampen any tendencies to pitch, roll, or yaw from physics effects
+        let angVel = this.physicsImpostor.getAngularVelocity();
+        angVel.scaleInPlace(0.99);
+        this.physicsImpostor.setAngularVelocity(angVel);
 
     }
 }
