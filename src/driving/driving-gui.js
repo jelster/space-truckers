@@ -40,8 +40,8 @@ const initializeGui = async (screen) => {
 
     radarMesh.rotation.x = Math.PI / 4;
     let radarMaterial = new StandardMaterial("radMat", scene);
-    let nodeMat = new NodeMaterial("radarNodeMat", scene);
-    await NodeMaterial.ParseFromSnippetAsync("XB8WRJ#7", scene, document.baseURI, nodeMat);
+    let nodeMat = NodeMaterial.Parse(radarNodeMaterial, scene, document.baseURI);
+    
     let radarTexture = nodeMat.createProceduralTexture(radarTextureResolution, scene);
     radarMesh.material = radarMaterial;
     radarMaterial.diffuseTexture = radarGui;
