@@ -41,10 +41,7 @@ class Truck extends BaseGameObject {
     update(deltaTime) {
         super.update(deltaTime);
         let linVel = this.physicsImpostor.getLinearVelocity();
-        let currAccel = this.currentAcceleration * deltaTime;
-        let currDir = this.forward;
-
-        linVel.addInPlace(this.currentVelocity);
+        linVel.addInPlace(this.currentVelocity.scaleInPlace(deltaTime));
         this.physicsImpostor.setLinearVelocity(linVel);
         this.currentVelocity.setAll(0);
 

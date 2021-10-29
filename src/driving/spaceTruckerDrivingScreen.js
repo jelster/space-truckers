@@ -34,6 +34,16 @@ import initializeEnvironment from "./environment.js";
 
 const { GUI_MASK, SCENE_MASK } = screenConfig;
 const { followCamSetup } = screenConfig;
+
+const actionList = [
+   // { action: 'ACTIVATE', shouldBounce: () => true },
+    { action: 'MOVE_UP', shouldBounce: () => false },
+    { action: 'MOVE_DOWN', shouldBounce: () => false },
+    { action: 'GO_BACK', shouldBounce: () => true },
+    { action: 'MOVE_LEFT', shouldBounce: () => false },
+    { action: 'MOVE_RIGHT', shouldBounce: () => false },
+  //  { action: 'PAUSE', shouldBounce: () => true },
+];
 class SpaceTruckerDrivingScreen {
     engine;
     scene;
@@ -56,7 +66,7 @@ class SpaceTruckerDrivingScreen {
         this.engine = engine;
         this.scene = new Scene(engine);
         this.inputManager = inputManager;
-        this.actionProcessor = new SpaceTruckerInputProcessor(this, inputManager, []);
+        this.actionProcessor = new SpaceTruckerInputProcessor(this, inputManager, actionList);
         this.scene.clearColor = new Color3(0, 0, 0);
         this.cameraDolly = new TransformNode("cameraDolly", this.scene);
         this.followCamera = new ArcRotateCamera("followCam", 4.712, 1.078, 80, Vector3.Zero(), this.scene);
@@ -155,6 +165,22 @@ class SpaceTruckerDrivingScreen {
     dispose() {
         this.scene.onAfterRenderObservable.remove(this.gui.sceneObserver);
         this.scene.dispose();
+    }
+
+    MOVE_UP(state) {
+        let currDir = this.truck.forward;
+        let currAccel = this.truck.currentAcceleration
+        this.truck.currentVelocity.addInPlace(currDir.scale(currAccel));
+    }
+
+    MOVE_DOWN(state) {
+        let currDir = this.truck.forward;
+        let currAccel = this.truck.currentAcceleration
+        this.truck.currentVelocity.addInPlace(currDir.scale(currAccel).negate());
+    }
+
+    GO_BACK() {
+        this.reset();
     }
 }
 export default SpaceTruckerDrivingScreen;
