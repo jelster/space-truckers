@@ -30,19 +30,21 @@ import Truck from "./truck.js";
 
 import initializeGui from "./driving-gui.js";
 import initializeEnvironment from "./environment.js";
-
+import { Axis } from "@babylonjs/core/Maths/math.axis";
+import { Scalar } from "@babylonjs/core/Maths/math.scalar";
+import { Space } from "@babylonjs/core/"; // TODO: fix import
 
 const { GUI_MASK, SCENE_MASK } = screenConfig;
 const { followCamSetup } = screenConfig;
 
 const actionList = [
-   // { action: 'ACTIVATE', shouldBounce: () => true },
+    // { action: 'ACTIVATE', shouldBounce: () => true },
     { action: 'MOVE_UP', shouldBounce: () => false },
     { action: 'MOVE_DOWN', shouldBounce: () => false },
     { action: 'GO_BACK', shouldBounce: () => true },
     { action: 'MOVE_LEFT', shouldBounce: () => false },
     { action: 'MOVE_RIGHT', shouldBounce: () => false },
-  //  { action: 'PAUSE', shouldBounce: () => true },
+    //  { action: 'PAUSE', shouldBounce: () => true },
 ];
 class SpaceTruckerDrivingScreen {
     engine;
@@ -62,7 +64,7 @@ class SpaceTruckerDrivingScreen {
     routeParameters = { groundHeight: 0, groundWidth: 50, pathLength: 0, };
 
     constructor(engine, inputManager) {
-        
+
         this.engine = engine;
         this.scene = new Scene(engine);
         this.inputManager = inputManager;
@@ -79,7 +81,7 @@ class SpaceTruckerDrivingScreen {
         this.followCamera.layerMask = SCENE_MASK;
 
         this.scene.activeCameras.push(this.followCamera);
-        
+
     }
 
     async initialize(routeData) {
@@ -129,7 +131,7 @@ class SpaceTruckerDrivingScreen {
         let pathLength = 0;
         let groundWidth = 50;
         let groundHeight = this.routeData.length;
-       
+
         this.routeParameters.pathLength = pathLength;
         this.routeParameters.groundWidth = groundWidth;
         this.routeParameters.groundHeight = groundHeight;
@@ -177,6 +179,22 @@ class SpaceTruckerDrivingScreen {
         let currDir = this.truck.forward;
         let currAccel = this.truck.currentAcceleration
         this.truck.currentVelocity.addInPlace(currDir.scale(currAccel).negate());
+    }
+
+    MOVE_LEFT(state) {
+        let { forward, currentAcceleration, currentVelocity } = this.truck;
+        let left = Vector3.Cross(forward, this.followCamera.upVector);
+        currentVelocity.addInPlace(left.scale(currentAcceleration));
+        
+        this.truck.mesh.rotate(Axis.Y, -currentAcceleration/Scalar.TwoPi/60, Space.LOCAL);
+    }
+
+    MOVE_RIGHT(state) {
+        let { forward, currentAcceleration, currentVelocity } = this.truck;
+        let right = Vector3.Cross(forward, this.followCamera.upVector.negate());
+        currentVelocity.addInPlace(right.scale(currentAcceleration));
+
+        this.truck.mesh.rotate(Axis.Y, currentAcceleration/Scalar.TwoPi/60, Space.LOCAL);
     }
 
     GO_BACK() {
