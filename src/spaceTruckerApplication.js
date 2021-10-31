@@ -174,8 +174,11 @@ class SpaceTruckerApplication {
         // set current scene to driving scene       
         this._currentScene = this._drivingScene;
         this.moveNextAppState(AppStates.DRIVING);
+        this._engine.displayLoadingUI();
         this._drivingScene.initialize(routeData).then(() => {
             this._currentScene.actionProcessor.attachControl();
+            this._engine.hideLoadingUI();
+            this._drivingScene.reset();
         });
 
     }

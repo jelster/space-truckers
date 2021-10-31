@@ -1,5 +1,5 @@
 import { Scene } from "@babylonjs/core/scene";
-import { Vector3, Vector2 } from "@babylonjs/core/Maths/math.vector";
+import { Vector3, Vector2, Matrix } from "@babylonjs/core/Maths/math.vector";
 import { Viewport } from "@babylonjs/core/Maths/math.viewport";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
 import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
@@ -12,10 +12,14 @@ import { CreateBox } from "@babylonjs/core/Meshes/Builders/boxBuilder";
 import { CreateSphere } from "@babylonjs/core/Meshes/Builders/sphereBuilder";
 import { CreateCylinder } from "@babylonjs/core/Meshes/Builders/cylinderBuilder";
 import { CreateTorus } from "@babylonjs/core/Meshes/Builders/torusBuilder";
+import { CreateRibbon } from "@babylonjs/core/Meshes/Builders/ribbonBuilder";
+import { CreateLines } from "@babylonjs/core/Meshes/Builders/linesBuilder";
+
 import { SceneLoader } from "@babylonjs/core/Loading/sceneLoader";
 import { ArcRotateCamera } from "@babylonjs/core/Cameras/arcRotateCamera";
 import { GridMaterial } from "@babylonjs/materials/grid";
 import { Quaternion } from "@babylonjs/core/Maths/math";
+import { Path3D } from "@babylonjs/core/Maths/math.path";
 
 
 import { PhysicsHelper } from "@babylonjs/core/Physics/physicsHelper";
@@ -59,6 +63,8 @@ class SpaceTruckerDrivingScreen {
     followCamera;
     actionProcessor;
     routeData;
+    path;
+    curve = [];
 
     isLoaded = false;
     routeParameters = { groundHeight: 0, groundWidth: 50, pathLength: 0, };
@@ -86,16 +92,20 @@ class SpaceTruckerDrivingScreen {
 
     async initialize(routeData) {
         this.routeData = routeData;
-        this.calculateRouteParameters();
-
-        var groundMat = this.groundMaterial = new GridMaterial("roadMat", this.scene);
-        this.ground = MeshBuilder.CreateGround("ground", {
-            width: this.routeParameters.groundWidth,
-            height: this.routeParameters.groundHeight,
-            subdivisionsX: 64,
-            subdivisionsY: 64,
-            updateable: true
+        let paths = this.calculateRouteParameters(routeData);
+        this.ground = MeshBuilder.CreateRibbon("road", {
+            pathArray: paths,
         }, this.scene);
+        var groundMat = this.groundMaterial = new GridMaterial("roadMat", this.scene);
+
+        // this.ground = MeshBuilder.CreateGround("ground", {
+        //     width: this.routeParameters.groundWidth,
+        //     height: this.routeParameters.groundHeight,
+        //     subdivisionsX: 64,
+        //     subdivisionsY: 64,
+        //     updateable: true
+        // }, this.scene);
+
         this.ground.layerMask = SCENE_MASK;
         this.ground.material = groundMat;
 
@@ -124,25 +134,45 @@ class SpaceTruckerDrivingScreen {
         this.followCamera.lockedTarget = this.cameraDolly;
         this.followCamera.attachControl(undefined, true);
         this.isLoaded = true;
-        this.reset();
     }
 
-    calculateRouteParameters() {
-        let pathLength = 0;
-        let groundWidth = 50;
-        let groundHeight = this.routeData.length;
+    calculateRouteParameters(routeData) {
+        let pathPoints = routeData.map(p => {
+            return (typeof p !== 'Vector3' ? new Vector3(p.position.x, p.position.y, p.position.z) : p).scaleInPlace(7);
+        });
 
-        this.routeParameters.pathLength = pathLength;
-        this.routeParameters.groundWidth = groundWidth;
-        this.routeParameters.groundHeight = groundHeight;
+        let path3d = new Path3D(pathPoints, null, true, true);
+
+        let curve = path3d.getCurve();
+        let displayLines = MeshBuilder.CreateLines("displayLines", { points: curve }, this.scene);
+        let pathA = [new Vector3(0, 0, 0)];
+        let pathB = [new Vector3(0, 0, 0)];
+        for (let i = 0; i < curve.length; i++) {
+            let p = curve[i];
+            const { x, y, z, w } = routeData[i].rotationQuaternion;
+            const rotation = new Quaternion(x, y, z, w);
+            const vel = routeData[i].velocity;
+
+            let pA = new Vector3(p.x + 20, 0, p.z + 20);
+            //    pA.rotateByQuaternionToRef(rotation, pA);
+            let pB = new Vector3(p.x - 20, 0, p.z - 20);
+            //     pB.rotateByQuaternionToRef(rotation, pB);
+            pathA.push(pA);
+            pathB.push(pB);
+        }
+
+        this.path = path3d;
+        this.curve = curve;
+        return [pathA, pathB];
+
     }
 
     reset() {
         console.log('resetting...');
 
-        this.truck.position.z = -this.routeParameters.groundHeight / 2;
-        this.truck.position.x = 0;
-        this.truck.position.y = 1.5;
+        this.truck.position.z = this.curve[1].z;
+        this.truck.position.x = this.curve[1].x;
+        this.truck.position.y = this.curve[1].y + 12.5;
         this.truck.mesh.rotationQuaternion = new Quaternion();
 
         this.truck.currentVelocity.setAll(0);
@@ -185,8 +215,8 @@ class SpaceTruckerDrivingScreen {
         let { forward, currentAcceleration, currentVelocity } = this.truck;
         let left = Vector3.Cross(forward, this.followCamera.upVector);
         currentVelocity.addInPlace(left.scale(currentAcceleration));
-        
-        this.truck.mesh.rotate(Axis.Y, -currentAcceleration/Scalar.TwoPi/60, Space.LOCAL);
+
+        this.truck.mesh.rotate(Axis.Y, -currentAcceleration / Scalar.TwoPi / 60, Space.LOCAL);
     }
 
     MOVE_RIGHT(state) {
@@ -194,7 +224,7 @@ class SpaceTruckerDrivingScreen {
         let right = Vector3.Cross(forward, this.followCamera.upVector.negate());
         currentVelocity.addInPlace(right.scale(currentAcceleration));
 
-        this.truck.mesh.rotate(Axis.Y, currentAcceleration/Scalar.TwoPi/60, Space.LOCAL);
+        this.truck.mesh.rotate(Axis.Y, currentAcceleration / Scalar.TwoPi / 60, Space.LOCAL);
     }
 
     GO_BACK() {
