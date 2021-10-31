@@ -141,21 +141,21 @@ class SpaceTruckerDrivingScreen {
             return (typeof p !== 'Vector3' ? new Vector3(p.position.x, p.position.y, p.position.z) : p).scaleInPlace(7);
         });
 
-        let path3d = new Path3D(pathPoints, null, true, true);
+        let path3d = new Path3D(pathPoints, new Vector3(0, 1, 0), false,true);
 
         let curve = path3d.getCurve();
         let displayLines = MeshBuilder.CreateLines("displayLines", { points: curve }, this.scene);
-        let pathA = [new Vector3(0, 0, 0)];
-        let pathB = [new Vector3(0, 0, 0)];
+        let pathA = [];
+        let pathB = [];
         for (let i = 0; i < curve.length; i++) {
             let p = curve[i];
             const { x, y, z, w } = routeData[i].rotationQuaternion;
             const rotation = new Quaternion(x, y, z, w);
             const vel = routeData[i].velocity;
 
-            let pA = new Vector3(p.x + 20, 0, p.z + 20);
+            let pA = new Vector3(p.x + 20, p.y, p.z + 20);
             //    pA.rotateByQuaternionToRef(rotation, pA);
-            let pB = new Vector3(p.x - 20, 0, p.z - 20);
+            let pB = new Vector3(p.x - 20, p.y, p.z - 20);
             //     pB.rotateByQuaternionToRef(rotation, pB);
             pathA.push(pA);
             pathB.push(pB);
@@ -163,7 +163,7 @@ class SpaceTruckerDrivingScreen {
 
         this.path = path3d;
         this.curve = curve;
-        return [pathA, pathB];
+        return [pathB, curve, pathA];
 
     }
 
