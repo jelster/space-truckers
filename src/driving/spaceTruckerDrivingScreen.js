@@ -12,34 +12,31 @@ import { CreateBox } from "@babylonjs/core/Meshes/Builders/boxBuilder";
 import { CreateSphere } from "@babylonjs/core/Meshes/Builders/sphereBuilder";
 import { CreateCylinder } from "@babylonjs/core/Meshes/Builders/cylinderBuilder";
 import { CreateTorus } from "@babylonjs/core/Meshes/Builders/torusBuilder";
-import { CreateRibbon } from "@babylonjs/core/Meshes/Builders/ribbonBuilder";
-import { CreateLines } from "@babylonjs/core/Meshes/Builders/linesBuilder";
-
-import { SceneLoader } from "@babylonjs/core/Loading/sceneLoader";
+import { Axis } from "@babylonjs/core/Maths/math.axis";
+import { Scalar } from "@babylonjs/core/Maths/math.scalar";
+import { Space } from "@babylonjs/core/"; // TODO: fix import
+import { setAndStartTimer } from "@babylonjs/core/Misc";
 import { ArcRotateCamera } from "@babylonjs/core/Cameras/arcRotateCamera";
 import { GridMaterial } from "@babylonjs/materials/grid";
 import { Quaternion } from "@babylonjs/core/Maths/math";
 import { Path3D } from "@babylonjs/core/Maths/math.path";
 import { ActionManager } from "@babylonjs/core/Actions/actionManager";
 import { ExecuteCodeAction } from "@babylonjs/core/Actions/directActions";
-
-
 import { PhysicsHelper } from "@babylonjs/core/Physics/physicsHelper";
 import { PhysicsImpostor } from "@babylonjs/core/Physics/physicsImpostor";
 import { AmmoJSPlugin } from "@babylonjs/core/Physics/Plugins/ammoJSPlugin";
 import "@babylonjs/core/Physics/physicsEngineComponent";
-import { ammoModule, ammoReadyPromise } from "../externals/ammoWrapper";
+import "@babylonjs/core/Meshes/Builders/ribbonBuilder";
+import "@babylonjs/core/Meshes/Builders/linesBuilder";
 
+import { ammoModule, ammoReadyPromise } from "../externals/ammoWrapper";
 import { screenConfig, truckSetup } from "./gameData.js";
 import SpaceTruckerInputProcessor from "../spaceTruckerInputProcessor.js";
 import Truck from "./truck.js";
 
 import initializeGui from "./driving-gui.js";
 import initializeEnvironment from "./environment.js";
-import { Axis } from "@babylonjs/core/Maths/math.axis";
-import { Scalar } from "@babylonjs/core/Maths/math.scalar";
-import { Space } from "@babylonjs/core/"; // TODO: fix import
-import { setAndStartTimer } from "@babylonjs/core/Misc";
+
 
 const { GUI_MASK, SCENE_MASK } = screenConfig;
 const { followCamSetup } = screenConfig;
@@ -91,8 +88,6 @@ class SpaceTruckerDrivingScreen {
         this.followCamera.layerMask = SCENE_MASK;
 
         this.scene.activeCameras.push(this.followCamera);
-        
-
     }
 
     async initialize(routeData) {
@@ -101,17 +96,8 @@ class SpaceTruckerDrivingScreen {
         this.ground = MeshBuilder.CreateRibbon("road", {
             pathArray: paths,
         }, this.scene);
-        
-        var groundMat = this.groundMaterial = new GridMaterial("roadMat", this.scene);        
 
-        // this.ground = MeshBuilder.CreateGround("ground", {
-        //     width: this.routeParameters.groundWidth,
-        //     height: this.routeParameters.groundHeight,
-        //     subdivisionsX: 64,
-        //     subdivisionsY: 64,
-        //     updateable: true
-        // }, this.scene);
-
+        var groundMat = this.groundMaterial = new GridMaterial("roadMat", this.scene);
         this.ground.layerMask = SCENE_MASK;
         this.ground.material = groundMat;
 
@@ -162,10 +148,9 @@ class SpaceTruckerDrivingScreen {
 
     calculateRouteParameters(routeData) {
         let pathPoints = routeData.map(p => {
-            return (typeof p !== 'Vector3' ? new Vector3(p.position.x, p.position.y, p.position.z) : p).scaleInPlace(7);
+            return (typeof p.position !== 'Vector3' ? new Vector3(p.position.x, p.position.y, p.position.z) : p).scaleInPlace(7);
         });
-
-        let path3d = new Path3D(pathPoints, new Vector3(0, 1, 0), false, true);
+        let path3d = new Path3D(pathPoints, new Vector3(0, 1, 0), false, false);
 
         let curve = path3d.getCurve();
         let displayLines = MeshBuilder.CreateLines("displayLines", { points: curve }, this.scene);
@@ -173,10 +158,6 @@ class SpaceTruckerDrivingScreen {
         let pathB = [];
         for (let i = 0; i < curve.length; i++) {
             let p = curve[i];
-            const { x, y, z, w } = routeData[i].rotationQuaternion;
-            const rotation = new Quaternion(x, y, z, w);
-            const vel = routeData[i].velocity;
-
             let pA = new Vector3(p.x + 20, p.y, p.z + 20);
             //    pA.rotateByQuaternionToRef(rotation, pA);
             let pB = new Vector3(p.x - 20, p.y, p.z - 20);
