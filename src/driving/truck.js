@@ -28,7 +28,7 @@ class Truck extends BaseGameObject {
         imported.meshes[0].dispose();
 
         truck.mesh = truckMesh;
-        truck.physicsImpostor = new PhysicsImpostor(truckMesh, PhysicsImpostor.BoxImpostor, physicsConfig, scene);
+        truck.physicsImpostor = new PhysicsImpostor(truckMesh, PhysicsImpostor.BoxImpostor, Object.assign({},physicsConfig), scene);
         engine.hideLoadingUI();
         return truck;
     }

@@ -20,6 +20,8 @@ import { ArcRotateCamera } from "@babylonjs/core/Cameras/arcRotateCamera";
 import { GridMaterial } from "@babylonjs/materials/grid";
 import { Quaternion } from "@babylonjs/core/Maths/math";
 import { Path3D } from "@babylonjs/core/Maths/math.path";
+import { ActionManager } from "@babylonjs/core/Actions/actionManager";
+import { ExecuteCodeAction } from "@babylonjs/core/Actions/directActions";
 
 
 import { PhysicsHelper } from "@babylonjs/core/Physics/physicsHelper";
@@ -37,6 +39,7 @@ import initializeEnvironment from "./environment.js";
 import { Axis } from "@babylonjs/core/Maths/math.axis";
 import { Scalar } from "@babylonjs/core/Maths/math.scalar";
 import { Space } from "@babylonjs/core/"; // TODO: fix import
+import { setAndStartTimer } from "@babylonjs/core/Misc";
 
 const { GUI_MASK, SCENE_MASK } = screenConfig;
 const { followCamSetup } = screenConfig;
@@ -65,6 +68,7 @@ class SpaceTruckerDrivingScreen {
     routeData;
     path;
     curve = [];
+    killMesh;
 
     isLoaded = false;
     routeParameters = { groundHeight: 0, groundWidth: 50, pathLength: 0, };
@@ -87,6 +91,7 @@ class SpaceTruckerDrivingScreen {
         this.followCamera.layerMask = SCENE_MASK;
 
         this.scene.activeCameras.push(this.followCamera);
+        
 
     }
 
@@ -96,7 +101,8 @@ class SpaceTruckerDrivingScreen {
         this.ground = MeshBuilder.CreateRibbon("road", {
             pathArray: paths,
         }, this.scene);
-        var groundMat = this.groundMaterial = new GridMaterial("roadMat", this.scene);
+        
+        var groundMat = this.groundMaterial = new GridMaterial("roadMat", this.scene);        
 
         // this.ground = MeshBuilder.CreateGround("ground", {
         //     width: this.routeParameters.groundWidth,
@@ -120,6 +126,8 @@ class SpaceTruckerDrivingScreen {
         this.truck = await tP;
         this.gui = await gP;
 
+        this.setupKillMesh();
+
         this.ground.physicsImpostor = new PhysicsImpostor(
             this.ground,
             PhysicsImpostor.BoxImpostor,
@@ -136,12 +144,28 @@ class SpaceTruckerDrivingScreen {
         this.isLoaded = true;
     }
 
+    setupKillMesh() {
+        this.killMesh = MeshBuilder.CreatePlane("killMesh", { size: 50000 }, this.scene);
+        this.killMesh.rotation.x = Math.PI / 2;
+        this.killMesh.position.y = -150;
+        this.killMesh.layerMask = 0x0;
+
+        let killAm = new ActionManager(this.scene);
+        let zact = new ExecuteCodeAction({
+            trigger: ActionManager.OnIntersectionEnterTrigger,
+            parameter: { mesh: this.truck.mesh }
+        }, aev => this.killTruck());
+
+        killAm.registerAction(zact);
+        this.killMesh.actionManager = killAm;
+    }
+
     calculateRouteParameters(routeData) {
         let pathPoints = routeData.map(p => {
             return (typeof p !== 'Vector3' ? new Vector3(p.position.x, p.position.y, p.position.z) : p).scaleInPlace(7);
         });
 
-        let path3d = new Path3D(pathPoints, new Vector3(0, 1, 0), false,true);
+        let path3d = new Path3D(pathPoints, new Vector3(0, 1, 0), false, true);
 
         let curve = path3d.getCurve();
         let displayLines = MeshBuilder.CreateLines("displayLines", { points: curve }, this.scene);
@@ -178,6 +202,16 @@ class SpaceTruckerDrivingScreen {
         this.truck.currentVelocity.setAll(0);
         this.truck.physicsImpostor.mass = truckSetup.physicsConfig.mass;
         this.truck.physicsImpostor.setLinearVelocity(this.truck.currentVelocity);
+    }
+
+    killTruck() {
+        this.truck.physicsImpostor.mass = 0;
+        this.truck.physicsImpostor.setLinearVelocity(Vector3.Zero());
+        setAndStartTimer({
+            contextObservable: this.scene.onAfterRenderObservable,
+            timeout: 3000,
+            onEnded: () => this.reset()
+        });
     }
 
     update(deltaTime) {
