@@ -9,6 +9,7 @@ const { SCENE_MASK } = screenConfig;
 class Truck extends BaseGameObject {
     currentVelocity = truckSetup.initialVelocity.clone();
     currentAcceleration = truckSetup.maxAcceleration;
+    currentAngularVelocity = Vector3.Zero();
 
     static async loadTruck(scene) {
         const { modelUrl, physicsConfig } = truckSetup;
@@ -47,8 +48,9 @@ class Truck extends BaseGameObject {
 
         // dampen any tendencies to pitch, roll, or yaw from physics effects
         let angVel = this.physicsImpostor.getAngularVelocity();
-        angVel.scaleInPlace(0.99);
+        angVel.addInPlace(this.currentAngularVelocity).scaleInPlace(0.99);
         this.physicsImpostor.setAngularVelocity(angVel);
+        this.currentAngularVelocity.setAll(0);
 
     }
 }

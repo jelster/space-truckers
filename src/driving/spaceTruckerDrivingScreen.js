@@ -48,6 +48,9 @@ const actionList = [
     { action: 'GO_BACK', shouldBounce: () => true },
     { action: 'MOVE_LEFT', shouldBounce: () => false },
     { action: 'MOVE_RIGHT', shouldBounce: () => false },
+    { action: 'MOVE_IN', shouldBounce: () => false },
+    { action: 'MOVE_OUT', shouldBounce: () => false }
+
     //  { action: 'PAUSE', shouldBounce: () => true },
 ];
 class SpaceTruckerDrivingScreen {
@@ -92,9 +95,10 @@ class SpaceTruckerDrivingScreen {
 
     async initialize(routeData) {
         this.routeData = routeData;
-        let paths = this.calculateRouteParameters(routeData);
+        let route = this.calculateRouteParameters(routeData);
         this.ground = MeshBuilder.CreateRibbon("road", {
-            pathArray: paths,
+            pathArray: route.paths,
+            sideOrientation: Mesh.DOUBLESIDE
         }, this.scene);
 
         var groundMat = this.groundMaterial = new GridMaterial("roadMat", this.scene);
@@ -147,37 +151,51 @@ class SpaceTruckerDrivingScreen {
     }
 
     calculateRouteParameters(routeData) {
+        const { routeDataScalingFactor } = screenConfig;
         let pathPoints = routeData.map(p => {
-            return (typeof p.position !== 'Vector3' ? new Vector3(p.position.x, p.position.y, p.position.z) : p).scaleInPlace(7);
+            return {
+                position: (typeof p.position !== 'Vector3' ? new Vector3(p.position.x, p.position.y, p.position.z) : p.position).scaleInPlace(routeDataScalingFactor),
+                gravity: (typeof p.gravity !== 'Vector3' ? new Vector3(p.gravity.x, p.gravity.y, p.gravity.z) : p.gravity).scaleInPlace(routeDataScalingFactor),
+                velocity: (typeof p.velocity !== 'Vector3' ? new Vector3(p.velocity.x, p.velocity.y, p.velocity.z) : p.velocity).scaleInPlace(routeDataScalingFactor),
+            };
         });
-        let path3d = new Path3D(pathPoints, new Vector3(0, 1, 0), false, false);
+
+        let path3d = new Path3D(pathPoints.map(p => p.position), new Vector3(0, 1, 0), false, false);
 
         let curve = path3d.getCurve();
         let displayLines = MeshBuilder.CreateLines("displayLines", { points: curve }, this.scene);
         let pathA = [];
         let pathB = [];
-        for (let i = 0; i < curve.length; i++) {
-            let p = curve[i];
-            let pA = new Vector3(p.x + 20, p.y, p.z + 20);
+        let pathC = [];
+        let pathD = [];
+        for (let i = 0; i < pathPoints.length; i++) {
+            const { position, gravity, velocity } = pathPoints[i];
+            let p = position;
+            let speed = velocity.length() / routeDataScalingFactor;
+            let pA = new Vector3(p.x + speed, p.y - speed, p.z + speed);
             //    pA.rotateByQuaternionToRef(rotation, pA);
-            let pB = new Vector3(p.x - 20, p.y, p.z - 20);
+            let pB = new Vector3(p.x - speed, p.y - speed, p.z - speed);
             //     pB.rotateByQuaternionToRef(rotation, pB);
+            let pC = pB.clone().addInPlaceFromFloats(0, speed * 2, 0);
+            let pD = pA.clone().addInPlaceFromFloats(0, speed * 2, 0);
             pathA.push(pA);
             pathB.push(pB);
+            pathC.push(pC);
+            pathD.push(pD);
         }
 
         this.path = path3d;
         this.curve = curve;
-        return [pathB, curve, pathA];
+        return { paths: [pathB, pathC, pathD, pathA, pathB], path3d, displayLines };
 
     }
 
     reset() {
         console.log('resetting...');
 
-        this.truck.position.z = this.curve[1].z;
-        this.truck.position.x = this.curve[1].x;
-        this.truck.position.y = this.curve[1].y + 12.5;
+        this.truck.position.z = this.curve[0].z;
+        this.truck.position.x = this.curve[0].x;
+        this.truck.position.y = this.curve[0].y;
         this.truck.mesh.rotationQuaternion = new Quaternion();
 
         this.truck.currentVelocity.setAll(0);
@@ -227,19 +245,27 @@ class SpaceTruckerDrivingScreen {
     }
 
     MOVE_LEFT(state) {
-        let { forward, currentAcceleration, currentVelocity } = this.truck;
-        let left = Vector3.Cross(forward, this.followCamera.upVector);
-        currentVelocity.addInPlace(left.scale(currentAcceleration));
-
-        this.truck.mesh.rotate(Axis.Y, -currentAcceleration / Scalar.TwoPi / 60, Space.LOCAL);
+        const { turnSpeedRadians } = truckSetup;
+        let { currentAngularVelocity } = this.truck;
+        currentAngularVelocity.y -= turnSpeedRadians;
     }
 
     MOVE_RIGHT(state) {
-        let { forward, currentAcceleration, currentVelocity } = this.truck;
-        let right = Vector3.Cross(forward, this.followCamera.upVector.negate());
-        currentVelocity.addInPlace(right.scale(currentAcceleration));
+        const { turnSpeedRadians } = truckSetup;
+        let { currentAngularVelocity } = this.truck;
+        currentAngularVelocity.y += turnSpeedRadians;
+    }
 
-        this.truck.mesh.rotate(Axis.Y, currentAcceleration / Scalar.TwoPi / 60, Space.LOCAL);
+    MOVE_IN(state) {
+        let up = this.truck.mesh.up;
+        let currAccel = this.truck.currentAcceleration;
+        this.truck.currentVelocity.addInPlace(up.scale(currAccel));
+    }
+
+    MOVE_OUT(state) {
+        let up = this.truck.mesh.up;
+        let currAccel = this.truck.currentAcceleration;
+        this.truck.currentVelocity.addInPlace(up.scale(currAccel).negate());
     }
 
     GO_BACK() {
