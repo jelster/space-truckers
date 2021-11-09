@@ -95,7 +95,7 @@ class SpaceTruckerDrivingScreen {
 
     async initialize(routeData) {
         this.routeData = routeData;
-        let route = this.calculateRouteParameters(routeData);
+        let route = this.route = this.calculateRouteParameters(routeData);
         this.ground = MeshBuilder.CreateRibbon("road", {
             pathArray: route.paths,
             sideOrientation: Mesh.DOUBLESIDE
@@ -107,7 +107,7 @@ class SpaceTruckerDrivingScreen {
 
         await ammoReadyPromise;
         let plugin = new AmmoJSPlugin(true, ammoModule);
-        this.scene.enablePhysics(new Vector3(0, -9.81, 0), plugin);
+        this.scene.enablePhysics(new Vector3(0, 0, 0), plugin);
 
         initializeEnvironment(this);
         let tP = Truck.loadTruck(this.scene);
@@ -120,7 +120,7 @@ class SpaceTruckerDrivingScreen {
 
         this.ground.physicsImpostor = new PhysicsImpostor(
             this.ground,
-            PhysicsImpostor.BoxImpostor,
+            PhysicsImpostor.ConvexHullImpostor,
             { mass: 0, restitution: 0.5 },
             this.scene);
 
@@ -184,33 +184,32 @@ class SpaceTruckerDrivingScreen {
             pathD.push(pD);
         }
 
-        this.path = path3d;
-        this.curve = curve;
-        return { paths: [pathB, pathC, pathD, pathA, pathB], path3d, displayLines };
+        return { paths: [pathB, pathC, pathD, pathA, pathB], pathPoints, path3d, displayLines };
 
     }
 
     reset() {
         console.log('resetting...');
+        const point = this.route.path3d.getPointAt(0);
+        const tang = this.route.path3d.getTangentAt(0);
+        this.truck.mesh.position.copyFrom(point);
+        this.truck.currentVelocity.copyFrom(this.route.pathPoints[0].velocity);
+        this.truck.currentAngularVelocity.setAll(0);
+        this.truck.physicsImpostor.setLinearVelocity(Vector3.Zero());
+        
+        this.truck.mesh.rotationQuaternion = Quaternion.FromLookDirectionRH(tang, this.followCamera.upVector);
 
-        this.truck.position.z = this.curve[0].z;
-        this.truck.position.x = this.curve[0].x;
-        this.truck.position.y = this.curve[0].y;
-        this.truck.mesh.rotationQuaternion = new Quaternion();
-
-        this.truck.currentVelocity.setAll(0);
-        this.truck.physicsImpostor.mass = truckSetup.physicsConfig.mass;
-        this.truck.physicsImpostor.setLinearVelocity(this.truck.currentVelocity);
+        
+   // this.truck.physicsImpostor.setAngularVelocity(this.truck.currentAngularVelocity);
     }
 
     killTruck() {
-        this.truck.physicsImpostor.mass = 0;
+        
+        this.truck.currentVelocity.setAll(0);
+        this.truck.currentAngularVelocity.setAll(0);
         this.truck.physicsImpostor.setLinearVelocity(Vector3.Zero());
-        setAndStartTimer({
-            contextObservable: this.scene.onAfterRenderObservable,
-            timeout: 3000,
-            onEnded: () => this.reset()
-        });
+        this.truck.physicsImpostor.setAngularVelocity(Vector3.Zero());
+        this.reset();
     }
 
     update(deltaTime) {

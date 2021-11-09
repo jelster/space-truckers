@@ -48,7 +48,7 @@ class Truck extends BaseGameObject {
 
         // dampen any tendencies to pitch, roll, or yaw from physics effects
         let angVel = this.physicsImpostor.getAngularVelocity();
-        angVel.addInPlace(this.currentAngularVelocity).scaleInPlace(0.99);
+        angVel.addInPlace(this.currentAngularVelocity).scaleInPlace(0.986);
         this.physicsImpostor.setAngularVelocity(angVel);
         this.currentAngularVelocity.setAll(0);
 
