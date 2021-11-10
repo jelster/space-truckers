@@ -135,19 +135,14 @@ class SpaceTruckerDrivingScreen {
     }
 
     setupKillMesh() {
-        this.killMesh = MeshBuilder.CreatePlane("killMesh", { size: 50000 }, this.scene);
-        this.killMesh.rotation.x = Math.PI / 2;
-        this.killMesh.position.y = -150;
-        this.killMesh.layerMask = 0x0;
-
         let killAm = new ActionManager(this.scene);
         let zact = new ExecuteCodeAction({
-            trigger: ActionManager.OnIntersectionEnterTrigger,
+            trigger: ActionManager.OnIntersectionExitTrigger,
             parameter: { mesh: this.truck.mesh }
         }, aev => this.killTruck());
 
         killAm.registerAction(zact);
-        this.killMesh.actionManager = killAm;
+        this.ground.actionManager = killAm;
     }
 
     calculateRouteParameters(routeData) {
@@ -189,26 +184,32 @@ class SpaceTruckerDrivingScreen {
     }
 
     reset() {
+        const { path3d, pathPoints } = this.route;
+        const { currentVelocity, currentAngularVelocity, physicsImpostor, mesh } = this.truck;
+
         console.log('resetting...');
-        const point = this.route.path3d.getPointAt(0);
-        const tang = this.route.path3d.getTangentAt(0);
-        this.truck.mesh.position.copyFrom(point);
-        this.truck.currentVelocity.copyFrom(this.route.pathPoints[0].velocity);
-        this.truck.currentAngularVelocity.setAll(0);
-        this.truck.physicsImpostor.setLinearVelocity(Vector3.Zero());
+        const point = path3d.getPointAt(0);
+        const tang = path3d.getTangentAt(0);
         
-        this.truck.mesh.rotationQuaternion = Quaternion.FromLookDirectionRH(tang, this.followCamera.upVector);
+        currentVelocity.copyFrom(pathPoints[0].velocity);
+        currentAngularVelocity.setAll(0);
+
+        mesh.position.copyFrom(point);
+        physicsImpostor.setLinearVelocity(Vector3.Zero());
+        
+        mesh.rotationQuaternion = Quaternion.FromLookDirectionRH(tang, this.followCamera.upVector);
+        physicsImpostor.setAngularVelocity(Vector3.Zero());
 
         
    // this.truck.physicsImpostor.setAngularVelocity(this.truck.currentAngularVelocity);
     }
 
     killTruck() {
-        
-        this.truck.currentVelocity.setAll(0);
-        this.truck.currentAngularVelocity.setAll(0);
-        this.truck.physicsImpostor.setLinearVelocity(Vector3.Zero());
-        this.truck.physicsImpostor.setAngularVelocity(Vector3.Zero());
+        const { currentVelocity, currentAngularVelocity, physicsImpostor } = this.truck;
+        currentVelocity.setAll(0);
+        currentAngularVelocity.setAll(0);
+        physicsImpostor.setLinearVelocity(Vector3.Zero());
+        physicsImpostor.setAngularVelocity(Vector3.Zero());
         this.reset();
     }
 
