@@ -73,48 +73,56 @@ class SpaceTruckerDrivingScreen {
     isLoaded = false;
     routeParameters = { groundHeight: 0, groundWidth: 50, pathLength: 0, };
 
-    constructor(engine, inputManager) {
-
+    constructor(engine, routeData, inputManager) {
+        this.routeData = routeData;
         this.engine = engine;
         this.scene = new Scene(engine);
-        this.inputManager = inputManager;
-        this.actionProcessor = new SpaceTruckerInputProcessor(this, inputManager, actionList);
-        this.scene.clearColor = new Color3(0, 0, 0);
         this.cameraDolly = new TransformNode("cameraDolly", this.scene);
-        this.followCamera = new ArcRotateCamera("followCam", 4.712, 1.078, 80, Vector3.Zero(), this.scene);
+        
+        this.scene.clearColor = new Color3(0, 0, 0);
 
+        this.inputManager = inputManager;
+        this.actionProcessor = new SpaceTruckerInputProcessor(this, inputManager, actionList);        
+        
+        this.followCamera = new ArcRotateCamera("followCam", 4.712, 1.078, 80, Vector3.Zero(), this.scene);
         for (var k in followCamSetup) {
             this.followCamera[k] = followCamSetup[k];
         }
-
         this.followCamera.viewport = new Viewport(0, 0, 1, 1);
         this.followCamera.layerMask = SCENE_MASK;
-
+        //this.followCamera.attachControl(undefined, true);
         this.scene.activeCameras.push(this.followCamera);
+
+        initializeEnvironment(this);
+        this.route = this.calculateRouteParameters(this.routeData);
+        this.scene.onReadyObservable.addOnce(async () => {
+            await this.initialize();
+            let gP = initializeGui(this);
+            this.gui = await gP;
+            this.gui.sceneObserver = this.scene.onAfterRenderObservable.add(() => this.updateGui());
+        });
     }
 
-    async initialize(routeData) {
-        this.routeData = routeData;
-        let route = this.route = this.calculateRouteParameters(routeData);
-        this.ground = MeshBuilder.CreateRibbon("road", {
-            pathArray: route.paths,
-            sideOrientation: Mesh.DOUBLESIDE
-        }, this.scene);
-
-        var groundMat = this.groundMaterial = new GridMaterial("roadMat", this.scene);
-        this.ground.layerMask = SCENE_MASK;
-        this.ground.material = groundMat;
-
+    async initialize() {
         await ammoReadyPromise;
         let plugin = new AmmoJSPlugin(true, ammoModule);
         this.scene.enablePhysics(new Vector3(0, 0, 0), plugin);
-
-        initializeEnvironment(this);
+        
+        const { route } = this;
+        
         let tP = Truck.loadTruck(this.scene);
-        let gP = initializeGui(this);
-
         this.truck = await tP;
-        this.gui = await gP;
+        this.cameraDolly.parent = this.truck.mesh;
+        this.followCamera.parent = this.cameraDolly;
+        var groundMat = this.groundMaterial = new GridMaterial("roadMat", this.scene);
+        this.ground = MeshBuilder.CreateRibbon("road", {
+            pathArray: route.paths,
+            sideOrientation: Mesh.BACKSIDE
+        }, this.scene);
+
+        this.ground.layerMask = SCENE_MASK;
+        this.ground.material = groundMat;
+        this.ground.visibility = 0.67;
 
         this.setupKillMesh();
 
@@ -124,14 +132,9 @@ class SpaceTruckerDrivingScreen {
             { mass: 0, restitution: 0.5 },
             this.scene);
 
-        this.cameraDolly.position.z = this.truck.position.z + 30;
-        this.cameraDolly.position.y = 10;
-        this.cameraDolly.parent = this.truck.mesh;
-
-        this.gui.sceneObserver = this.scene.onAfterRenderObservable.add(() => this.updateGui());
-        this.followCamera.lockedTarget = this.cameraDolly;
-        this.followCamera.attachControl(undefined, true);
         this.isLoaded = true;
+        this.reset();
+        //this.followCamera.lockedTarget = this.truck.mesh;
     }
 
     setupKillMesh() {
@@ -149,9 +152,12 @@ class SpaceTruckerDrivingScreen {
         const { routeDataScalingFactor } = screenConfig;
         let pathPoints = routeData.map(p => {
             return {
-                position: (typeof p.position !== 'Vector3' ? new Vector3(p.position.x, p.position.y, p.position.z) : p.position).scaleInPlace(routeDataScalingFactor),
-                gravity: (typeof p.gravity !== 'Vector3' ? new Vector3(p.gravity.x, p.gravity.y, p.gravity.z) : p.gravity).scaleInPlace(routeDataScalingFactor),
-                velocity: (typeof p.velocity !== 'Vector3' ? new Vector3(p.velocity.x, p.velocity.y, p.velocity.z) : p.velocity).scaleInPlace(routeDataScalingFactor),
+                position: (typeof p.position !== 'Vector3' ? new Vector3(p.position.x, p.position.y, p.position.z) : p.position)
+                    .scaleInPlace(routeDataScalingFactor),
+                gravity: (typeof p.gravity !== 'Vector3' ? new Vector3(p.gravity.x, p.gravity.y, p.gravity.z) : p.gravity)
+                    .scaleInPlace(routeDataScalingFactor),
+                velocity: (typeof p.velocity !== 'Vector3' ? new Vector3(p.velocity.x, p.velocity.y, p.velocity.z) : p.velocity)
+                    .scaleInPlace(routeDataScalingFactor),
             };
         });
 
@@ -190,18 +196,18 @@ class SpaceTruckerDrivingScreen {
         console.log('resetting...');
         const point = path3d.getPointAt(0);
         const tang = path3d.getTangentAt(0);
-        
+
         currentVelocity.copyFrom(pathPoints[0].velocity);
         currentAngularVelocity.setAll(0);
 
         mesh.position.copyFrom(point);
         physicsImpostor.setLinearVelocity(Vector3.Zero());
-        
+
         mesh.rotationQuaternion = Quaternion.FromLookDirectionRH(tang, this.followCamera.upVector);
         physicsImpostor.setAngularVelocity(Vector3.Zero());
 
-        
-   // this.truck.physicsImpostor.setAngularVelocity(this.truck.currentAngularVelocity);
+
+        // this.truck.physicsImpostor.setAngularVelocity(this.truck.currentAngularVelocity);
     }
 
     killTruck() {
@@ -218,8 +224,7 @@ class SpaceTruckerDrivingScreen {
         this.actionProcessor?.update();
 
         if (this.isLoaded) {
-
-            this.truck.update(deltaTime);
+            this.truck.update(dT);
         }
     }
 

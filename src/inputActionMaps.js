@@ -1,8 +1,8 @@
 const inputControlsMap = {
     /* Keyboard Mappings */
     W: 'MOVE_UP', w: 'MOVE_UP', 87: 'MOVE_UP',
-    S: 'MOVE_UP', s: 'MOVE_DOWN', 83: 'MOVE_DOWN',
-    A: 'MOVE_UP', a: 'MOVE_LEFT', 65: 'MOVE_LEFT',
+    S: 'MOVE_DOWN', s: 'MOVE_DOWN', 83: 'MOVE_DOWN',
+    A: 'MOVE_LEFT', a: 'MOVE_LEFT', 65: 'MOVE_LEFT',
     D: 'MOVE_RIGHT', d: 'MOVE_RIGHT', 68: 'MOVE_RIGHT',
     Q: 'ROTATE_LEFT', q: 'ROTATE_LEFT',
     E: 'ROTATE_RIGHT', e: 'ROTATE_RIGHT',
@@ -11,7 +11,7 @@ const inputControlsMap = {
     Enter: 'ACTIVATE', Return: 'ACTIVATE', 13: 'ACTIVATE',  Space: 'ACTIVATE', 32: 'ACTIVATE', ' ': 'ACTIVATE',
     Shift: 'MOVE_IN',
     Control: 'MOVE_OUT',
-    //ArrowUp: 'MOVE_UP',
+   // ArrowUp: 'MOVE_UP',
    // ArrowDown: 'MOVE_DOWN',
    // ArrowLeft: 'MOVE_LEFT',
    // ArrowRight: 'MOVE_RIGHT',

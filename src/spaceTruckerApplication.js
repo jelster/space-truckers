@@ -85,9 +85,6 @@ class SpaceTruckerApplication {
             this.goToDrivingState(routeData);
         });
 
-        this._engine.loadingUIText = "Loading Driving Screen...";
-        this._drivingScene = new SpaceTruckerDrivingScreen(this._engine, this.inputManager);
-
 
     }
 
@@ -167,19 +164,16 @@ class SpaceTruckerApplication {
     }
 
     goToDrivingState(routeData) {
+        this._engine.displayLoadingUI();
         routeData = routeData ?? this._routePlanningScene.routePath;
         this._currentScene?.actionProcessor?.detachControl();
-        // create new driving scene with route data
-
-        // set current scene to driving scene       
+        this._engine.loadingUIText = "Loading Driving Screen...";
+        this._drivingScene = new SpaceTruckerDrivingScreen(this._engine, routeData, this.inputManager);     
         this._currentScene = this._drivingScene;
+        this._routePlanningScene.dispose();
+        this._routePlanningScene = null;
         this.moveNextAppState(AppStates.DRIVING);
-        this._engine.displayLoadingUI();
-        this._drivingScene.initialize(routeData).then(() => {
-            this._currentScene.actionProcessor.attachControl();
-            this._engine.hideLoadingUI();
-            this._drivingScene.reset();
-        });
+        this._currentScene.actionProcessor.attachControl();
 
     }
 

@@ -10,11 +10,11 @@ const screenConfig = {
     guiViewportSize: 4.96,
     routeDataScalingFactor: 5.0,
     followCamSetup: {
-        lowerAlphaLimit: Math.PI,
-        upperAlphaLimit: 5.600,
-        lowerBetaLimit: 0,
-        upperBetaLimit: 1.5000,
-        lowerRadiusLimit: 25.0,
+        lowerAlphaLimit: -1.25,
+        upperAlphaLimit: 5.480,
+        lowerBetaLimit: 1.25,
+        upperBetaLimit: 1.6400,
+        lowerRadiusLimit: 80.0,
         upperRadiusLimit: 180.0
     }
 };

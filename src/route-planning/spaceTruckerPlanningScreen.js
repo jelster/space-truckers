@@ -178,7 +178,7 @@ class SpaceTruckerPlanningScreen {
             ));
 
 
-        this.scene.onReadyObservable.add(() => {
+        this.scene.onReadyObservable.addOnce(() => {
             this.ui = new PlanningScreenGui(this);
             this.ui.bindToScreen();
 
@@ -410,6 +410,16 @@ class SpaceTruckerPlanningScreen {
         this.planets.forEach(p => summedForces.addInPlace(p.calculateGravitationalForce(cargoPosition)));
 
         return summedForces;
+    }
+
+    dispose() {
+        this.soundManager.dispose();
+        this.onStateChangeObservable.clear();
+        this.routeAcceptedObservable.clear();
+
+        this.encounterManager.dispose();
+        this.scene.dispose();
+
     }
 }
 

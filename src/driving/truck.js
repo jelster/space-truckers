@@ -19,16 +19,17 @@ class Truck extends BaseGameObject {
         engine.displayLoadingUI("Loading Truck assets");
         let imported = await SceneLoader.ImportMeshAsync("", modelUrl, "", scene);
         let truckMesh = imported.meshes[1];
-        truckMesh.layerMask = SCENE_MASK;
+        
         truckMesh.setParent(null);
+        imported.meshes[0].dispose();
+        truckMesh.layerMask = SCENE_MASK;
         truckMesh.position = new Vector3(0, 0, 0);
         truckMesh.rotation = new Vector3(0, 0, 0);
         truckMesh.scaling.setAll(truckSetup.modelScaling);
-        truckMesh.checkCollisions = true;
+        
         truckMesh.receiveShadows = true;
-        imported.meshes[0].dispose();
-
         truck.mesh = truckMesh;
+        truck.mesh.bakeCurrentTransformIntoVertices();
         truck.physicsImpostor = new PhysicsImpostor(truckMesh, PhysicsImpostor.BoxImpostor, Object.assign({},physicsConfig), scene);
         engine.hideLoadingUI();
         return truck;
