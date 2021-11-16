@@ -60,6 +60,15 @@ class SpaceTruckerSoundManager {
             .then(readyIds => this.onReadyObservable.notifyObservers(readyIds));
     }
 
+    stopAll() {
+        Object.values(this.registeredSounds).forEach(sound => sound.stop());
+    }
+
+    dispose() {
+        this.stopAll();
+        Object.values(this.registeredSounds).forEach(sound => sound.dispose());
+    }
+
      
 }
 

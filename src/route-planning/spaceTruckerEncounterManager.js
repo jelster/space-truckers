@@ -39,7 +39,7 @@ class SpaceTruckerEncounterManager {
     teardown() {
         this.encounterZones.forEach(ez => {
             const zone = ez.zone;
-            zone.unregisterZoneIntersectionTrigger(this.cargo.mesh);
+            zone.unRegisterZoneIntersectionTrigger(this.cargo.mesh);
             zone.onEnterObservable.remove(ez.enterObserver);
             zone.onExitObservable.remove(ez.exitObserver);
             zone.onEncounterObservable.remove(ez.encounterObserver);
@@ -76,7 +76,6 @@ class SpaceTruckerEncounterManager {
 
     dispose() {
         this.teardown();
-        super.dispose();
     }
 
 }
