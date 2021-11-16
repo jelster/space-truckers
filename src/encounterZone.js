@@ -59,7 +59,7 @@ class SpaceTruckerEncounterZone extends BaseGameObject {
     isWithinZone(position) {
         return (position.x >= this.innerBoundary || 
             position.x <= this.outerBoundary) && 
-            (position.z >= this.innerBoundary && 
+            (position.z >= this.innerBoundary || 
             position.z <= this.outerBoundary);
     }
 
@@ -126,6 +126,9 @@ class SpaceTruckerEncounterZone extends BaseGameObject {
             return;
         }
         const zam = this.meshToWatch.actionManager;
+        if (!zam) {
+            return;
+        }
         let zact = this.intersectEnterAction,
             zext = this.intersectExitAction;
         zam.unregisterAction(zext);
