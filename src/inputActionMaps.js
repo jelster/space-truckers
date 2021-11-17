@@ -8,14 +8,14 @@ const inputControlsMap = {
     E: 'ROTATE_RIGHT', e: 'ROTATE_RIGHT',
     P: 'PAUSE', p: 'PAUSE',
     Backspace: 'GO_BACK', Delete: 'GO_BACK', 46: 'GO_BACK', 8: 'GO_BACK',
-    Enter: 'ACTIVATE', Return: 'ACTIVATE', 13: 'ACTIVATE',  Space: 'ACTIVATE', 32: 'ACTIVATE', ' ': 'ACTIVATE',
+    Enter: 'ACTIVATE', Return: 'ACTIVATE', 13: 'ACTIVATE', Space: 'ACTIVATE', 32: 'ACTIVATE', ' ': 'ACTIVATE',
     Shift: 'MOVE_IN',
     Control: 'MOVE_OUT',
-   // ArrowUp: 'MOVE_UP',
-   // ArrowDown: 'MOVE_DOWN',
-   // ArrowLeft: 'MOVE_LEFT',
-   // ArrowRight: 'MOVE_RIGHT',
-    
+    ArrowUp: 'MOVE_UP',
+    ArrowDown: 'MOVE_DOWN',
+    ArrowLeft: 'ROTATE_LEFT',
+    ArrowRight: 'ROTATE_RIGHT',
+
     /*                  */
 
     /* Mouse and Touch Mappings */

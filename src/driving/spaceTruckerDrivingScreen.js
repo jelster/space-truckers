@@ -36,11 +36,22 @@ import Truck from "./truck.js";
 
 import initializeGui from "./driving-gui.js";
 import initializeEnvironment from "./environment.js";
+import SpaceTruckerInputManager from "../spaceTruckerInput";
 
 
 const { GUI_MASK, SCENE_MASK } = screenConfig;
 const { followCamSetup } = screenConfig;
 
+const inputMapPatches = {
+    w: "MOVE_IN", W: "MOVE_IN",
+    s: "MOVE_OUT", S: "MOVE_OUT",
+    ArrowUp: 'MOVE_UP',
+    ArrowDown: 'MOVE_DOWN',
+    ArrowLeft: 'ROTATE_LEFT',
+    ArrowRight: 'ROTATE_RIGHT',
+
+};
+SpaceTruckerInputManager.patchControlMap(inputMapPatches);
 const actionList = [
     // { action: 'ACTIVATE', shouldBounce: () => true },
     { action: 'MOVE_UP', shouldBounce: () => false },
@@ -49,7 +60,9 @@ const actionList = [
     { action: 'MOVE_LEFT', shouldBounce: () => false },
     { action: 'MOVE_RIGHT', shouldBounce: () => false },
     { action: 'MOVE_IN', shouldBounce: () => false },
-    { action: 'MOVE_OUT', shouldBounce: () => false }
+    { action: 'MOVE_OUT', shouldBounce: () => false },
+    { action: 'ROTATE_LEFT', shouldBounce: () => false },
+    { action: 'ROTATE_RIGHT', shouldBounce: () => false },
 
     //  { action: 'PAUSE', shouldBounce: () => true },
 ];
@@ -78,12 +91,12 @@ class SpaceTruckerDrivingScreen {
         this.engine = engine;
         this.scene = new Scene(engine);
         this.cameraDolly = new TransformNode("cameraDolly", this.scene);
-        
+
         this.scene.clearColor = new Color3(0, 0, 0);
 
         this.inputManager = inputManager;
-        this.actionProcessor = new SpaceTruckerInputProcessor(this, inputManager, actionList);        
-        
+        this.actionProcessor = new SpaceTruckerInputProcessor(this, inputManager, actionList);
+
         this.followCamera = new ArcRotateCamera("followCam", 4.712, 1.078, 80, Vector3.Zero(), this.scene);
         for (var k in followCamSetup) {
             this.followCamera[k] = followCamSetup[k];
@@ -107,9 +120,9 @@ class SpaceTruckerDrivingScreen {
         await ammoReadyPromise;
         let plugin = new AmmoJSPlugin(true, ammoModule);
         this.scene.enablePhysics(new Vector3(0, 0, 0), plugin);
-        
+
         const { route } = this;
-        
+
         let tP = Truck.loadTruck(this.scene);
         this.truck = await tP;
         this.cameraDolly.parent = this.truck.mesh;
@@ -117,7 +130,7 @@ class SpaceTruckerDrivingScreen {
         var groundMat = this.groundMaterial = new GridMaterial("roadMat", this.scene);
         this.ground = MeshBuilder.CreateRibbon("road", {
             pathArray: route.paths,
-            sideOrientation: Mesh.BACKSIDE
+            sideOrientation: Mesh.DOUBLESIDE
         }, this.scene);
 
         this.ground.layerMask = SCENE_MASK;
@@ -128,12 +141,12 @@ class SpaceTruckerDrivingScreen {
 
         this.ground.physicsImpostor = new PhysicsImpostor(
             this.ground,
-            PhysicsImpostor.ConvexHullImpostor,
-            { mass: 0, restitution: 0.5 },
+            PhysicsImpostor.MeshImpostor,
+            { mass: 0, restitution: 0.998, friction: 0.5 },
             this.scene);
 
         this.isLoaded = true;
-        this.reset();
+        setTimeout(() => this.reset(), 1000);
         //this.followCamera.lockedTarget = this.truck.mesh;
     }
 
@@ -161,9 +174,10 @@ class SpaceTruckerDrivingScreen {
             };
         });
 
-        let path3d = new Path3D(pathPoints.map(p => p.position), new Vector3(0, 1, 0), false, false);
+        let path3d = new Path3D(pathPoints.map(p => p.position), new Vector3(0, 1, 0), false, true);
 
         let curve = path3d.getCurve();
+        console.log("Curve and Path sample set sizes", curve.length, pathPoints.length);
         let displayLines = MeshBuilder.CreateLines("displayLines", { points: curve }, this.scene);
         let pathA = [];
         let pathB = [];
@@ -233,44 +247,47 @@ class SpaceTruckerDrivingScreen {
     }
 
     dispose() {
+        SpaceTruckerInputManager.unPatchControlMap(inputMapPatches);
         this.scene.onAfterRenderObservable.remove(this.gui.sceneObserver);
         this.scene.dispose();
+
     }
 
     MOVE_UP(state) {
-        let currDir = this.truck.forward;
-        let currAccel = this.truck.currentAcceleration
-        this.truck.currentVelocity.addInPlace(currDir.scale(currAccel));
+        let up = this.truck.mesh.up;
+        let currAccel = this.truck.currentAcceleration;
+        this.truck.currentVelocity.addInPlace(up.scale(currAccel));
     }
 
     MOVE_DOWN(state) {
-        let currDir = this.truck.forward;
-        let currAccel = this.truck.currentAcceleration
-        this.truck.currentVelocity.addInPlace(currDir.scale(currAccel).negate());
+        let up = this.truck.mesh.up;
+        let currAccel = this.truck.currentAcceleration;
+        this.truck.currentVelocity.addInPlace(up.scale(currAccel).negate());
+
     }
 
-    MOVE_LEFT(state) {
+    ROTATE_LEFT(state) {
         const { turnSpeedRadians } = truckSetup;
         let { currentAngularVelocity } = this.truck;
         currentAngularVelocity.y -= turnSpeedRadians;
     }
 
-    MOVE_RIGHT(state) {
+    ROTATE_RIGHT(state) {
         const { turnSpeedRadians } = truckSetup;
         let { currentAngularVelocity } = this.truck;
         currentAngularVelocity.y += turnSpeedRadians;
     }
 
     MOVE_IN(state) {
-        let up = this.truck.mesh.up;
-        let currAccel = this.truck.currentAcceleration;
-        this.truck.currentVelocity.addInPlace(up.scale(currAccel));
+        let currDir = this.truck.forward;
+        let currAccel = this.truck.currentAcceleration
+        this.truck.currentVelocity.addInPlace(currDir.scale(currAccel));
     }
 
     MOVE_OUT(state) {
-        let up = this.truck.mesh.up;
-        let currAccel = this.truck.currentAcceleration;
-        this.truck.currentVelocity.addInPlace(up.scale(currAccel).negate());
+        let currDir = this.truck.forward;
+        let currAccel = this.truck.currentAcceleration
+        this.truck.currentVelocity.addInPlace(currDir.scale(currAccel).negate());
     }
 
     GO_BACK() {

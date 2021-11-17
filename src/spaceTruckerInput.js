@@ -6,8 +6,16 @@ import SpaceTruckerControls from "./inputActionMaps";
 
 
 const controlsMap = SpaceTruckerControls.inputControlsMap;
+let tempControlsMap = {};
 class SpaceTruckerInputManager {
-
+    static patchControlMap(newMaps) {
+        tempControlsMap = Object.assign({}, controlsMap);
+        Object.assign(controlsMap, newMaps);
+    }
+    static unPatchControlMap() {
+        controlsMap = tempControlsMap;
+        tempControlsMap = {};
+    }
     get hasInput() {
         return this._inputKeys?.length > 0;
     }
@@ -102,10 +110,9 @@ class SpaceTruckerInputManager {
     enableKeyboard(scene) {
         const observer = scene.onKeyboardObservable.add((kbInfo) => {
             const key = kbInfo.event.key;
-            const keyMapped = SpaceTruckerControls.inputControlsMap[key];
-
+            const keyMapped = controlsMap[key];
             if (!keyMapped) {
-                console.log("Unmapped key processed by app", kbInfo);
+                console.log("Unmapped key processed by app", key);
                 return;
             }
 

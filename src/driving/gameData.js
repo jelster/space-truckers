@@ -8,21 +8,21 @@ const screenConfig = {
     SCENE_MASK: 0x1,
     radarTextureResolution: 4096,
     guiViewportSize: 4.96,
-    routeDataScalingFactor: 5.0,
+    routeDataScalingFactor: 1.0,
     followCamSetup: {
         lowerAlphaLimit: -1.25,
         upperAlphaLimit: 5.480,
         lowerBetaLimit: 1.25,
         upperBetaLimit: 1.6400,
         lowerRadiusLimit: 80.0,
-        upperRadiusLimit: 180.0
+        upperRadiusLimit: 100.0
     }
 };
 const truckSetup = {
     modelUrl: truckModelUrl,
     modelScaling: 0.02,
     modelName: "semi_truck.1",
-    turnSpeedRadians: Math.PI / 60,
+    turnSpeedRadians: Math.PI / 2,
     maxAcceleration: 9.86,
     initialVelocity: new Vector3(1, 0, 0),
     physicsConfig: {
