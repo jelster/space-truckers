@@ -15,13 +15,12 @@ class Truck extends BaseGameObject {
         const { modelUrl, physicsConfig } = truckSetup;
 
         let truck = new Truck(scene);
-        let engine = scene.getEngine();
-        engine.displayLoadingUI("Loading Truck assets");
         let imported = await SceneLoader.ImportMeshAsync("", modelUrl, "", scene);
         let truckMesh = imported.meshes[1];
         
         truckMesh.setParent(null);
         imported.meshes[0].dispose();
+
         truckMesh.layerMask = SCENE_MASK;
         truckMesh.position = new Vector3(0, 0, 0);
         truckMesh.rotation = new Vector3(0, 0, 0);
@@ -30,14 +29,14 @@ class Truck extends BaseGameObject {
         truckMesh.receiveShadows = true;
         truck.mesh = truckMesh;
         truck.mesh.bakeCurrentTransformIntoVertices();
+        truck.mesh.refreshBoundingInfo();
         truck.physicsImpostor = new PhysicsImpostor(truckMesh, PhysicsImpostor.BoxImpostor, Object.assign({},physicsConfig), scene);
-        engine.hideLoadingUI();
+
         return truck;
     }
 
     constructor(scene) {
         super(scene);
-
     }
 
     update(deltaTime) {
@@ -49,7 +48,7 @@ class Truck extends BaseGameObject {
 
         // dampen any tendencies to pitch, roll, or yaw from physics effects
         let angVel = this.physicsImpostor.getAngularVelocity();
-        angVel.addInPlace(this.currentAngularVelocity).scaleInPlace(0.986);
+        angVel.addInPlace(this.currentAngularVelocity.scaleInPlace(deltaTime)).scaleInPlace(0.986);
         this.physicsImpostor.setAngularVelocity(angVel);
         this.currentAngularVelocity.setAll(0);
 
