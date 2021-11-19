@@ -82,15 +82,18 @@ class SpaceTruckerDrivingScreen {
     path;
     curve = [];
     killMesh;
-
+    encounters = [];
     isLoaded = false;
-    routeParameters = { groundHeight: 0, groundWidth: 50, pathLength: 0, };
-
+    tempObstacleMesh;
     constructor(engine, routeData, inputManager) {
         this.routeData = routeData;
+        this.encounters = routeData.filter(e => e.encounter).map(e => e.encounter);
         this.engine = engine;
         this.scene = new Scene(engine);
         this.cameraDolly = new TransformNode("cameraDolly", this.scene);
+
+        // temporary until the encounter spawner is implemented
+        this.tempObstacleMesh = CreateSphere("tempObstacle", this.scene, { size: new Vector3(1, 1, 1) });
 
         this.scene.clearColor = new Color3(0, 0, 0);
 
@@ -170,6 +173,7 @@ class SpaceTruckerDrivingScreen {
                     .scaleInPlace(routeDataScalingFactor),
                 velocity: (typeof p.velocity !== 'Vector3' ? new Vector3(p.velocity.x, p.velocity.y, p.velocity.z) : p.velocity)
                     .scaleInPlace(routeDataScalingFactor),
+                encounter: p.encounter,
             };
         });
 
@@ -199,9 +203,11 @@ class SpaceTruckerDrivingScreen {
         paths.push(paths[0]);
 
         return { paths, pathPoints, path3d, displayLines };
-
     }
 
+    spawnEncounter(encounter) {
+        
+    }
     reset() {
         const { path3d, pathPoints } = this.route;
         const { currentVelocity, currentAngularVelocity, physicsImpostor, mesh } = this.truck;
