@@ -16,7 +16,8 @@ const screenConfig = {
         upperBetaLimit: 1.6400,
         lowerRadiusLimit: 80.0,
         upperRadiusLimit: 100.0
-    }
+    },
+    numberOfRoadSegments: 12
 };
 const truckSetup = {
     modelUrl: truckModelUrl,

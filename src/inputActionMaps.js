@@ -11,10 +11,10 @@ const inputControlsMap = {
     Enter: 'ACTIVATE', Return: 'ACTIVATE', 13: 'ACTIVATE', Space: 'ACTIVATE', 32: 'ACTIVATE', ' ': 'ACTIVATE',
     Shift: 'MOVE_IN',
     Control: 'MOVE_OUT',
-    ArrowUp: 'MOVE_UP',
-    ArrowDown: 'MOVE_DOWN',
-    ArrowLeft: 'ROTATE_LEFT',
-    ArrowRight: 'ROTATE_RIGHT',
+    // ArrowUp: 'MOVE_UP',
+    // ArrowDown: 'MOVE_DOWN',
+    // ArrowLeft: 'ROTATE_LEFT',
+    // ArrowRight: 'ROTATE_RIGHT',
 
     /*                  */
 

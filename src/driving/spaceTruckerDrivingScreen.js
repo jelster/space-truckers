@@ -147,7 +147,6 @@ class SpaceTruckerDrivingScreen {
 
         this.isLoaded = true;
         setTimeout(() => this.reset(), 1000);
-        //this.followCamera.lockedTarget = this.truck.mesh;
     }
 
     setupKillMesh() {
@@ -179,27 +178,27 @@ class SpaceTruckerDrivingScreen {
         let curve = path3d.getCurve();
         console.log("Curve and Path sample set sizes", curve.length, pathPoints.length);
         let displayLines = MeshBuilder.CreateLines("displayLines", { points: curve }, this.scene);
-        let pathA = [];
-        let pathB = [];
-        let pathC = [];
-        let pathD = [];
-        for (let i = 0; i < pathPoints.length; i++) {
-            const { position, gravity, velocity } = pathPoints[i];
-            let p = position;
-            let speed = velocity.length() / routeDataScalingFactor;
-            let pA = new Vector3(p.x + speed, p.y - speed, p.z + speed);
-            //    pA.rotateByQuaternionToRef(rotation, pA);
-            let pB = new Vector3(p.x - speed, p.y - speed, p.z - speed);
-            //     pB.rotateByQuaternionToRef(rotation, pB);
-            let pC = pB.clone().addInPlaceFromFloats(0, speed * 2, 0);
-            let pD = pA.clone().addInPlaceFromFloats(0, speed * 2, 0);
-            pathA.push(pA);
-            pathB.push(pB);
-            pathC.push(pC);
-            pathD.push(pD);
+        const { numberOfRoadSegments } = screenConfig;
+        let paths = [];
+        for (let i = 0; i < numberOfRoadSegments; i++) {
+            paths.push([]);
         }
 
-        return { paths: [pathB, pathC, pathD, pathA, pathB], pathPoints, path3d, displayLines };
+        for (let i = 0; i < pathPoints.length; i++) {
+            let { position, gravity, velocity } = pathPoints[i];
+            let speed = velocity.length() / routeDataScalingFactor;
+            let last = position.clone();
+            for (let pathIdx = 0; pathIdx < numberOfRoadSegments; pathIdx++) {
+                let radiix = (pathIdx / numberOfRoadSegments) * Scalar.TwoPi;
+                let path = paths[pathIdx];
+                path.push(last.clone()
+                    .addInPlaceFromFloats(Math.sin(radiix) * speed, Math.cos(radiix) * speed, 0));
+
+            }
+        }
+        paths.push(paths[0]);
+
+        return { paths, pathPoints, path3d, displayLines };
 
     }
 
