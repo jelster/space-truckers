@@ -94,6 +94,8 @@ class SpaceTruckerDrivingScreen {
 
         // temporary until the encounter spawner is implemented
         this.tempObstacleMesh = CreateSphere("tempObstacle", this.scene);
+        this.tempObstacleMesh.visibility = 1;
+        this.tempObstacleMesh.layerMask = 0;
 
         this.scene.clearColor = new Color3(0, 0, 0);
 
@@ -203,7 +205,7 @@ class SpaceTruckerDrivingScreen {
                 let path = paths[pathIdx];
                 path.push(last.clone()
                     .addInPlaceFromFloats(
-                        Math.sin(radiix) * speed, 
+                        Math.sin(radiix) * speed * 2, 
                         Math.cos(radiix) * speed, 
                         0));
             }
@@ -216,20 +218,27 @@ class SpaceTruckerDrivingScreen {
     spawnEncounter(seed) {
         const { pathPoints } = this.route;
         const tempObstacleMesh = this.tempObstacleMesh;
-        const point = pathPoints[seed];
-        const {encounter, position, gravity} = point;
+        const { routeDataScalingFactor } = screenConfig;
+        let point = pathPoints[seed];
+        let {encounter, position, gravity, velocity} = point;
         let encounterMesh = tempObstacleMesh.createInstance(encounter.id + '-' + seed);
+        const scaling = 20; // hack: temporary
+       
         encounterMesh.position.copyFrom(position);
-        encounterMesh.scaling.copyFrom(gravity);
+        encounterMesh.position.x += Scalar.RandomRange(-scaling, scaling);
+        encounterMesh.position.y += Scalar.RandomRange(-scaling, scaling);
+        encounterMesh.scaling.setAll(scaling / routeDataScalingFactor);
+        
+        encounterMesh.layerMask = SCENE_MASK;
         encounterMesh.physicsImpostor = new PhysicsImpostor(
             encounterMesh, 
             PhysicsImpostor.SphereImpostor, 
             {
-                mass: 100,
-                restitution: 0.998
+                mass: velocity.lengthSquared(),
+                restitution: 0.576
             }, this.scene);
         encounterMesh.physicsImpostor.setLinearVelocity(gravity);
-        encounterMesh.physicsImpostor.setAngularVelocity(new Vector3(0, 0, 0));
+
         return encounterMesh;
     }
     reset() {
