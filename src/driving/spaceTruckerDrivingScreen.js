@@ -84,7 +84,7 @@ class SpaceTruckerDrivingScreen {
     killMesh;
     encounters = [];
     isLoaded = false;
-    tempObstacleMesh;
+    tempObstacleMesh = null;
     constructor(engine, routeData, inputManager) {
         this.routeData = routeData;
         this.encounters = routeData.filter(e => e.encounter).map(e => e.encounter);
@@ -93,7 +93,7 @@ class SpaceTruckerDrivingScreen {
         this.cameraDolly = new TransformNode("cameraDolly", this.scene);
 
         // temporary until the encounter spawner is implemented
-        this.tempObstacleMesh = CreateSphere("tempObstacle", this.scene, { size: new Vector3(1, 1, 1) });
+        this.tempObstacleMesh = CreateSphere("tempObstacle", this.scene);
 
         this.scene.clearColor = new Color3(0, 0, 0);
 
@@ -148,6 +148,13 @@ class SpaceTruckerDrivingScreen {
             { mass: 0, restitution: 0.998, friction: 0.5 },
             this.scene);
 
+        for (let i = 0; i < this.route.pathPoints.length;i++) {
+            if (this.route.pathPoints[i].encounter) {
+                let enc = this.spawnEncounter(i);
+                this.encounters.push(enc);
+            }            
+        }
+
         this.isLoaded = true;
         setTimeout(() => this.reset(), 1000);
     }
@@ -178,7 +185,6 @@ class SpaceTruckerDrivingScreen {
         });
 
         let path3d = new Path3D(pathPoints.map(p => p.position), new Vector3(0, 1, 0), false, true);
-
         let curve = path3d.getCurve();
         console.log("Curve and Path sample set sizes", curve.length, pathPoints.length);
         let displayLines = MeshBuilder.CreateLines("displayLines", { points: curve }, this.scene);
@@ -196,8 +202,10 @@ class SpaceTruckerDrivingScreen {
                 let radiix = (pathIdx / numberOfRoadSegments) * Scalar.TwoPi;
                 let path = paths[pathIdx];
                 path.push(last.clone()
-                    .addInPlaceFromFloats(Math.sin(radiix) * speed, Math.cos(radiix) * speed, 0));
-
+                    .addInPlaceFromFloats(
+                        Math.sin(radiix) * speed, 
+                        Math.cos(radiix) * speed, 
+                        0));
             }
         }
         paths.push(paths[0]);
@@ -205,8 +213,24 @@ class SpaceTruckerDrivingScreen {
         return { paths, pathPoints, path3d, displayLines };
     }
 
-    spawnEncounter(encounter) {
-        
+    spawnEncounter(seed) {
+        const { pathPoints } = this.route;
+        const tempObstacleMesh = this.tempObstacleMesh;
+        const point = pathPoints[seed];
+        const {encounter, position, gravity} = point;
+        let encounterMesh = tempObstacleMesh.createInstance(encounter.id + '-' + seed);
+        encounterMesh.position.copyFrom(position);
+        encounterMesh.scaling.copyFrom(gravity);
+        encounterMesh.physicsImpostor = new PhysicsImpostor(
+            encounterMesh, 
+            PhysicsImpostor.SphereImpostor, 
+            {
+                mass: 100,
+                restitution: 0.998
+            }, this.scene);
+        encounterMesh.physicsImpostor.setLinearVelocity(gravity);
+        encounterMesh.physicsImpostor.setAngularVelocity(new Vector3(0, 0, 0));
+        return encounterMesh;
     }
     reset() {
         const { path3d, pathPoints } = this.route;
