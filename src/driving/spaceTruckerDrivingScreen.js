@@ -135,7 +135,8 @@ class SpaceTruckerDrivingScreen {
         var groundMat = this.groundMaterial = new GridMaterial("roadMat", this.scene);
         this.ground = MeshBuilder.CreateRibbon("road", {
             pathArray: route.paths,
-            sideOrientation: Mesh.DOUBLESIDE
+            sideOrientation: Mesh.DOUBLESIDE,
+            closeArray: true
         }, this.scene);
 
         this.ground.layerMask = SCENE_MASK;
@@ -189,6 +190,7 @@ class SpaceTruckerDrivingScreen {
         let path3d = new Path3D(pathPoints.map(p => p.position), new Vector3(0, 1, 0), false, true);
         let curve = path3d.getCurve();
         console.log("Curve and Path sample set sizes", curve.length, pathPoints.length);
+
         let displayLines = MeshBuilder.CreateLines("displayLines", { points: curve }, this.scene);
         const { numberOfRoadSegments } = screenConfig;
         let paths = [];
@@ -210,7 +212,7 @@ class SpaceTruckerDrivingScreen {
                         0));
             }
         }
-        paths.push(paths[0]);
+        //paths.push(paths[0]);
 
         return { paths, pathPoints, path3d, displayLines };
     }
@@ -301,19 +303,41 @@ class SpaceTruckerDrivingScreen {
         let up = this.truck.mesh.up;
         let currAccel = this.truck.currentAcceleration;
         this.truck.currentVelocity.addInPlace(up.scale(currAccel).negate());
-
     }
 
     ROTATE_LEFT(state) {
         const { turnSpeedRadians } = truckSetup;
         let { currentAngularVelocity } = this.truck;
-        currentAngularVelocity.y -= turnSpeedRadians;
+        let wV = this.truck.mesh.up.clone()
+            .negateInPlace()
+            .scaleInPlace(turnSpeedRadians);
+        currentAngularVelocity.addInPlace(wV);
     }
 
     ROTATE_RIGHT(state) {
         const { turnSpeedRadians } = truckSetup;
         let { currentAngularVelocity } = this.truck;
-        currentAngularVelocity.y += turnSpeedRadians;
+        let wV = this.truck.mesh.up.clone()
+            .scaleInPlace(turnSpeedRadians);
+        currentAngularVelocity.addInPlace(wV);
+    }
+
+    MOVE_LEFT(state, amt) {
+        let { currentVelocity } = this.truck;
+        let { currDir } = this.truck.mesh.forward;
+        let currentAcceleration = isNumber(amt) ? amt : this.truck.currentAcceleration;
+
+        let left = Vector3.Cross(currDir, this.truck.mesh.up);
+        currentVelocity.addInPlace(left.scale(currentAcceleration/2));
+    }
+
+    MOVE_RIGHT(state, amt) {
+        let { currentVelocity } = this.truck;
+        let { currDir } = this.truck.mesh.forward;
+        let currentAcceleration = isNumber(amt) ? amt : this.truck.currentAcceleration;
+
+        let right = Vector3.Cross(currDir, this.truck.mesh.up).negate();
+        currentVelocity.addInPlace(right.scale(currentAcceleration/2));
     }
 
     MOVE_IN(state) {
