@@ -246,6 +246,7 @@ class SpaceTruckerDrivingScreen {
     reset() {
         const { path3d, pathPoints } = this.route;
         const { currentVelocity, currentAngularVelocity, physicsImpostor, mesh } = this.truck;
+        const { up } = mesh;
 
         console.log('resetting...');
         const point = path3d.getPointAt(0);
@@ -257,12 +258,9 @@ class SpaceTruckerDrivingScreen {
         mesh.position.copyFrom(point);
         physicsImpostor.setLinearVelocity(Vector3.Zero());
 
-        mesh.rotationQuaternion = Quaternion.FromLookDirectionRH(tang, this.followCamera.upVector);
+        mesh.rotationQuaternion = Quaternion.FromLookDirectionRH(tang, up);
         physicsImpostor.setAngularVelocity(Vector3.Zero());
-
-
-        // this.truck.physicsImpostor.setAngularVelocity(this.truck.currentAngularVelocity);
-    }
+  }
 
     killTruck() {
         const { currentVelocity, currentAngularVelocity, physicsImpostor } = this.truck;
