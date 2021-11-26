@@ -205,6 +205,7 @@ class SpaceTruckerInputManager {
                 this.gamepad = null;
                 manager.onGamepadConnectedObservable.remove(gamepadConnectedObserver);
                 manager.onGamepadDisconnectedObservable.remove(gamepadDisconnectedObserver);
+                SpaceTruckerInputManager.unPatchControlMap();
             }
         };
     }
