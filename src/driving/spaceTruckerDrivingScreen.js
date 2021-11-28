@@ -87,7 +87,7 @@ class SpaceTruckerDrivingScreen {
     tempObstacleMesh = null;
     constructor(engine, routeData, inputManager) {
         this.routeData = routeData;
-        this.encounters = routeData.filter(e => e.encounter).map(e => e.encounter);
+        // this.encounters = routeData.filter(e => e.encounter).map(e => e.encounter);
         this.engine = engine;
         this.scene = new Scene(engine);
         this.cameraDolly = new TransformNode("cameraDolly", this.scene);
@@ -151,11 +151,11 @@ class SpaceTruckerDrivingScreen {
             { mass: 0, restitution: 0.998, friction: 0.5 },
             this.scene);
 
-        for (let i = 0; i < this.route.pathPoints.length;i++) {
+        for (let i = 0; i < this.route.pathPoints.length; i++) {
             if (this.route.pathPoints[i].encounter) {
                 let enc = this.spawnEncounter(i);
                 this.encounters.push(enc);
-            }            
+            }
         }
 
         this.isLoaded = true;
@@ -207,8 +207,8 @@ class SpaceTruckerDrivingScreen {
                 let path = paths[pathIdx];
                 path.push(last.clone()
                     .addInPlaceFromFloats(
-                        Math.sin(radiix) * speed * 2, 
-                        Math.cos(radiix) * speed, 
+                        Math.sin(radiix) * speed * 2,
+                        Math.cos(radiix) * speed,
                         0));
             }
         }
@@ -222,19 +222,19 @@ class SpaceTruckerDrivingScreen {
         const tempObstacleMesh = this.tempObstacleMesh;
         const { routeDataScalingFactor } = screenConfig;
         let point = pathPoints[seed];
-        let {encounter, position, gravity, velocity} = point;
+        let { encounter, position, gravity, velocity } = point;
         let encounterMesh = tempObstacleMesh.createInstance(encounter.id + '-' + seed);
         const scaling = 20; // hack: temporary
-       
+
         encounterMesh.position.copyFrom(position);
         encounterMesh.position.x += Scalar.RandomRange(-scaling, scaling);
         encounterMesh.position.y += Scalar.RandomRange(-scaling, scaling);
         encounterMesh.scaling.setAll(scaling / routeDataScalingFactor);
-        
+
         encounterMesh.layerMask = SCENE_MASK;
         encounterMesh.physicsImpostor = new PhysicsImpostor(
-            encounterMesh, 
-            PhysicsImpostor.SphereImpostor, 
+            encounterMesh,
+            PhysicsImpostor.SphereImpostor,
             {
                 mass: velocity.lengthSquared(),
                 restitution: 0.576
@@ -260,7 +260,7 @@ class SpaceTruckerDrivingScreen {
 
         mesh.rotationQuaternion = Quaternion.FromLookDirectionRH(tang, up);
         physicsImpostor.setAngularVelocity(Vector3.Zero());
-  }
+    }
 
     killTruck() {
         const { currentVelocity, currentAngularVelocity, physicsImpostor } = this.truck;
@@ -282,6 +282,19 @@ class SpaceTruckerDrivingScreen {
 
     updateGui() {
         const dT = (this.scene.getEngine().getDeltaTime() / 1000);
+        const { absolutePosition, up } = this.truck.mesh;
+        const { encounters } = this;
+        encounters.forEach(obstacle => {
+            const { uiBlip } = obstacle;
+            // calculate the polar coordinates of the obstacle relative to the truck
+            let r = Vector3.Distance(obstacle.absolutePosition, absolutePosition);
+            // theta is the angle between the center origin and the obstacle
+            let theta = Vector3.GetAngleBetweenVectorsOnPlane(absolutePosition, up, obstacle.absolutePosition);// Math.atan2(del.z, del.x);
+            let posLeft = Math.cos(theta) * r; // translate from origin-center
+            let posTop = -1 * Math.sin(theta) * r; // translate from origin-center
+            uiBlip.left = posLeft * 4.96 - (r * 0.5); // scale by size of radar mesh
+            uiBlip.top = posTop * 4.96 - (r * 0.5);
+        });
     }
 
     dispose() {
@@ -320,22 +333,22 @@ class SpaceTruckerDrivingScreen {
         currentAngularVelocity.addInPlace(wV);
     }
 
-    MOVE_LEFT(state, amt) {
+    MOVE_LEFT(state, evt, amt) {
         let { currentVelocity } = this.truck;
-        let { currDir } = this.truck.mesh.forward;
-        let currentAcceleration = isNumber(amt) ? amt : this.truck.currentAcceleration;
+        let currDir = this.truck.forward;
+        let currentAcceleration = this.truck.currentAcceleration;
 
         let left = Vector3.Cross(currDir, this.truck.mesh.up);
-        currentVelocity.addInPlace(left.scale(currentAcceleration/2));
+        currentVelocity.addInPlace(left.scale(currentAcceleration / 2));
     }
 
-    MOVE_RIGHT(state, amt) {
+    MOVE_RIGHT(state, evt, amt) {
         let { currentVelocity } = this.truck;
-        let { currDir } = this.truck.mesh.forward;
-        let currentAcceleration = isNumber(amt) ? amt : this.truck.currentAcceleration;
+        let currDir  = this.truck.forward;
+        let currentAcceleration = this.truck.currentAcceleration;
 
         let right = Vector3.Cross(currDir, this.truck.mesh.up).negate();
-        currentVelocity.addInPlace(right.scale(currentAcceleration/2));
+        currentVelocity.addInPlace(right.scale(currentAcceleration / 2));
     }
 
     MOVE_IN(state) {

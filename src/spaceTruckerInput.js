@@ -5,7 +5,7 @@ import logger from "./logger";
 import SpaceTruckerControls from "./inputActionMaps";
 
 
-let controlsMap = SpaceTruckerControls.inputControlsMap;
+const controlsMap = SpaceTruckerControls.inputControlsMap;
 let tempControlsMap = {};
 class SpaceTruckerInputManager {
     static patchControlMap(newMaps) {
@@ -13,7 +13,7 @@ class SpaceTruckerInputManager {
         Object.assign(controlsMap, newMaps);
     }
     static unPatchControlMap() {
-        controlsMap = tempControlsMap;
+        Object.assign(controlsMap, tempControlsMap);
         tempControlsMap = {};
     }
     get hasInput() {

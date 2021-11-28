@@ -19,7 +19,7 @@ import { GlowLayer } from '@babylonjs/core/Layers/glowLayer';
 
 const { GUI_MASK } = screenConfig;
 const initializeGui = async (screen) => {
-    const { scene } = screen;
+    const { scene, encounters } = screen;
     const { guiViewportSize, radarTextureResolution } = screenConfig;
     
     let guiCamera = new UniversalCamera("guiCam", new Vector3(0, 50, 0), scene);
@@ -34,15 +34,15 @@ const initializeGui = async (screen) => {
 
     let radarMesh = MeshBuilder.CreatePlane("radarMesh", { width: 4.96, height: 4.96 }, scene);
     radarMesh.layerMask = GUI_MASK;
+    radarMesh.rotation.x = Math.PI / 2;
 
     let radarGui = AdvancedDynamicTexture.CreateForMeshTexture(radarMesh, radarTextureResolution, radarTextureResolution, false);
     radarGui.background = "black";
-
-    radarMesh.rotation.x = Math.PI / 4;
-    let radarMaterial = new StandardMaterial("radMat", scene);
-    let nodeMat = NodeMaterial.Parse(radarNodeMaterial, scene, document.baseURI);
     
+    let radarMaterial = new StandardMaterial("radMat", scene);
+    let nodeMat = NodeMaterial.Parse(radarNodeMaterial, scene, document.baseURI);    
     let radarTexture = nodeMat.createProceduralTexture(radarTextureResolution, scene);
+
     radarMesh.material = radarMaterial;
     radarMaterial.diffuseTexture = radarGui;
     radarMaterial.specularColor = Color3.Black();
@@ -52,6 +52,18 @@ const initializeGui = async (screen) => {
     radarTexture.TextureMode = Texture.PLANAR_MODE;
 
     guiCamera.lockedTarget = radarMesh;
+
+    encounters.forEach((o, i) => {
+        let blip = new Rectangle("radar-obstacle-" + i);
+        o.uiBlip = blip;
+        blip.width = "3%";
+        blip.height = "3%";
+        blip.background = "white";
+        blip.color = "white";
+        blip.cornerRadius = "1000";
+        radarGui.addControl(blip);
+
+    });
     var gl = new GlowLayer("gl", scene, { blurKernelSize: 4, camera: guiCamera });
     return { radarGui, radarMesh, radarMaterial, radarTexture, guiCamera };
 };
