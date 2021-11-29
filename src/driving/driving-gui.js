@@ -32,7 +32,7 @@ const initializeGui = async (screen) => {
     guiCamera.orthoBottom = -guiViewportSize / 2;
     scene.activeCameras.push(guiCamera);
 
-    let radarMesh = MeshBuilder.CreatePlane("radarMesh", { width: 4.96, height: 4.96 }, scene);
+    let radarMesh = MeshBuilder.CreatePlane("radarMesh", { width: guiViewportSize, height: guiViewportSize }, scene);
     radarMesh.layerMask = GUI_MASK;
     radarMesh.rotation.x = Math.PI / 2;
 
