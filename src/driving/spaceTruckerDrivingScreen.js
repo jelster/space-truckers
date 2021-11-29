@@ -289,7 +289,7 @@ class SpaceTruckerDrivingScreen {
             // calculate the polar coordinates of the obstacle relative to the truck
             let r = Vector3.Distance(obstacle.absolutePosition, absolutePosition);
             // theta is the angle between the center origin and the obstacle
-            let theta = Vector3.GetAngleBetweenVectorsOnPlane(absolutePosition, up, obstacle.absolutePosition);// Math.atan2(del.z, del.x);
+            let theta = Vector3.GetAngleBetweenVectorsOnPlane(absolutePosition, up, obstacle.absolutePosition);
             let posLeft = Math.cos(theta) * r; // translate from origin-center
             let posTop = -1 * Math.sin(theta) * r; // translate from origin-center
             uiBlip.left = posLeft * 4.96 - (r * 0.5); // scale by size of radar mesh
@@ -313,7 +313,7 @@ class SpaceTruckerDrivingScreen {
     MOVE_DOWN(state) {
         let up = this.truck.mesh.up;
         let currAccel = this.truck.currentAcceleration;
-        this.truck.currentVelocity.addInPlace(up.scale(currAccel).negate());
+        this.truck.currentVelocity.addInPlace(up.scale(currAccel).negateInPlace());
     }
 
     ROTATE_LEFT(state) {
@@ -347,7 +347,7 @@ class SpaceTruckerDrivingScreen {
         let currDir  = this.truck.forward;
         let currentAcceleration = this.truck.currentAcceleration;
 
-        let right = Vector3.Cross(currDir, this.truck.mesh.up).negate();
+        let right = Vector3.Cross(currDir, this.truck.mesh.up).negateInPlace();
         currentVelocity.addInPlace(right.scale(currentAcceleration / 2));
     }
 
@@ -360,7 +360,7 @@ class SpaceTruckerDrivingScreen {
     MOVE_OUT(state) {
         let currDir = this.truck.forward;
         let currAccel = this.truck.currentAcceleration
-        this.truck.currentVelocity.addInPlace(currDir.scale(currAccel).negate());
+        this.truck.currentVelocity.addInPlace(currDir.scale(currAccel).negateInPlace());
     }
 
     GO_BACK() {
