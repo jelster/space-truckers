@@ -86,7 +86,7 @@ const encounterZones = {
         name: "Inner System",
         innerBoundary: 250,
         outerBoundary: 800,
-        encounterRate: 0.1,
+        encounterRate: 0.25,
         colorCode: "#00ff00",
         encounters: [
             { name: 'Solar Flare', id: 'solar_flare', probability: 0.99, image: hazard_icon },
@@ -100,7 +100,7 @@ const encounterZones = {
         name: "Asteroid Belt",
         innerBoundary: 1000,
         outerBoundary: 1700,
-        encounterRate: 0.1,
+        encounterRate: 0.35,
         colorCode: "#ff0000",
         encounters: [
             { name: 'Rock Hazard',  id: 'rock_hazard', image: hazard_icon, probability: 0.89 },
@@ -114,7 +114,7 @@ const encounterZones = {
         name: "Space Highway",
         innerBoundary: 1800,
         outerBoundary: 2500,
-        encounterRate: 0.0,
+        encounterRate: 0.45,
         colorCode: "#ffff00",
         encounters: [
             { name: '', id: 'no_encounter', probability: 0.01, image: '' },
@@ -129,7 +129,7 @@ const encounterZones = {
         name: "Outer System",
         innerBoundary: 2600,
         outerBoundary: 5000,
-        encounterRate: 0.0,
+        encounterRate: 0.30,
         colorCode: "#ff00ff",
         encounters: [
             { name: '', id: 'no_encounter', probability: 0.01, image: '' },

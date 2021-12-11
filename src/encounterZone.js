@@ -3,7 +3,7 @@ import { Color3 } from "@babylonjs/core/Maths/math.color";
 import { ExecuteCodeAction } from "@babylonjs/core/Actions/directActions";
 import { PredicateCondition } from "@babylonjs/core/Actions/condition";
 import { Observable } from "@babylonjs/core/Misc/observable";
-import { TorusBuilder } from "@babylonjs/core/Meshes/Builders/torusBuilder";
+import { CreateTorus } from "@babylonjs/core/Meshes/Builders/torusBuilder";
 
 import BaseGameObject from "./baseGameObject";
 
@@ -37,7 +37,7 @@ class SpaceTruckerEncounterZone extends BaseGameObject {
         this.color = Color3.FromHexString(this.colorCode);
         this.torusDiameter = this.outerBoundary - (0.5 * (this.outerBoundary - this.innerBoundary)),
             this.torusThickness = (this.outerBoundary / 2 - this.innerBoundary / 2);
-        this.mesh = TorusBuilder.CreateTorus(this.name + '-Zone', {
+        this.mesh = CreateTorus(this.name + '-Zone', {
             diameter: 2 * this.torusDiameter,
             thickness: 2 * this.torusThickness,
             tesselation: 64
@@ -57,7 +57,10 @@ class SpaceTruckerEncounterZone extends BaseGameObject {
     }
 
     isWithinZone(position) {
-        return true;
+        return (position.x >= this.innerBoundary || 
+            position.x <= this.outerBoundary) && 
+            (position.z >= this.innerBoundary || 
+            position.z <= this.outerBoundary);
     }
 
     update(deltaTime) {
@@ -75,12 +78,11 @@ class SpaceTruckerEncounterZone extends BaseGameObject {
         let diceRoll = Math.random();
 
         for (var i = 0; i < this.cumulativeDistribution.length && (diceRoll > this.cumulativeDistribution[i]); i++) { };
-
-        let et = this.encounterTable[i];
-
-        if (!et) {
+        if (!this.encounterTable[i]) {
             console.log('no encounter found', diceRoll, this.encounterTable);
         }
+        let et = {};
+        Object.assign(et, this.encounterTable[i]);
         return et;
     }
 
@@ -92,7 +94,7 @@ class SpaceTruckerEncounterZone extends BaseGameObject {
         const zam = this.mesh.actionManager;
         const zact = this.intersectionEnterAction = new ExecuteCodeAction({
             trigger: ActionManager.OnIntersectionEnterTrigger,
-            parameter: { mesh: meshToWatch, usePreciseIntersections: true }
+            parameter: { mesh: meshToWatch, usePreciseIntersections: false }
         },
             (c1) => {
                 this.onEnterObservable.notifyObservers(this);
@@ -103,7 +105,7 @@ class SpaceTruckerEncounterZone extends BaseGameObject {
 
         const zext = this.intersectionExitAction = new ExecuteCodeAction({
             trigger: ActionManager.OnIntersectionExitTrigger,
-            parameter: { mesh: meshToWatch, usePreciseIntersections: true }
+            parameter: { mesh: meshToWatch, usePreciseIntersections: false }
         },
             (c1) => {
                 this.onExitObservable.notifyObservers(this);
@@ -123,6 +125,9 @@ class SpaceTruckerEncounterZone extends BaseGameObject {
             return;
         }
         const zam = this.meshToWatch.actionManager;
+        if (!zam) {
+            return;
+        }
         let zact = this.intersectEnterAction,
             zext = this.intersectExitAction;
         zam.unregisterAction(zext);

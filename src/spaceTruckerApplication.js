@@ -3,10 +3,14 @@ import AppStates from "./appstates"
 import logger from "./logger"
 import MainMenuScene from "./mainMenuScene";
 import SplashScene from "./splashScene";
- import SpaceTruckerInputManager from "./spaceTruckerInput";
+import SpaceTruckerInputManager from "./spaceTruckerInput";
 
 import appData from "./route-planning/gameData";
-import SpaceTruckerPlanningScreen from "./route-planning/spaceTruckerPlanningScreen"; 
+import SpaceTruckerPlanningScreen from "./route-planning/spaceTruckerPlanningScreen";
+import SpaceTruckerDrivingScreen from "./driving/spaceTruckerDrivingScreen";
+
+// TODO: conditionally include sample data in the build
+import sampleRoute from "./driving/sample-route.json";
 
 class SpaceTruckerApplication {
     *appStateMachine() {
@@ -72,9 +76,16 @@ class SpaceTruckerApplication {
         });
         this._mainMenu.onExitActionObservable.addOnce(() => this.exit());
         this._mainMenu.onPlayActionObservable.add(() => this.goToRunningState());
-        
+
         this._engine.loadingUIText = "Loading Route Planning...";
-        this._routePlanningScene = new SpaceTruckerPlanningScreen(this._engine, this.inputManager, appData);    
+        this._routePlanningScene = new SpaceTruckerPlanningScreen(this._engine, this.inputManager, appData);
+
+        this._routePlanningScene.routeAcceptedObservable.add(() => {
+            const routeData = this._routePlanningScene.routePath;
+            this.goToDrivingState(routeData);
+        });
+
+
     }
 
     run() {
@@ -85,26 +96,34 @@ class SpaceTruckerApplication {
     onRender() {
         // update loop. Inputs are routed to the active state's scene.
         let state = this.currentState;
-        const gameTime = this._engine.getDeltaTime() / 1000
+        const gameTime = this._engine.getDeltaTime() / 1000;
         switch (state) {
             case AppStates.CREATED:
             case AppStates.INITIALIZING:
                 break;
             case AppStates.CUTSCENE:
                 if (this._splashScreen.skipRequested) {
-                    this.goToMainMenu();
+                    // for debugging driving phase
+                    const queryString = window.location.search;
+                    if (queryString.includes("testDrive")) {
+                        this.goToDrivingState(sampleRoute);
+                    }
+                    else {
+                        this.goToMainMenu();
+                    }
+
                     logger.logInfo("in application onRender - skipping splash screen message");
                 }
-                this._splashScreen.update();
-
+                this._splashScreen.update(gameTime);
                 break;
             case AppStates.MENU:
-                this._mainMenu.update();
-
+                this._mainMenu.update(gameTime);
                 break;
-            case AppStates.RUNNING:
+            case AppStates.PLANNING:
                 this?._routePlanningScene.update(gameTime);
-
+                break;
+            case AppStates.DRIVING:
+                this._drivingScene.update(gameTime);
                 break;
             case AppStates.EXITING:
 
@@ -136,14 +155,26 @@ class SpaceTruckerApplication {
 
     goToRunningState() {
         this._currentScene.actionProcessor.detachControl();
-        
+
         this._currentScene = this._routePlanningScene;
 
-        this.moveNextAppState(AppStates.RUNNING);        
+        this.moveNextAppState(AppStates.PLANNING);
         this._currentScene.actionProcessor.attachControl();
         this._routePlanningScene.setReadyToLaunchState();
+    }
 
-        
+    goToDrivingState(routeData) {
+        this._engine.displayLoadingUI();
+        routeData = routeData ?? this._routePlanningScene.routePath;
+        this._currentScene?.actionProcessor?.detachControl();
+        this._engine.loadingUIText = "Loading Driving Screen...";
+        this._drivingScene = new SpaceTruckerDrivingScreen(this._engine, routeData, this.inputManager);     
+        this._currentScene = this._drivingScene;
+        this._routePlanningScene.dispose();
+        this._routePlanningScene = null;
+        this.moveNextAppState(AppStates.DRIVING);
+        this._currentScene.actionProcessor.attachControl();
+
     }
 
     exit() {

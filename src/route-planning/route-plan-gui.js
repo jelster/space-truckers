@@ -3,23 +3,8 @@ import { Animation } from "@babylonjs/core/Animations/animation";
 import { AdvancedDynamicTexture } from "@babylonjs/gui/2D/advancedDynamicTexture";
 import { TextBlock } from "@babylonjs/gui/2D/controls/textBlock";
 import { Control } from "@babylonjs/gui/2D/controls/control";
-import SpaceTruckerPlanningScreen, { PLAN_STATE_KEYS, PLANNING_STATE } from "./spaceTruckerPlanningScreen";
+import { PLAN_STATE_KEYS, PLANNING_STATE } from "./spaceTruckerPlanningScreen";
 import { Grid, Image, Slider, StackPanel } from "@babylonjs/gui";
-import { AnimationGroup } from "@babylonjs/core";
-
-const panelShrinkX = new Animation("shrinkImageAnimationX", "scaleX", 60,
-    Animation.ANIMATIONTYPE_FLOAT, Animation.ANIMATIONLOOPMODE_CONSTANT);
-
-const panelShrinkY = new Animation("shrinkImageAnimationY", "scaleY", 60,
-    Animation.ANIMATIONTYPE_FLOAT, Animation.ANIMATIONLOOPMODE_CONSTANT);
-
-const keys = [];
-keys.push({ frame: 0, value: 1.0 });
-keys.push({ frame: 90, value: 0.04 });
-
-panelShrinkX.setKeys(keys);
-panelShrinkY.setKeys(keys);
-
 
 
 class PlanningScreenGui {
@@ -46,28 +31,6 @@ class PlanningScreenGui {
 
         this.scene.onBeforeRenderObservable.add(() => {
             this.update();
-        });
-
-        const em = this.planningScreen.encounterManager;
-        em.onNewEncounterObservable.add(encounterIdx => {            
-            let evt = this.planningScreen.encounterManager.encounterEvents[encounterIdx];
-            console.log('encounter gui', evt);
-            if (evt && evt.encounter?.id) {
-                const encounter = evt.encounter;
-                let panel = new Rectangle("panel-" + encounter.name);
-                let image = new Image("image-" + encounter.name, encounter.image);
-                image.alpha = 0.68;
-                panel.addControl(image);
-                panel.thickness = 0;
-                this.gui.addControl(panel);                
-                panel.moveToVector3(evt.cargoData.position, this.scene);
-                let animationGroup = new AnimationGroup("shrinkAnimationGroup-" + encounter.name, this.scene);
-                animationGroup.addTargetedAnimation(panelShrinkX, panel);
-                animationGroup.addTargetedAnimation(panelShrinkY, panel);
-                animationGroup.start(false, 1.0);
-
-                this.encounterPanels.push(panel);
-            }
         });
     }
 

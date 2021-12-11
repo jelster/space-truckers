@@ -27,7 +27,6 @@ import { Ray } from "@babylonjs/core/Culling/ray"; // used by ActionManager
 import { ExecuteCodeAction } from "@babylonjs/core/Actions/directActions";
 import { Axis, Scalar, Space } from "@babylonjs/core";
 import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
-import SpaceTruckerEncounterManager from "./spaceTruckerEncounterManager";
 
 const preFlightActionList = [
     { action: 'ACTIVATE', shouldBounce: () => true },
@@ -42,7 +41,6 @@ const preFlightActionList = [
 ];
 const overworldMusic = "overworld";
 const ambientSound = "ambient";
-const encounterSound = "encounter";
 
 const PLANNING_STATE = Object.freeze({
     Created: 0,
@@ -51,7 +49,6 @@ const PLANNING_STATE = Object.freeze({
     InFlight: 3,
     CargoArrived: 4,
     RouteAccepted: 5,
-    GeneratingCourse: 6,
     CargoDestroyed: 7,
     Paused: 8
 });
@@ -73,7 +70,11 @@ class SpaceTruckerPlanningScreen {
     soundManager;
     actionProcessor;
     onStateChangeObservable = new Observable();
-    
+    routeAcceptedObservable = new Observable();
+
+    get routePath() {
+        return this.cargo.routePath;
+    }
     get encounterManager() {
         return this.cargo.encounterManager;
     }
@@ -102,7 +103,7 @@ class SpaceTruckerPlanningScreen {
         this.scene = new Scene(engine);
         this.config = config;
 
-        this.soundManager = new SpaceTruckerSoundManager(this.scene, overworldMusic, ambientSound, encounterSound);
+        this.soundManager = new SpaceTruckerSoundManager(this.scene, overworldMusic, ambientSound);
 
         this.scene.clearColor = new Color3(0.1, 0.1, 0.1);
 
@@ -177,7 +178,7 @@ class SpaceTruckerPlanningScreen {
             ));
 
 
-        this.scene.onReadyObservable.add(() => {
+        this.scene.onReadyObservable.addOnce(() => {
             this.ui = new PlanningScreenGui(this);
             this.ui.bindToScreen();
 
@@ -191,7 +192,6 @@ class SpaceTruckerPlanningScreen {
         this.camera.useFramingBehavior = true;
         this.camera.attachControl(true);
         
-        this.encounterManager.onNewEncounterObservable.add(encounter =>  this.soundManager.sound(encounterSound).play());
     }
 
     update(deltaTime) {
@@ -222,6 +222,8 @@ class SpaceTruckerPlanningScreen {
             case PLANNING_STATE.CargoDestroyed:
                 break;
             case PLANNING_STATE.Paused:
+                break;
+            case PLANNING_STATE.RouteAccepted:
                 break;
             default:
                 break;
@@ -319,6 +321,11 @@ class SpaceTruckerPlanningScreen {
     cargoArrived() {
         this.gameState = PLANNING_STATE.CargoArrived;
         this.cargo.physicsImpostor.setLinearVelocity(new Vector3(0, 0, 0));
+        
+        // temporary
+        this.routeAcceptedObservable.notifyObservers();
+        this.gameState = PLANNING_STATE.RouteAccepted
+        
     }
 
 
@@ -403,6 +410,16 @@ class SpaceTruckerPlanningScreen {
         this.planets.forEach(p => summedForces.addInPlace(p.calculateGravitationalForce(cargoPosition)));
 
         return summedForces;
+    }
+
+    dispose() {
+        this.soundManager.dispose();
+        this.onStateChangeObservable.clear();
+        this.routeAcceptedObservable.clear();
+
+        this.encounterManager.dispose();
+        this.scene.dispose();
+
     }
 }
 
