@@ -17,7 +17,11 @@ canvas.id = CanvasName;
 canvas.classList.add("background-canvas");
 document.body.appendChild(canvas);
 
-const eng = new Engine(canvas, true, null, true);
+const eng = new Engine(canvas, true, {
+    deterministicLockstep: true,
+    lockstepMaxSteps: 5,
+    useHighPrecisionFloats: true,
+}, true);
 logger.logInfo("Created BJS engine");
 
 eng.loadingScreen = new SpaceTruckerLoadingScreen(eng);
