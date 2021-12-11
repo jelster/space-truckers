@@ -6,6 +6,7 @@ import BaseGameObject from "../baseGameObject";
 import { truckSetup, screenConfig } from "./gameData.js";
 
 const { SCENE_MASK } = screenConfig;
+const ANGULAR_DAMPING = 0.1;
 class Truck extends BaseGameObject {
     currentVelocity = truckSetup.initialVelocity.clone();
     currentAcceleration = truckSetup.maxAcceleration;
@@ -48,7 +49,7 @@ class Truck extends BaseGameObject {
 
         // dampen any tendencies to pitch, roll, or yaw from physics effects
         let angVel = this.physicsImpostor.getAngularVelocity();
-        angVel.addInPlace(this.currentAngularVelocity.scaleInPlace(deltaTime)).scaleInPlace(0.986);
+        angVel.addInPlace(this.currentAngularVelocity.scaleInPlace(deltaTime)).scaleInPlace(1-ANGULAR_DAMPING);
         this.physicsImpostor.setAngularVelocity(angVel);
         this.currentAngularVelocity.setAll(0);
 

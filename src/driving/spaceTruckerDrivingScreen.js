@@ -246,7 +246,7 @@ class SpaceTruckerDrivingScreen {
     reset() {
         const { path3d, pathPoints } = this.route;
         const { currentVelocity, currentAngularVelocity, physicsImpostor, mesh } = this.truck;
-        const { up } = mesh;
+        const up = Axis.Y;
 
         console.log('resetting...');
         const point = path3d.getPointAt(0);
@@ -344,20 +344,20 @@ class SpaceTruckerDrivingScreen {
 
     MOVE_RIGHT(state, evt, amt) {
         let { currentVelocity } = this.truck;
-        let currDir  = this.truck.forward;
+        let currDir = this.truck.forward;
         let currentAcceleration = this.truck.currentAcceleration;
 
         let right = Vector3.Cross(currDir, this.truck.mesh.up).negateInPlace();
         currentVelocity.addInPlace(right.scale(currentAcceleration / 2));
     }
 
-    MOVE_IN(state) {        
+    MOVE_IN(state) {
         let currDir = this.truck.forward;
         let currAccel = this.truck.currentAcceleration;
         this.truck.currentVelocity.addInPlace(currDir.scale(currAccel));
     }
 
-    MOVE_OUT(state) {       
+    MOVE_OUT(state) {
         let currDir = this.truck.forward;
         let currAccel = this.truck.currentAcceleration;
         this.truck.currentVelocity.addInPlace(currDir.scale(currAccel).negateInPlace());
