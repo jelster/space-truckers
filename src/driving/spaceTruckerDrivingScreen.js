@@ -51,7 +51,7 @@ const inputMapPatches = {
     ArrowRight: 'ROTATE_RIGHT',
 
 };
-SpaceTruckerInputManager.patchControlMap(inputMapPatches);
+
 const actionList = [
     // { action: 'ACTIVATE', shouldBounce: () => true },
     { action: 'MOVE_UP', shouldBounce: () => false },
@@ -98,7 +98,7 @@ class SpaceTruckerDrivingScreen {
         this.tempObstacleMesh.layerMask = 0;
 
         this.scene.clearColor = new Color3(0, 0, 0);
-
+        SpaceTruckerInputManager.patchControlMap(inputMapPatches);
         this.inputManager = inputManager;
         this.actionProcessor = new SpaceTruckerInputProcessor(this, inputManager, actionList);
 
@@ -351,15 +351,15 @@ class SpaceTruckerDrivingScreen {
         currentVelocity.addInPlace(right.scale(currentAcceleration / 2));
     }
 
-    MOVE_IN(state) {
+    MOVE_IN(state) {        
         let currDir = this.truck.forward;
-        let currAccel = this.truck.currentAcceleration
+        let currAccel = this.truck.currentAcceleration;
         this.truck.currentVelocity.addInPlace(currDir.scale(currAccel));
     }
 
-    MOVE_OUT(state) {
+    MOVE_OUT(state) {       
         let currDir = this.truck.forward;
-        let currAccel = this.truck.currentAcceleration
+        let currAccel = this.truck.currentAcceleration;
         this.truck.currentVelocity.addInPlace(currDir.scale(currAccel).negateInPlace());
     }
 
