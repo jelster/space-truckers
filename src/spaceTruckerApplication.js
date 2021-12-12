@@ -108,10 +108,12 @@ class SpaceTruckerApplication {
                     const queryString = window.location.search;
                     if (queryString.includes("testDrive")) {
                         this.goToDrivingState(sampleRoute);
+                        this._splashScreen.scene.dispose();
+                        this._splashScreen = null;
                     }
                     else {
                         this.goToMainMenu();
-                    }                    
+                    }
                     break;
                 }
                 break;
@@ -155,33 +157,23 @@ class SpaceTruckerApplication {
 
     goToRunningState() {
         this._currentScene.actionProcessor.detachControl();
-
         this._currentScene = this._routePlanningScene;
-
         this.moveNextAppState(AppStates.PLANNING);
         this._currentScene.actionProcessor.attachControl();
         this._routePlanningScene.setReadyToLaunchState();
     }
 
     goToDrivingState(routeData) {
-        //HACK: this is a hack to get the driving scene to work with the sample route
-        this._splashScreen.scene.dispose();
-        this._splashScreen = null;
-
-        this._engine.displayLoadingUI();
         routeData = routeData ?? this._routePlanningScene.routePath;
-        this._currentScene?.actionProcessor?.detachControl();
-        this._engine.loadingUIText = "Loading Driving Screen...";
+        this._currentScene.actionProcessor.detachControl();
+        this._routePlanningScene.dispose();
+        this._routePlanningScene = null;
         this._drivingScene = new SpaceTruckerDrivingScreen(this._engine, routeData, this.inputManager);
-        this.moveNextAppState(AppStates.DRIVING);
         this._currentScene = this._drivingScene;
+        this.moveNextAppState(AppStates.DRIVING);
         this._drivingScene.onReadyObservable.addOnce(() => {
-            this._engine.hideLoadingUI();
             this._currentScene.actionProcessor.attachControl();
-            this._routePlanningScene.dispose();
-            this._routePlanningScene = null;
         });
-
     }
 
     exit() {
