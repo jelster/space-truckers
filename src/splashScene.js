@@ -24,7 +24,7 @@ import babylonLogoUrl from "../assets/babylonjs_identity_color.png";
 import SpaceTruckerSoundManager from "./spaceTruckerSoundManager";
 
 
-const animationFps = 30;
+const animationFps = 60;
 const flipAnimation = new Animation("flip", "rotation.x", animationFps, Animation.ANIMATIONTYPE_FLOAT, 0, true);
 const fadeAnimation = new Animation("entranceAndExitFade", "visibility", animationFps, Animation.ANIMATIONTYPE_FLOAT, 0, true);
 const scaleAnimation = new Animation("scaleTarget", "scaling", animationFps, Animation.ANIMATIONTYPE_VECTOR3, Animation.ANIMATIONLOOPMODE_CYCLE, true);
@@ -118,23 +118,19 @@ class SplashScene {
         callToAction.onEnd.addOnce(() => {
             console.log("callToAction end");
             ctaBlock.isVisible = true;
-        });
-
-       
+        });       
 
         this.actionProcessor = new SpaceTruckerInputProcessor(this, inputManager, actionList);
 
         this.audioManager = new SpaceTruckerSoundManager(scene, 'title');
         this.audioManager.onReadyObservable.addOnce(_ => this.onReadyObservable.notifyObservers());
-        
-
     }
 
     run() {
         this.currentSegment = this.poweredBy;
         this.music.setVolume(0.01);
         this.music.play();
-        this.music.setVolume(0.998, 400);
+        this.music.setVolume(0.998, 300);
         this.currentSegment.start();
         // this.scene.onBeforeRenderObservable.add(() => {
         //     this.update

@@ -15,7 +15,7 @@ import { CreateTorus } from "@babylonjs/core/Meshes/Builders/torusBuilder";
 import { Axis } from "@babylonjs/core/Maths/math.axis";
 import { Scalar } from "@babylonjs/core/Maths/math.scalar";
 import { Space } from "@babylonjs/core/"; // TODO: fix import
-import { setAndStartTimer } from "@babylonjs/core/Misc";
+import { Observable, setAndStartTimer } from "@babylonjs/core/Misc";
 import { ArcRotateCamera } from "@babylonjs/core/Cameras/arcRotateCamera";
 import { GridMaterial } from "@babylonjs/materials/grid";
 import { Quaternion } from "@babylonjs/core/Maths/math";
@@ -85,6 +85,8 @@ class SpaceTruckerDrivingScreen {
     encounters = [];
     isLoaded = false;
     tempObstacleMesh = null;
+    onReadyObservable = new Observable();
+
     constructor(engine, routeData, inputManager) {
         this.routeData = routeData;
         // this.encounters = routeData.filter(e => e.encounter).map(e => e.encounter);
@@ -118,6 +120,7 @@ class SpaceTruckerDrivingScreen {
             let gP = initializeGui(this);
             this.gui = await gP;
             this.gui.sceneObserver = this.scene.onAfterRenderObservable.add(() => this.updateGui());
+            this.onReadyObservable.notifyObservers(this);
         });
     }
 
