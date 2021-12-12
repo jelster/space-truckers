@@ -84,8 +84,7 @@ class SpaceTruckerApplication {
             const routeData = this._routePlanningScene.routePath;
             this.goToDrivingState(routeData);
         });
-
-
+        engine.hideLoadingUI();
     }
 
     run() {
@@ -102,7 +101,9 @@ class SpaceTruckerApplication {
             case AppStates.INITIALIZING:
                 break;
             case AppStates.CUTSCENE:
+                this._splashScreen.update(gameTime);
                 if (this._splashScreen.skipRequested) {
+                    logger.logInfo("in application onRender - skipping splash screen message");
                     // for debugging driving phase
                     const queryString = window.location.search;
                     if (queryString.includes("testDrive")) {
@@ -110,11 +111,9 @@ class SpaceTruckerApplication {
                     }
                     else {
                         this.goToMainMenu();
-                    }
-
-                    logger.logInfo("in application onRender - skipping splash screen message");
+                    }                    
+                    break;
                 }
-                this._splashScreen.update(gameTime);
                 break;
             case AppStates.MENU:
                 this._mainMenu.update(gameTime);
@@ -126,7 +125,6 @@ class SpaceTruckerApplication {
                 this._drivingScene.update(gameTime);
                 break;
             case AppStates.EXITING:
-
                 break;
             default:
                 break;
@@ -148,6 +146,8 @@ class SpaceTruckerApplication {
 
     goToMainMenu() {
         this._currentScene.actionProcessor.detachControl();
+        this._splashScreen.scene.dispose();
+        this._splashScreen = null;
         this._currentScene = this._mainMenu;
         this.moveNextAppState(AppStates.MENU);
         this._currentScene.actionProcessor.attachControl();
@@ -164,16 +164,23 @@ class SpaceTruckerApplication {
     }
 
     goToDrivingState(routeData) {
+        //HACK: this is a hack to get the driving scene to work with the sample route
+        this._splashScreen.scene.dispose();
+        this._splashScreen = null;
+
         this._engine.displayLoadingUI();
         routeData = routeData ?? this._routePlanningScene.routePath;
         this._currentScene?.actionProcessor?.detachControl();
         this._engine.loadingUIText = "Loading Driving Screen...";
-        this._drivingScene = new SpaceTruckerDrivingScreen(this._engine, routeData, this.inputManager);     
-        this._currentScene = this._drivingScene;
-        this._routePlanningScene.dispose();
-        this._routePlanningScene = null;
+        this._drivingScene = new SpaceTruckerDrivingScreen(this._engine, routeData, this.inputManager);
         this.moveNextAppState(AppStates.DRIVING);
-        this._currentScene.actionProcessor.attachControl();
+        this._currentScene = this._drivingScene;
+        this._drivingScene.onReadyObservable.addOnce(() => {
+            this._engine.hideLoadingUI();
+            this._currentScene.actionProcessor.attachControl();
+            this._routePlanningScene.dispose();
+            this._routePlanningScene = null;
+        });
 
     }
 
