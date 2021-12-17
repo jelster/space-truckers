@@ -14,7 +14,8 @@ const CONTROL_NAMES = Object.freeze({
     acceptText: 'userAcceptText',
     cancelText: 'userCancelText',
     dialog: 'dialogBorder',
-    bodyScrollViewer: 'bodyContainer'
+    bodyScrollViewer: 'bodyContainer',
+    bodyStackPanel: 'bodyStackPanel',
 });
 
 class DialogBox {
@@ -52,6 +53,9 @@ class DialogBox {
             return;
         }
         ctrl.text = value;
+    }
+    get bodyStackPanel() {
+        return this.advancedTexture.getControlByName(CONTROL_NAMES.bodyStackPanel);
     }
     get acceptText() {
         let ctrl = this.advancedTexture.getControlByName(CONTROL_NAMES.acceptText);
@@ -95,7 +99,9 @@ class DialogBox {
         this.advancedTexture.parseContent(stackedDialog, false);
         this.scene = scene;
         this.dialog.isVisible = false;
-        this.bodyText = bodyText;
+        if (bodyText) {
+            this.bodyText = bodyText;
+        }        
         this.titleText = titleText ?? "Space-Truckers: The Dialog Box";
         this.acceptText = acceptText ?? "OK";
         this.cancelText = cancelText ?? "Cancel";
