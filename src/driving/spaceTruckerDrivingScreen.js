@@ -53,7 +53,7 @@ const inputMapPatches = {
 };
 
 const actionList = [
-    // { action: 'ACTIVATE', shouldBounce: () => true },
+    { action: 'ACTIVATE', shouldBounce: () => true },
     { action: 'MOVE_UP', shouldBounce: () => false },
     { action: 'MOVE_DOWN', shouldBounce: () => false },
     { action: 'GO_BACK', shouldBounce: () => true },
@@ -66,6 +66,15 @@ const actionList = [
 
     //  { action: 'PAUSE', shouldBounce: () => true },
 ];
+
+const DRIVING_STATE = Object.freeze({
+    Created: 0,
+    Initialized: 1,
+    Paused: 2,
+    RouteStart: 3,
+    Driving: 4,
+    RouteComplete: 5
+});
 class SpaceTruckerDrivingScreen {
     engine;
     scene;
@@ -83,9 +92,9 @@ class SpaceTruckerDrivingScreen {
     curve = [];
     killMesh;
     encounters = [];
-    isLoaded = false;
     tempObstacleMesh = null;
     onReadyObservable = new Observable();
+    onRouteCompleteObservable = new Observable();
 
     constructor(engine, routeData, inputManager) {
         this.routeData = routeData;
@@ -117,11 +126,12 @@ class SpaceTruckerDrivingScreen {
         this.route = this.calculateRouteParameters(this.routeData);
         this.scene.onReadyObservable.addOnce(async () => {
             await this.initialize();
+            this.currentState = DRIVING_STATE.Initialized;
             let gP = initializeGui(this);
             this.gui = await gP;
-            this.gui.sceneObserver = this.scene.onAfterRenderObservable.add(() => this.updateGui());
             this.onReadyObservable.notifyObservers(this);
         });
+        this.currentState = DRIVING_STATE.Created;
     }
 
     async initialize() {
@@ -160,9 +170,9 @@ class SpaceTruckerDrivingScreen {
                 this.encounters.push(enc);
             }
         }
-
-        this.isLoaded = true;
-        setTimeout(() => this.reset(), 1000);
+        setTimeout(() => {
+            this.reset();
+        }, 1000);
     }
 
     setupKillMesh() {
@@ -232,7 +242,7 @@ class SpaceTruckerDrivingScreen {
         encounterMesh.position.copyFrom(position);
         encounterMesh.position.x += Scalar.RandomRange(-scaling, scaling);
         encounterMesh.position.y += Scalar.RandomRange(-scaling, scaling);
-        encounterMesh.scaling.setAll(scaling / routeDataScalingFactor);
+        encounterMesh.scaling.setAll(Scalar.RandomRange(scaling * 0.5, scaling * 1.5));
 
         encounterMesh.layerMask = SCENE_MASK;
         encounterMesh.physicsImpostor = new PhysicsImpostor(
@@ -246,6 +256,11 @@ class SpaceTruckerDrivingScreen {
 
         return encounterMesh;
     }
+
+    start() {
+        this.currentState = DRIVING_STATE.Driving;
+    }
+
     reset() {
         const { path3d, pathPoints } = this.route;
         const { currentVelocity, currentAngularVelocity, physicsImpostor, mesh } = this.truck;
@@ -263,23 +278,46 @@ class SpaceTruckerDrivingScreen {
 
         mesh.rotationQuaternion = Quaternion.FromLookDirectionRH(tang, up);
         physicsImpostor.setAngularVelocity(Vector3.Zero());
+        this.currentState = DRIVING_STATE.RouteStart;
     }
 
     killTruck() {
-        const { currentVelocity, currentAngularVelocity, physicsImpostor } = this.truck;
+        const { currentVelocity, currentAngularVelocity, physicsImpostor, mesh } = this.truck;
+        const { path3d } = this.route;
         currentVelocity.setAll(0);
         currentAngularVelocity.setAll(0);
         physicsImpostor.setLinearVelocity(Vector3.Zero());
         physicsImpostor.setAngularVelocity(Vector3.Zero());
-        this.reset();
+
+        // check to see if the player has completed the route or if it's just blown through the tube
+        let closestPathPosition = path3d.getClosestPositionTo(mesh.absolutePosition);
+        // not close enough!
+        if (closestPathPosition < 0.99) {
+            this.reset();
+            return;
+        }
+        this.cargoDelivered();
+       
+    }
+
+    cargoDelivered() {
+        this.currentState = DRIVING_STATE.RouteComplete;
+        // gather data for score computation
+        
+
+
+
     }
 
     update(deltaTime) {
         const dT = deltaTime ?? (this.scene.getEngine().getDeltaTime() / 1000);
         this.actionProcessor?.update();
 
-        if (this.isLoaded) {
-            this.truck.update(dT);
+        const { currentState, truck } = this;
+
+        if (currentState === DRIVING_STATE.Driving) {
+            truck.update(dT);        
+            this.updateGui();    
         }
     }
 
@@ -305,6 +343,12 @@ class SpaceTruckerDrivingScreen {
         this.scene.onAfterRenderObservable.remove(this.gui.sceneObserver);
         this.scene.dispose();
 
+    }
+
+    ACTIVATE(state) {
+        if (!state && this.currentState === DRIVING_STATE.RouteStart) {
+            this.start();
+        }
     }
 
     MOVE_UP(state) {
