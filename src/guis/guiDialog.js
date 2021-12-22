@@ -3,7 +3,7 @@ import { Observable } from "@babylonjs/core/Misc/observable";
 
 import { AdvancedDynamicTexture } from "@babylonjs/gui/2D/advancedDynamicTexture";
 import { Texture } from "@babylonjs/core/Materials/Textures/texture";
-import { setAndStartTimer } from "@babylonjs/core";
+import { setAndStartTimer } from "@babylonjs/core/Misc/timer";
 import stackedDialog from "./gui-dialog-buttons-scroll.json"
 
 const CONTROL_NAMES = Object.freeze({
@@ -134,16 +134,20 @@ class DialogBox {
     }
 
     hide() {
-        this.dialog.alpha = 0.998;
-        this.#showTimer = setAndStartTimer({
-            contextObservable: this.scene.onBeforeRenderObservable,
-            timeout: this.#fadeInTransitionDurationMs,
-            onTick: (d) => this.dialog.alpha = Scalar.SmoothStep(1, 0, d.completeRate),
-            onEnded: () => {
-                this.advancedTexture.isForeground = false;
-                this.onDisplayChangeComplete.notifyObservers();
-            }
-        });
+        if (this.dialog) {
+            this.dialog.alpha = 0.998;
+            this.#showTimer = setAndStartTimer({
+                contextObservable: this.scene.onBeforeRenderObservable,
+                timeout: this.#fadeInTransitionDurationMs,
+                onTick: (d) => this.dialog.alpha = Scalar.SmoothStep(1, 0, d.completeRate),
+                onEnded: () => {
+                    this.advancedTexture.isForeground = false;
+                    this.onDisplayChangeComplete.notifyObservers();
+                },
+                breakCondition: this.dialog == null
+            });
+        }
+        
     }
     onAccepted() {
         this.onAcceptedObservable.notifyObservers();
