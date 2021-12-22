@@ -9,7 +9,7 @@ import uiEncounterSoundUrl from "../assets/sounds/UI_Misc09.wav";
 
 const soundFileMap = {
     "title": { url: titleSongUrl, channel: 'music', loop: true },
-    "overworld": { url: backgroundMusicUrl, channel: 'music', loop: true },
+    "overworld": { url: backgroundMusicUrl, channel: 'music', loop: true, level: 0.75 },
     "whoosh": { url: uiWhooshSoundUrl, channel: 'ui', loop: false },
     "menu-slide": { url: uiSlideUrl, channel: 'ui', loop: false },
     "ambient": { url: ambientNoise, channel: 'music', loop: true },

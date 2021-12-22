@@ -45,7 +45,8 @@ class SpaceTruckerSoundManager {
                 }, {
                     autoplay: false,
                     loop: mapped.loop,
-                    spatialSound: mapped.channel === 'sfx'
+                    spatialSound: mapped.channel === 'sfx',
+                    volume: mapped.level ?? 1.0
                 });
                 sound.onEndedObservable.add((endedSound, state) => {
                     this.onSoundPlaybackEnded.notifyObservers(endedSound.name);
