@@ -6,6 +6,7 @@ import ambientNoise from "../assets/sounds/City_Amb_03.wav";
 import uiClickSoundUrl from "../assets/sounds/UI_Clicks01.wav";
 import uiErrorSoundUrl from "../assets/sounds/UIerror2.wav";
 import uiEncounterSoundUrl from "../assets/sounds/UI_Misc09.wav";
+import scoreSoundUrl from "../assets/sounds/cash-register-sound-effect.mp3";
 
 const soundFileMap = {
     "title": { url: titleSongUrl, channel: 'music', loop: true },
@@ -15,7 +16,8 @@ const soundFileMap = {
     "ambient": { url: ambientNoise, channel: 'music', loop: true },
     "click": { url: uiClickSoundUrl, channel: 'ui', loop: false },
     "error": { url: uiErrorSoundUrl, channel: 'ui', loop: false },
-    "encounter": { url: uiEncounterSoundUrl, channel: 'ui', loop: false }
+    "encounter": { url: uiEncounterSoundUrl, channel: 'ui', loop: false },
+    "scoring": { url: scoreSoundUrl, channel: 'ui', loop: false, level: 0.6, rate: 1.65 }
 };
 const soundList = Object.keys(soundFileMap);
 soundFileMap.keys = soundList;
