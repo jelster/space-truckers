@@ -1,4 +1,3 @@
-import { Sound } from "@babylonjs/core/Audio/sound";
 import { Tools } from "@babylonjs/core/Misc/tools";
 import { TextBlock } from "@babylonjs/gui/2D/controls/textBlock";
 import { Control } from "@babylonjs/gui/2D/controls/control";
@@ -6,17 +5,17 @@ import { Scalar } from "@babylonjs/core/Maths/math.scalar";
 import DialogBox from "../guis/guiDialog";
 
 const sampleScore = {
-    // scoreFactors: {
-    //     routeLength: 12450.25,
-    //     cargoCondition: 0.768,
-    //     encounters: 125
-    // },
-    // multipliers: {
-    //     transitTime: 1.2, //{ expected: 180, actual: 150, factor: 1.2  },
-    //     delivery: 1.0,
-    //     condition: 0.768,
-    //     encounterTypes: 1.05
-    // },
+    scoreFactors: {
+        routeLength: 12450.25,
+        cargoCondition: 0.768,
+        encounters: 125
+    },
+    multipliers: {
+        transitTime: 1.2, //{ expected: 180, actual: 150, factor: 1.2  },
+        delivery: 1.0,
+        condition: 0.768,
+        encounterTypes: 1.05
+    },
     finalScores: {
         'Base Delivery': 1000,
         'Route Score': 14940,
@@ -37,7 +36,7 @@ function* nextColor() {
 }
 let colorPicker = nextColor();
 
-function createScoringDialog(advancedTexture, scoreData, scene) {
+function createScoringDialog(scoreData, drivingScreen) {
     let opts = {
         bodyText: 'Time to earn payday!',
         titleText: 'The Drayage Report',
@@ -45,23 +44,24 @@ function createScoringDialog(advancedTexture, scoreData, scene) {
         acceptText: 'Main Menu',
         cancelText: 'Retry'
     };
-    let sound = new Sound("scoreSound", scoreSoundUrl, scene, null, { autoplay: false });
-    sound.setPlaybackRate(1.65);
-    sound.setVolume(0.6);
-    let scoreDialog = new DialogBox(advancedTexture, opts, scene);
+    const { scene, soundManager } = drivingScreen;
+    const sound = soundManager.sound('scoring');
+    
+    let scoreDialog = new DialogBox(opts, scene);
     let dialog = { scoreDialog };
     dialog.height = "98%";
     let scoringCo = scoringAnimationCo();
-    // scoreDialog.onDisplayChangeComplete.addOnce(() =>
+    
     scene.onBeforeRenderObservable.runCoroutineAsync(scoringCo);
+    return scoreDialog;
 
     function* scoringAnimationCo() {
-        let { finalScores } = scoreData;
+        let { finalScores } = scoreData ?? sampleScore;
         let bodyStack = scoreDialog.bodyContainer.children[0];
         let scrollBar = scoreDialog.bodyContainer.verticalBar;
         bodyStack.height = '100%';
         let computedHeight = 0;
-        for (i in finalScores) {
+        for (let i in finalScores) {
             yield Tools.DelayAsync(500);
 
             let frameCounter = 0
@@ -84,7 +84,7 @@ function createScoringDialog(advancedTexture, scoreData, scene) {
                 while (frameCounter <= MAX_COUNT) {
                     let currProgress = frameCounter / MAX_COUNT;
                     sound.play();
-                    speed = Scalar.SmoothStep(0, score, currProgress);
+                    let speed = Scalar.SmoothStep(0, score, currProgress);
                     scoreBlock.text = `${label}.........${speed.toFixed().toLocaleString()}`;
                     frameCounter++;
                     yield Tools.DelayAsync(50);

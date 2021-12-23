@@ -37,6 +37,8 @@ import Truck from "./truck.js";
 import initializeGui from "./driving-gui.js";
 import initializeEnvironment from "./environment.js";
 import SpaceTruckerInputManager from "../spaceTruckerInput";
+import createScoringDialog from "../scoring/scoringDialog";
+import SpaceTruckerSoundManager from "../spaceTruckerSoundManager";
 
 
 const { GUI_MASK, SCENE_MASK } = screenConfig;
@@ -95,6 +97,9 @@ class SpaceTruckerDrivingScreen {
     tempObstacleMesh = null;
     onReadyObservable = new Observable();
     onRouteCompleteObservable = new Observable();
+    onExitObservable = new Observable();
+    scoreDialog;
+    soundManager;
 
     constructor(engine, routeData, inputManager) {
         this.routeData = routeData;
@@ -112,6 +117,8 @@ class SpaceTruckerDrivingScreen {
         SpaceTruckerInputManager.patchControlMap(inputMapPatches);
         this.inputManager = inputManager;
         this.actionProcessor = new SpaceTruckerInputProcessor(this, inputManager, actionList);
+
+        this.soundManager = new SpaceTruckerSoundManager(this.scene, "scoring", "encounter", "error");
 
         this.followCamera = new ArcRotateCamera("followCam", 4.712, 1.078, 80, Vector3.Zero(), this.scene);
         for (var k in followCamSetup) {
@@ -220,7 +227,7 @@ class SpaceTruckerDrivingScreen {
                 let path = paths[pathIdx];
                 path.push(last.clone()
                     .addInPlaceFromFloats(
-                        Math.sin(radiix) * speed * 2,
+                        Math.sin(radiix) * speed,
                         Math.cos(radiix) * speed,
                         0));
             }
@@ -303,10 +310,14 @@ class SpaceTruckerDrivingScreen {
     cargoDelivered() {
         this.currentState = DRIVING_STATE.RouteComplete;
         // gather data for score computation
-        
+        const { pathPoints } = this.route;
+        const encounters = pathPoints.map(p => p.encounter);
 
+        let scoring = null;
 
-
+        let scoreDialog = this.scoreDialog = createScoringDialog(scoring, this);
+        scoreDialog.onAcceptedObservable.addOnce(() => this.onExitObservable.notifyObservers());
+        scoreDialog.onCancelledObservable.addOnce(() => this.reset());
     }
 
     update(deltaTime) {
@@ -317,12 +328,11 @@ class SpaceTruckerDrivingScreen {
 
         if (currentState === DRIVING_STATE.Driving) {
             truck.update(dT);        
-            this.updateGui();    
+            this.updateGui(dT);    
         }
     }
 
-    updateGui() {
-        const dT = (this.scene.getEngine().getDeltaTime() / 1000);
+    updateGui(dT) {
         const { absolutePosition, up } = this.truck.mesh;
         const { encounters } = this;
         encounters.forEach(obstacle => {

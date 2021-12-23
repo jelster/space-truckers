@@ -101,14 +101,20 @@ class DialogBox {
         this.dialog.isVisible = false;
         if (bodyText) {
             this.bodyText = bodyText;
-        }        
+        }
         this.titleText = titleText ?? "Space-Truckers: The Dialog Box";
         this.acceptText = acceptText ?? "OK";
         this.cancelText = cancelText ?? "Cancel";
         this.#acceptPointerObserver = this.accept.onPointerClickObservable
-            .add((evt) => this.onAccepted());
+            .add((evt) => {
+                this.onAccepted();
+                this.onAcceptedObservable.notifyObservers();
+            });
         this.#cancelPointerObserver = this.cancel.onPointerClickObservable
-            .add((evt) => this.onCancelled());
+            .add((evt) => {
+                this.onCancelled();
+                this.onCancelledObservable.notifyObservers();
+            });
 
         this.scene.executeWhenReady(() => {
             if (displayOnLoad) {
@@ -147,13 +153,14 @@ class DialogBox {
                 breakCondition: this.dialog == null
             });
         }
-        
     }
-    onAccepted() {
-        this.onAcceptedObservable.notifyObservers();
+    
+    onAccepted() {        
+        this.hide();
     }
-    onCancelled() {
-        this.onCancelledObservable.notifyObservers();
+
+    onCancelled() {        
+        this.hide();
     }
 
     dispose() {
