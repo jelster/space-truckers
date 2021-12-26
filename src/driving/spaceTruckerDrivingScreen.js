@@ -39,6 +39,8 @@ import initializeEnvironment from "./environment.js";
 import SpaceTruckerInputManager from "../spaceTruckerInput";
 import createScoringDialog from "../scoring/scoringDialog";
 import SpaceTruckerSoundManager from "../spaceTruckerSoundManager";
+import calculateEncounterScore from "../scoring/spaceTruckerScoreManager";
+import computeScores from "../scoring/spaceTruckerScoreManager";
 
 
 const { GUI_MASK, SCENE_MASK } = screenConfig;
@@ -90,6 +92,7 @@ class SpaceTruckerDrivingScreen {
     followCamera;
     actionProcessor;
     routeData;
+    route = null;
     path;
     curve = [];
     killMesh;
@@ -100,6 +103,16 @@ class SpaceTruckerDrivingScreen {
     onExitObservable = new Observable();
     scoreDialog;
     soundManager;
+    currentState = DRIVING_STATE.Created;
+
+    get currentTransitTime() {
+        return this?.route?.actualTransitTime;
+    }
+    set currentTransitTime(val) {
+        if (this.route) {
+            this.route.actualTransitTime = val;
+        }
+    }
 
     constructor(engine, routeData, inputManager) {
         this.routeData = routeData;
@@ -177,6 +190,10 @@ class SpaceTruckerDrivingScreen {
                 this.encounters.push(enc);
             }
         }
+        this.truck.onDestroyedObservable.add(() => {
+            this.currentState = DRIVING_STATE.RouteComplete;
+            // TODO: display cargo destroyed dialog
+        });
         setTimeout(() => {
             this.reset();
         }, 1000);
@@ -195,7 +212,8 @@ class SpaceTruckerDrivingScreen {
 
     calculateRouteParameters(routeData) {
         const { routeDataScalingFactor } = screenConfig;
-        let pathPoints = routeData.map(p => {
+        let { launchForce } = routeData;
+        let pathPoints = routeData.route.map(p => {
             return {
                 position: (typeof p.position !== 'Vector3' ? new Vector3(p.position.x, p.position.y, p.position.z) : p.position)
                     .scaleInPlace(routeDataScalingFactor),
@@ -220,21 +238,24 @@ class SpaceTruckerDrivingScreen {
 
         for (let i = 0; i < pathPoints.length; i++) {
             let { position, gravity, velocity } = pathPoints[i];
-            let speed = velocity.length() / routeDataScalingFactor;
+            let speed = Scalar.Clamp(velocity.length(), 10, 200);
             let last = position.clone();
             for (let pathIdx = 0; pathIdx < numberOfRoadSegments; pathIdx++) {
                 let radiix = (pathIdx / numberOfRoadSegments) * Scalar.TwoPi;
                 let path = paths[pathIdx];
+                let xScale = Math.cos(radiix);
+                let yScale = Math.sin(radiix);
+
                 path.push(last.clone()
                     .addInPlaceFromFloats(
-                        Math.sin(radiix) * speed,
-                        Math.cos(radiix) * speed,
+                        xScale * speed,
+                        yScale * speed,
                         0));
             }
         }
         //paths.push(paths[0]);
-
-        return { paths, pathPoints, path3d, displayLines };
+        let transitTime, distanceTraveled = { routeData };
+        return { paths, pathPoints, path3d, displayLines, transitTime, distanceTraveled, launchForce };
     }
 
     spawnEncounter(seed) {
@@ -259,7 +280,7 @@ class SpaceTruckerDrivingScreen {
                 mass: velocity.lengthSquared(),
                 restitution: 0.576
             }, this.scene);
-        encounterMesh.physicsImpostor.setLinearVelocity(gravity);
+        encounterMesh.physicsImpostor.setLinearVelocity(gravity.negateInPlace());
 
         return encounterMesh;
     }
@@ -274,6 +295,8 @@ class SpaceTruckerDrivingScreen {
         const up = Axis.Y;
 
         console.log('resetting...');
+        this.currentTransitTime = 0.0;
+        this.truck.health = 100;
         const point = path3d.getPointAt(0);
         const tang = path3d.getTangentAt(0);
 
@@ -299,22 +322,17 @@ class SpaceTruckerDrivingScreen {
         // check to see if the player has completed the route or if it's just blown through the tube
         let closestPathPosition = path3d.getClosestPositionTo(mesh.absolutePosition);
         // not close enough!
-        if (closestPathPosition < 0.99) {
+        if (closestPathPosition < 0.976) {
             this.reset();
             return;
         }
-        this.cargoDelivered();
-       
+        this.completeRound();
     }
 
-    cargoDelivered() {
+    completeRound() {
         this.currentState = DRIVING_STATE.RouteComplete;
         // gather data for score computation
-        const { pathPoints } = this.route;
-        const encounters = pathPoints.map(p => p.encounter);
-
-        let scoring = null;
-
+        let scoring = computeScores(this.route);
         let scoreDialog = this.scoreDialog = createScoringDialog(scoring, this);
         scoreDialog.onAcceptedObservable.addOnce(() => this.onExitObservable.notifyObservers());
         scoreDialog.onCancelledObservable.addOnce(() => this.reset());
@@ -327,8 +345,10 @@ class SpaceTruckerDrivingScreen {
         const { currentState, truck } = this;
 
         if (currentState === DRIVING_STATE.Driving) {
-            truck.update(dT);        
-            this.updateGui(dT);    
+            truck.update(dT);
+            this.updateGui(dT);
+            this.route.currentTransitTime += dT;
+            this.route.cargoCondition = this.truck.health;
         }
     }
 
@@ -352,7 +372,6 @@ class SpaceTruckerDrivingScreen {
         SpaceTruckerInputManager.unPatchControlMap(inputMapPatches);
         this.scene.onAfterRenderObservable.remove(this.gui.sceneObserver);
         this.scene.dispose();
-
     }
 
     ACTIVATE(state) {
