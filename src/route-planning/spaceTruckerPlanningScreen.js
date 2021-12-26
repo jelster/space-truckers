@@ -75,8 +75,13 @@ class SpaceTruckerPlanningScreen {
     routeConfirmationDialog = null;
     cargoDestroyedDialog = null;
 
-    get routePath() {
-        return this.cargo.routePath;
+    get routeData() {
+        return {
+            route: this.cargo.routePath,
+            launchForce: this.launchForce,
+            transitTime: this.cargo.timeInTransit,
+            distanceTraveled: this.cargo.distanceTraveled
+        }
     }
     get encounterManager() {
         return this.cargo.encounterManager;

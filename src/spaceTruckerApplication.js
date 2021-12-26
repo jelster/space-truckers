@@ -81,7 +81,7 @@ class SpaceTruckerApplication {
         this._routePlanningScene = new SpaceTruckerPlanningScreen(this._engine, this.inputManager, appData);
 
         this._routePlanningScene.routeAcceptedObservable.add(() => {
-            const routeData = this._routePlanningScene.routePath;
+            const routeData = this._routePlanningScene.routeData;
             this.goToDrivingState(routeData);
         });
         engine.hideLoadingUI();
@@ -164,7 +164,7 @@ class SpaceTruckerApplication {
     }
 
     goToDrivingState(routeData) {
-        routeData = routeData ?? this._routePlanningScene.routePath;
+        routeData = routeData ?? this._routePlanningScene.routeData;
         this._currentScene.actionProcessor.detachControl();
         this._routePlanningScene.dispose();
         this._routePlanningScene = null;

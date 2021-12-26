@@ -17,6 +17,7 @@ class CargoUnit extends OrbitingGameObject {
     mass = 0;
     isInFlight = false;
     routePath = [];
+    launchForce = 0.0;
     encounterManager;
     samplingFrequency = 10; //Hz
     get lastFlightPoint() {
@@ -41,6 +42,7 @@ class CargoUnit extends OrbitingGameObject {
 
     launch(impulse) {
         this.isInFlight = true;
+        this.launchForce = impulse;
         this.trailMesh = new TrailMesh("cargoTrail", this.mesh, this.scene, 3, 10000);
         this.physicsImpostor.applyImpulse(impulse, this.mesh.getAbsolutePosition());
     }
@@ -97,6 +99,7 @@ class CargoUnit extends OrbitingGameObject {
         node.velocity = node.scaling;
         node.gravity = this.lastGravity.clone();
         node.time = this.timeInTransit;
+        node.distanceTraveled = this.distanceTraveled;
         node.encounterZone = this.encounterManager.currentZone?.id;
         this.routePath.push(node);
     }
