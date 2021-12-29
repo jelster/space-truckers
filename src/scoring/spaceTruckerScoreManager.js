@@ -41,7 +41,7 @@ let calculateEncounterScoreToRef = function (route, score) {
             return prev + curr;
         });
     multipliers.encounterTypes = encounterModifier;
-    let encounterScore = encounters.length * multipliers.encounterTypes;
+    let encounterScore = 100 * encounters.length * multipliers.encounterTypes;
     finalScores['Encounters'] = encounterScore;
 
     return s;
@@ -69,7 +69,7 @@ let calculateCargoScoreToRef = function (route, score) {
 
     const { cargoCondition } = route;
     scoreFactors.cargoCondition = cargoCondition;
-    let cargoScore = cargoCondition * multipliers.condition;
+    let cargoScore = 10 * cargoCondition * multipliers.condition;
     finalScores['Cargo Score'] = cargoScore;
 
     return s;
