@@ -1,7 +1,7 @@
 const DELIVERY_BONUS = 10000;
 const BASE_DELIVERY_SCORE = 1000;
 
-let createDefaultScoring = function() {
+let createDefaultScoring = function () {
     return {
         scoreFactors: {
             routeLength: 0.0,
@@ -26,7 +26,7 @@ let createDefaultScoring = function() {
     };
 }
 
-let calculateEncounterScoreToRef = function(route, score) {
+let calculateEncounterScoreToRef = function (route, score) {
     let s = score ?? createDefaultScoring();
     let { finalScores, multipliers, scoreFactors } = s;
     const { pathPoints } = route;
@@ -36,73 +36,69 @@ let calculateEncounterScoreToRef = function(route, score) {
     console.log(encounters);
 
     scoreFactors.encounters = encounters.length;
-    let encounterModifier = encounters
+    let encounterModifier = 1 + encounters.map(e => e.scoreModifier)
         .reduce((prev, curr, cidx, arr) => {
-            if (curr === null) {
-                return prev;
-            }
-            return prev.scoreModifier + curr.scoreModifier;
+            return prev + curr;
         });
     multipliers.encounterTypes = encounterModifier;
     let encounterScore = encounters.length * multipliers.encounterTypes;
-    finalScores['Encounters'] = encounterScore;    
-    
+    finalScores['Encounters'] = encounterScore;
+
     return s;
 }
 
-let calculateRouteScoreToRef = function(route, score){
+let calculateRouteScoreToRef = function (route, score) {
     let s = score ?? createDefaultScoring();
     let { finalScores, multipliers, scoreFactors } = s;
-    let { expected, actual, factor } = multipliers.transitTime;
+    let transit = multipliers.transitTime;
 
-    let {launchForce, currentTransitTime, transitTime, distanceTraveled} = route.launchForce;
+    transit.expected = route.transitTime;
+    transit.actual = route.actualTransitTime;
+    transit.factor = 0.5 + route.transitTime / route.actualTransitTime;
+    scoreFactors.routeLength = route.distanceTraveled;
+    scoreFactors.launch = route.launchForce;
 
-    expected = transitTime;
-    actual = currentTransitTime;
-    factor = 0.5 + expected / actual;
-    scoreFactors.routeLength = distanceTraveled;
+    finalScores['Route Score'] = (route.distanceTraveled * transit.factor) - (route.launchForce * transit.factor);
 
-    finalScores['Route Score'] = (distanceTraveled * factor) - (launchForce * factor);
-    
     return s;
 };
 
-let calculateCargoScoreToRef = function(route, score) {
+let calculateCargoScoreToRef = function (route, score) {
     let s = score ?? createDefaultScoring();
     let { finalScores, multipliers, scoreFactors } = s;
-    
+
     const { cargoCondition } = route;
     scoreFactors.cargoCondition = cargoCondition;
     let cargoScore = cargoCondition * multipliers.condition;
     finalScores['Cargo Score'] = cargoScore;
-    
+
     return s;
 }
 
-let calculateBonusScoreToRef = function(route, score) {
+let calculateBonusScoreToRef = function (route, score) {
     let s = score ?? createDefaultScoring();
-    
+
     if (route.cargoCondition >= 100) {
         s.finalScores['Delivery Bonus'] = DELIVERY_BONUS;
     }
     else {
         s.finalScores['Delivery Bonus'] = 0;
     }
-    
+
     return s;
 }
 
-let calculateFinalScoreToRef = function(score) {
+let calculateFinalScoreToRef = function (score) {
     let { finalScores } = score;
     finalScores['Base Delivery'] = BASE_DELIVERY_SCORE;
     let finalScore = Object.values(finalScores)
         .reduce((prev, curr) => prev + Number(curr));
     score.finalScores['Final Total'] = finalScore;
-    
+
     return score;
 }
 
-let computeScores = function(route) {
+let computeScores = function (route) {
     let score = createDefaultScoring();
     calculateEncounterScoreToRef(route, score);
     calculateRouteScoreToRef(route, score);
@@ -116,4 +112,4 @@ let computeScores = function(route) {
 }
 
 export default computeScores;
-export {createDefaultScoring};
+export { createDefaultScoring };

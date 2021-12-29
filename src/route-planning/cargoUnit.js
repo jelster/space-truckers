@@ -42,7 +42,6 @@ class CargoUnit extends OrbitingGameObject {
 
     launch(impulse) {
         this.isInFlight = true;
-        this.launchForce = impulse;
         this.trailMesh = new TrailMesh("cargoTrail", this.mesh, this.scene, 3, 10000);
         this.physicsImpostor.applyImpulse(impulse, this.mesh.getAbsolutePosition());
     }

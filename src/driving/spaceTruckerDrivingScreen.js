@@ -115,7 +115,7 @@ class SpaceTruckerDrivingScreen {
     }
 
     constructor(engine, routeData, inputManager) {
-        this.routeData = routeData;
+        
         // this.encounters = routeData.filter(e => e.encounter).map(e => e.encounter);
         this.engine = engine;
         this.scene = new Scene(engine);
@@ -143,7 +143,7 @@ class SpaceTruckerDrivingScreen {
         this.scene.activeCameras.push(this.followCamera);
 
         initializeEnvironment(this);
-        this.route = this.calculateRouteParameters(this.routeData);
+        this.route = this.calculateRouteParameters(routeData);
         this.scene.onReadyObservable.addOnce(async () => {
             await this.initialize();
             this.currentState = DRIVING_STATE.Initialized;
@@ -211,8 +211,8 @@ class SpaceTruckerDrivingScreen {
     }
 
     calculateRouteParameters(routeData) {
+        console.log(routeData);
         const { routeDataScalingFactor } = screenConfig;
-        let { launchForce } = routeData;
         let pathPoints = routeData.route.map(p => {
             return {
                 position: (typeof p.position !== 'Vector3' ? new Vector3(p.position.x, p.position.y, p.position.z) : p.position)
@@ -238,7 +238,7 @@ class SpaceTruckerDrivingScreen {
 
         for (let i = 0; i < pathPoints.length; i++) {
             let { position, gravity, velocity } = pathPoints[i];
-            let speed = Scalar.Clamp(velocity.length(), 10, 200);
+            let speed = Scalar.Clamp(velocity.length(), 20, 200);
             let last = position.clone();
             for (let pathIdx = 0; pathIdx < numberOfRoadSegments; pathIdx++) {
                 let radiix = (pathIdx / numberOfRoadSegments) * Scalar.TwoPi;
@@ -254,7 +254,8 @@ class SpaceTruckerDrivingScreen {
             }
         }
         //paths.push(paths[0]);
-        let transitTime, distanceTraveled = { routeData };
+        let transitTime = routeData.transitTime;
+        let {distanceTraveled, launchForce} = routeData;
         return { paths, pathPoints, path3d, displayLines, transitTime, distanceTraveled, launchForce };
     }
 
@@ -331,6 +332,8 @@ class SpaceTruckerDrivingScreen {
 
     completeRound() {
         this.currentState = DRIVING_STATE.RouteComplete;
+
+        this.route.actualTransitTime = this.currentTransitTime;
         // gather data for score computation
         let scoring = computeScores(this.route);
         let scoreDialog = this.scoreDialog = createScoringDialog(scoring, this);
@@ -347,7 +350,7 @@ class SpaceTruckerDrivingScreen {
         if (currentState === DRIVING_STATE.Driving) {
             truck.update(dT);
             this.updateGui(dT);
-            this.route.currentTransitTime += dT;
+            this.currentTransitTime += dT;
             this.route.cargoCondition = this.truck.health;
         }
     }

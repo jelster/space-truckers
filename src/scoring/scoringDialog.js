@@ -63,7 +63,7 @@ function createScoringDialog(scoreData, drivingScreen) {
         let computedHeight = 0;
         for (let i in finalScores) {
             yield Tools.DelayAsync(500);
-            scoreDialog.bodyText = null;
+            scoreDialog.bodyText = '';
             let frameCounter = 0
             let label = i;
             let score = Number(finalScores[i]);
