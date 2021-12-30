@@ -310,6 +310,7 @@ class SpaceTruckerDrivingScreen {
         mesh.rotationQuaternion = Quaternion.FromLookDirectionRH(tang, up);
         physicsImpostor.setAngularVelocity(Vector3.Zero());
         this.currentState = DRIVING_STATE.RouteStart;
+        this.gui.guiCamera.layerMask = GUI_MASK;
     }
 
     killTruck() {
@@ -331,8 +332,8 @@ class SpaceTruckerDrivingScreen {
     }
 
     completeRound() {
+        this.gui.guiCamera.layerMask = 0x0;
         this.currentState = DRIVING_STATE.RouteComplete;
-
         this.route.actualTransitTime = this.currentTransitTime;
         // gather data for score computation
         let scoring = computeScores(this.route);
