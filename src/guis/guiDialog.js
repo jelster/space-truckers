@@ -4,7 +4,9 @@ import { Observable } from "@babylonjs/core/Misc/observable";
 import { AdvancedDynamicTexture } from "@babylonjs/gui/2D/advancedDynamicTexture";
 import { Texture } from "@babylonjs/core/Materials/Textures/texture";
 import { setAndStartTimer } from "@babylonjs/core/Misc/timer";
-import stackedDialog from "./gui-dialog-buttons-scroll.json"
+import stackedDialog from "./gui-dialog-buttons-scroll.json";
+
+const SCENE_MASK = 0x1;
 
 const CONTROL_NAMES = Object.freeze({
     cancel: 'userCancel',
@@ -96,6 +98,7 @@ class DialogBox {
         } = options;
 
         this.advancedTexture = AdvancedDynamicTexture.CreateFullscreenUI("dialog", false, scene, Texture.NEAREST_NEAREST, true);
+        this.advancedTexture.layer.layerMask = SCENE_MASK;
         this.advancedTexture.parseContent(stackedDialog, false);
         this.scene = scene;
         this.dialog.isVisible = false;
