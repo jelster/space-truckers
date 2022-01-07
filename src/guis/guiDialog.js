@@ -23,7 +23,7 @@ const CONTROL_NAMES = Object.freeze({
 class DialogBox {
     advancedTexture;
     scene;
-    onDisplayChangeComplete = new Observable();
+
     onAcceptedObservable = new Observable();
     #acceptPointerObserver = null;
     onCancelledObservable = new Observable();
@@ -31,7 +31,7 @@ class DialogBox {
     #fadeInTransitionDurationMs = 800;
     #showTimer = null;
 
-    get dialog() {
+    get dialogContainer() {
         return this.advancedTexture.getControlByName(CONTROL_NAMES.dialog);
     }
     get titleText() {
@@ -101,7 +101,7 @@ class DialogBox {
         this.advancedTexture.layer.layerMask = SCENE_MASK;
         this.advancedTexture.parseContent(stackedDialog, false);
         this.scene = scene;
-        this.dialog.isVisible = false;
+        this.dialogContainer.isVisible = false;
         if (bodyText) {
             this.bodyText = bodyText;
         }
@@ -130,39 +130,44 @@ class DialogBox {
         });
     }
 
-    show() {
-        this.dialog.alpha = 0;
-        this.dialog.isVisible = true;
-        this.advancedTexture.isForeground = true;
-        this.#showTimer = setAndStartTimer({
-            contextObservable: this.scene.onBeforeRenderObservable,
-            timeout: this.#fadeInTransitionDurationMs,
-            onTick: (d) => this.dialog.alpha = Scalar.SmoothStep(0, 1, d.completeRate),
-            onEnded: () => this.onDisplayChangeComplete.notifyObservers()
-        });
-    }
-
-    hide() {
-        if (this.dialog) {
-            this.dialog.alpha = 0.998;
+    async show() {
+        return new Promise((resolve, reject) => {
+            console.log('show');
+            this.dialogContainer.alpha = 0;
+            this.dialogContainer.isVisible = true;
+            this.advancedTexture.isForeground = true;
             this.#showTimer = setAndStartTimer({
                 contextObservable: this.scene.onBeforeRenderObservable,
                 timeout: this.#fadeInTransitionDurationMs,
-                onTick: (d) => this.dialog.alpha = Scalar.SmoothStep(1, 0, d.completeRate),
-                onEnded: () => {
-                    this.advancedTexture.isForeground = false;
-                    this.onDisplayChangeComplete.notifyObservers();
-                },
-                breakCondition: this.dialog == null
+                onTick: (d) => this.dialogContainer.alpha = Scalar.SmoothStep(0, 1, d.completeRate),
+                onEnded: () => resolve()
             });
-        }
+        });
     }
-    
-    onAccepted() {        
+
+    async hide() {
+        return new Promise((resolve, reject) => {
+            if (this.dialogContainer) {
+                this.dialogContainer.alpha = 1;
+                this.#showTimer = setAndStartTimer({
+                    contextObservable: this.scene.onBeforeRenderObservable,
+                    timeout: this.#fadeInTransitionDurationMs,
+                    onTick: (d) => this.dialogContainer.alpha = Scalar.SmoothStep(0.998, 0, d.completeRate),
+                    onEnded: () => {
+                        this.advancedTexture.isForeground = false;
+                        this.dialogContainer.isVisible = false;
+                        resolve();
+                    },
+                    breakCondition: this.dialogContainer == null
+                });
+            }
+        });
+    }
+    onAccepted() {
         this.hide();
     }
 
-    onCancelled() {        
+    onCancelled() {
         this.hide();
     }
 

@@ -7,7 +7,7 @@ import BaseGameObject from "../baseGameObject";
 import { truckSetup, screenConfig } from "./gameData.js";
 
 const { SCENE_MASK } = screenConfig;
-const ANGULAR_DAMPING = 0.25;
+const ANGULAR_DAMPING = 0.025;
 class Truck extends BaseGameObject {
     currentVelocity = truckSetup.initialVelocity.clone();
     currentAcceleration = truckSetup.maxAcceleration;
