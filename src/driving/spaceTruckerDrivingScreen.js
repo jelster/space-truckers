@@ -39,7 +39,6 @@ import initializeEnvironment from "./environment.js";
 import SpaceTruckerInputManager from "../spaceTruckerInput";
 import createScoringDialog from "../scoring/scoringDialog";
 import SpaceTruckerSoundManager from "../spaceTruckerSoundManager";
-import calculateEncounterScore from "../scoring/spaceTruckerScoreManager";
 import computeScores from "../scoring/spaceTruckerScoreManager";
 
 
@@ -115,7 +114,7 @@ class SpaceTruckerDrivingScreen {
     }
 
     constructor(engine, routeData, inputManager) {
-        
+
         // this.encounters = routeData.filter(e => e.encounter).map(e => e.encounter);
         this.engine = engine;
         this.scene = new Scene(engine);
@@ -255,7 +254,7 @@ class SpaceTruckerDrivingScreen {
         }
         //paths.push(paths[0]);
         let transitTime = routeData.transitTime;
-        let {distanceTraveled, launchForce} = routeData;
+        let { distanceTraveled, launchForce } = routeData;
         return { paths, pathPoints, path3d, displayLines, transitTime, distanceTraveled, launchForce };
     }
 

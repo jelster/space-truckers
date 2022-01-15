@@ -10,7 +10,7 @@ import scoreSoundUrl from "../assets/sounds/cash-register-sound-effect.mp3";
 
 const soundFileMap = {
     "title": { url: titleSongUrl, channel: 'music', loop: true },
-    "overworld": { url: backgroundMusicUrl, channel: 'music', loop: true, level: 0.75 },
+    "overworld": { url: backgroundMusicUrl, channel: 'music', loop: true, level: 0.670 },
     "whoosh": { url: uiWhooshSoundUrl, channel: 'ui', loop: false },
     "menu-slide": { url: uiSlideUrl, channel: 'ui', loop: false },
     "ambient": { url: ambientNoise, channel: 'music', loop: true },
