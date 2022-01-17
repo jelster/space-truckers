@@ -36,7 +36,7 @@ const initializeGui = async (screen) => {
     radarMesh.layerMask = GUI_MASK;
     radarMesh.rotation.x = Math.PI / 2;
 
-    let radarGui = AdvancedDynamicTexture.CreateForMeshTexture(radarMesh, radarTextureResolution, radarTextureResolution, false);
+    let radarGui = AdvancedDynamicTexture.CreateForMeshTexture(radarMesh, radarTextureResolution, radarTextureResolution, false, false);
     radarGui.background = "black";
     
     let radarMaterial = new StandardMaterial("radMat", scene);

@@ -212,7 +212,8 @@ class SpaceTruckerDrivingScreen {
     calculateRouteParameters(routeData) {
         console.log(routeData);
         const { routeDataScalingFactor } = screenConfig;
-        let pathPoints = routeData.route.map(p => {
+        let pathPoints = Array.isArray(routeData) ? routeData : routeData.route;
+        pathPoints = pathPoints.map(p => {
             return {
                 position: (typeof p.position !== 'Vector3' ? new Vector3(p.position.x, p.position.y, p.position.z) : p.position)
                     .scaleInPlace(routeDataScalingFactor),
@@ -356,18 +357,21 @@ class SpaceTruckerDrivingScreen {
     }
 
     updateGui(dT) {
-        const { absolutePosition, up } = this.truck.mesh;
+        const { absolutePosition, up, forward } = this.truck.mesh;
         const { encounters } = this;
         encounters.forEach(obstacle => {
             const { uiBlip } = obstacle;
             // calculate the polar coordinates of the obstacle relative to the truck
-            let r = Vector3.Distance(obstacle.absolutePosition, absolutePosition);
+            let dir = absolutePosition.subtract(obstacle.position);
+            let r = dir.length();
+            dir.normalize();
+
             // theta is the angle between the center origin and the obstacle
-            let theta = Vector3.GetAngleBetweenVectorsOnPlane(absolutePosition, up, obstacle.absolutePosition);
-            let posLeft = Math.cos(theta) * r; // translate from origin-center
-            let posTop = -1 * Math.sin(theta) * r; // translate from origin-center
-            uiBlip.left = posLeft * 4.96 - (r * 0.5); // scale by size of radar mesh
-            uiBlip.top = posTop * 4.96 - (r * 0.5);
+            let theta = Vector3.GetAngleBetweenVectorsOnPlane(dir, forward, Axis.Y);
+            let posLeft = Math.sin(theta) * r; // translate from origin-center
+            let posTop = Math.cos(theta) * r; // translate from origin-center
+            uiBlip.left = posLeft - 0.5; // scale by size of radar mesh
+            uiBlip.top = posTop - 0.5;
         });
     }
 

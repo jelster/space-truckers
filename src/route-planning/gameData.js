@@ -204,7 +204,7 @@ const gameData = {
     asteroidBeltOptions: {
         density: 280,
         maxScale: new Vector3(10.25, 10.25, 10.25),
-        number: 3000,
+        number: 1000,
         innerBeltRadius: 1000 * distanceMultiplier,
         outerBeltRadius: 1700 * distanceMultiplier,
         posRadians: 0,
