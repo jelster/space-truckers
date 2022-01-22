@@ -27,6 +27,7 @@ import { Ray } from "@babylonjs/core/Culling/ray"; // used by ActionManager
 import { ExecuteCodeAction } from "@babylonjs/core/Actions/directActions";
 import { Axis, Scalar, Space } from "@babylonjs/core";
 import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
+import DialogBox from "../guis/guiDialog";
 
 const preFlightActionList = [
     { action: 'ACTIVATE', shouldBounce: () => true },
@@ -71,9 +72,16 @@ class SpaceTruckerPlanningScreen {
     actionProcessor;
     onStateChangeObservable = new Observable();
     routeAcceptedObservable = new Observable();
+    routeConfirmationDialog = null;
+    cargoDestroyedDialog = null;
 
-    get routePath() {
-        return this.cargo.routePath;
+    get routeData() {
+        return {
+            route: this.cargo.routePath,
+            launchForce: this.launchForce,
+            transitTime: this.cargo.timeInTransit,
+            distanceTraveled: this.cargo.distanceTraveled
+        }
     }
     get encounterManager() {
         return this.cargo.encounterManager;
@@ -191,7 +199,24 @@ class SpaceTruckerPlanningScreen {
         this.gameState = PLANNING_STATE.Initialized;
         this.camera.useFramingBehavior = true;
         this.camera.attachControl(true);
-        
+
+        this.routeConfirmationDialog = new DialogBox({
+            bodyText: 'Successful route planning! Use route and launch?',
+            titleText: 'Confirm Flight Plan',
+            acceptText: 'Launch!',
+            cancelText: 'Reset',
+            displayOnLoad: false
+        }, this.scene);
+        this.routeConfirmationDialog.onAcceptedObservable.add(() => {
+            this.routeAcceptedObservable.notifyObservers();
+            this.gameState = PLANNING_STATE.RouteAccepted;
+            this.routeConfirmationDialog.hide();
+        });
+        this.routeConfirmationDialog.onCancelledObservable.add(() => {
+            this.routeConfirmationDialog.hide();
+            this.setReadyToLaunchState();
+        });
+
     }
 
     update(deltaTime) {
@@ -307,7 +332,7 @@ class SpaceTruckerPlanningScreen {
                 this.cargo.position.copyFrom(this.cargo.lastFlightPoint.position);
                 this.cargo.physicsImpostor.setLinearVelocity(this.cargo.lastFlightPoint.velocity);
             }
-            
+
             this.cargo.physicsImpostor.wakeUp();
         }
         else {
@@ -321,11 +346,7 @@ class SpaceTruckerPlanningScreen {
     cargoArrived() {
         this.gameState = PLANNING_STATE.CargoArrived;
         this.cargo.physicsImpostor.setLinearVelocity(new Vector3(0, 0, 0));
-        
-        // temporary
-        this.routeAcceptedObservable.notifyObservers();
-        this.gameState = PLANNING_STATE.RouteAccepted
-        
+        this.routeConfirmationDialog.show();
     }
 
 
@@ -425,4 +446,4 @@ class SpaceTruckerPlanningScreen {
 
 export default SpaceTruckerPlanningScreen;
 const PLAN_STATE_KEYS = Object.keys(PLANNING_STATE);
-export { PLAN_STATE_KEYS,PLANNING_STATE  };
+export { PLAN_STATE_KEYS, PLANNING_STATE };

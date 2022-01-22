@@ -37,6 +37,9 @@ import Truck from "./truck.js";
 import initializeGui from "./driving-gui.js";
 import initializeEnvironment from "./environment.js";
 import SpaceTruckerInputManager from "../spaceTruckerInput";
+import createScoringDialog from "../scoring/scoringDialog";
+import SpaceTruckerSoundManager from "../spaceTruckerSoundManager";
+import computeScores from "../scoring/spaceTruckerScoreManager";
 
 
 const { GUI_MASK, SCENE_MASK } = screenConfig;
@@ -53,7 +56,7 @@ const inputMapPatches = {
 };
 
 const actionList = [
-    // { action: 'ACTIVATE', shouldBounce: () => true },
+    { action: 'ACTIVATE', shouldBounce: () => true },
     { action: 'MOVE_UP', shouldBounce: () => false },
     { action: 'MOVE_DOWN', shouldBounce: () => false },
     { action: 'GO_BACK', shouldBounce: () => true },
@@ -66,6 +69,15 @@ const actionList = [
 
     //  { action: 'PAUSE', shouldBounce: () => true },
 ];
+
+const DRIVING_STATE = Object.freeze({
+    Created: 0,
+    Initialized: 1,
+    Paused: 2,
+    RouteStart: 3,
+    Driving: 4,
+    RouteComplete: 5
+});
 class SpaceTruckerDrivingScreen {
     engine;
     scene;
@@ -79,16 +91,30 @@ class SpaceTruckerDrivingScreen {
     followCamera;
     actionProcessor;
     routeData;
+    route = null;
     path;
     curve = [];
     killMesh;
     encounters = [];
-    isLoaded = false;
     tempObstacleMesh = null;
     onReadyObservable = new Observable();
+    onRouteCompleteObservable = new Observable();
+    onExitObservable = new Observable();
+    scoreDialog;
+    soundManager;
+    currentState = DRIVING_STATE.Created;
+
+    get currentTransitTime() {
+        return this?.route?.actualTransitTime;
+    }
+    set currentTransitTime(val) {
+        if (this.route) {
+            this.route.actualTransitTime = val;
+        }
+    }
 
     constructor(engine, routeData, inputManager) {
-        this.routeData = routeData;
+
         // this.encounters = routeData.filter(e => e.encounter).map(e => e.encounter);
         this.engine = engine;
         this.scene = new Scene(engine);
@@ -104,6 +130,8 @@ class SpaceTruckerDrivingScreen {
         this.inputManager = inputManager;
         this.actionProcessor = new SpaceTruckerInputProcessor(this, inputManager, actionList);
 
+        this.soundManager = new SpaceTruckerSoundManager(this.scene, "scoring", "encounter", "error");
+
         this.followCamera = new ArcRotateCamera("followCam", 4.712, 1.078, 80, Vector3.Zero(), this.scene);
         for (var k in followCamSetup) {
             this.followCamera[k] = followCamSetup[k];
@@ -114,14 +142,15 @@ class SpaceTruckerDrivingScreen {
         this.scene.activeCameras.push(this.followCamera);
 
         initializeEnvironment(this);
-        this.route = this.calculateRouteParameters(this.routeData);
+        this.route = this.calculateRouteParameters(routeData);
         this.scene.onReadyObservable.addOnce(async () => {
             await this.initialize();
+            this.currentState = DRIVING_STATE.Initialized;
             let gP = initializeGui(this);
             this.gui = await gP;
-            this.gui.sceneObserver = this.scene.onAfterRenderObservable.add(() => this.updateGui());
             this.onReadyObservable.notifyObservers(this);
         });
+        this.currentState = DRIVING_STATE.Created;
     }
 
     async initialize() {
@@ -160,9 +189,13 @@ class SpaceTruckerDrivingScreen {
                 this.encounters.push(enc);
             }
         }
-
-        this.isLoaded = true;
-        setTimeout(() => this.reset(), 1000);
+        this.truck.onDestroyedObservable.add(() => {
+            this.currentState = DRIVING_STATE.RouteComplete;
+            // TODO: display cargo destroyed dialog
+        });
+        setTimeout(() => {
+            this.reset();
+        }, 1000);
     }
 
     setupKillMesh() {
@@ -177,8 +210,10 @@ class SpaceTruckerDrivingScreen {
     }
 
     calculateRouteParameters(routeData) {
+        console.log(routeData);
         const { routeDataScalingFactor } = screenConfig;
-        let pathPoints = routeData.map(p => {
+        let pathPoints = Array.isArray(routeData) ? routeData : routeData.route;
+        pathPoints = pathPoints.map(p => {
             return {
                 position: (typeof p.position !== 'Vector3' ? new Vector3(p.position.x, p.position.y, p.position.z) : p.position)
                     .scaleInPlace(routeDataScalingFactor),
@@ -203,21 +238,25 @@ class SpaceTruckerDrivingScreen {
 
         for (let i = 0; i < pathPoints.length; i++) {
             let { position, gravity, velocity } = pathPoints[i];
-            let speed = velocity.length() / routeDataScalingFactor;
+            let speed = Scalar.Clamp(velocity.length(), 20, 200);
             let last = position.clone();
             for (let pathIdx = 0; pathIdx < numberOfRoadSegments; pathIdx++) {
                 let radiix = (pathIdx / numberOfRoadSegments) * Scalar.TwoPi;
                 let path = paths[pathIdx];
+                let xScale = Math.cos(radiix);
+                let yScale = Math.sin(radiix);
+
                 path.push(last.clone()
                     .addInPlaceFromFloats(
-                        Math.sin(radiix) * speed * 2,
-                        Math.cos(radiix) * speed,
+                        xScale * speed,
+                        yScale * speed,
                         0));
             }
         }
         //paths.push(paths[0]);
-
-        return { paths, pathPoints, path3d, displayLines };
+        let transitTime = routeData.transitTime;
+        let { distanceTraveled, launchForce } = routeData;
+        return { paths, pathPoints, path3d, displayLines, transitTime, distanceTraveled, launchForce };
     }
 
     spawnEncounter(seed) {
@@ -232,7 +271,7 @@ class SpaceTruckerDrivingScreen {
         encounterMesh.position.copyFrom(position);
         encounterMesh.position.x += Scalar.RandomRange(-scaling, scaling);
         encounterMesh.position.y += Scalar.RandomRange(-scaling, scaling);
-        encounterMesh.scaling.setAll(scaling / routeDataScalingFactor);
+        encounterMesh.scaling.setAll(Scalar.RandomRange(scaling * 0.5, scaling * 1.5));
 
         encounterMesh.layerMask = SCENE_MASK;
         encounterMesh.physicsImpostor = new PhysicsImpostor(
@@ -242,16 +281,23 @@ class SpaceTruckerDrivingScreen {
                 mass: velocity.lengthSquared(),
                 restitution: 0.576
             }, this.scene);
-        encounterMesh.physicsImpostor.setLinearVelocity(gravity);
+        encounterMesh.physicsImpostor.setLinearVelocity(gravity.negateInPlace());
 
         return encounterMesh;
     }
+
+    start() {
+        this.currentState = DRIVING_STATE.Driving;
+    }
+
     reset() {
         const { path3d, pathPoints } = this.route;
         const { currentVelocity, currentAngularVelocity, physicsImpostor, mesh } = this.truck;
         const up = Axis.Y;
 
         console.log('resetting...');
+        this.currentTransitTime = 0.0;
+        this.truck.health = 100;
         const point = path3d.getPointAt(0);
         const tang = path3d.getTangentAt(0);
 
@@ -263,40 +309,69 @@ class SpaceTruckerDrivingScreen {
 
         mesh.rotationQuaternion = Quaternion.FromLookDirectionRH(tang, up);
         physicsImpostor.setAngularVelocity(Vector3.Zero());
+        this.currentState = DRIVING_STATE.RouteStart;
+        this.gui.guiCamera.layerMask = GUI_MASK;
     }
 
     killTruck() {
-        const { currentVelocity, currentAngularVelocity, physicsImpostor } = this.truck;
+        const { currentVelocity, currentAngularVelocity, physicsImpostor, mesh } = this.truck;
+        const { path3d } = this.route;
         currentVelocity.setAll(0);
         currentAngularVelocity.setAll(0);
         physicsImpostor.setLinearVelocity(Vector3.Zero());
         physicsImpostor.setAngularVelocity(Vector3.Zero());
-        this.reset();
+
+        // check to see if the player has completed the route or if it's just blown through the tube
+        let closestPathPosition = path3d.getClosestPositionTo(mesh.absolutePosition);
+        // not close enough!
+        if (closestPathPosition < 0.976) {
+            this.reset();
+            return;
+        }
+        this.completeRound();
+    }
+
+    completeRound() {
+        this.gui.guiCamera.layerMask = 0x0;
+        this.currentState = DRIVING_STATE.RouteComplete;
+        this.route.actualTransitTime = this.currentTransitTime;
+        // gather data for score computation
+        let scoring = computeScores(this.route);
+        let scoreDialog = this.scoreDialog = createScoringDialog(scoring, this);
+        scoreDialog.onAcceptedObservable.addOnce(() => this.onExitObservable.notifyObservers());
+        scoreDialog.onCancelledObservable.addOnce(() => this.reset());
     }
 
     update(deltaTime) {
         const dT = deltaTime ?? (this.scene.getEngine().getDeltaTime() / 1000);
         this.actionProcessor?.update();
 
-        if (this.isLoaded) {
-            this.truck.update(dT);
+        const { currentState, truck } = this;
+
+        if (currentState === DRIVING_STATE.Driving) {
+            truck.update(dT);
+            this.updateGui(dT);
+            this.currentTransitTime += dT;
+            this.route.cargoCondition = this.truck.health;
         }
     }
 
-    updateGui() {
-        const dT = (this.scene.getEngine().getDeltaTime() / 1000);
-        const { absolutePosition, up } = this.truck.mesh;
+    updateGui(dT) {
+        const { absolutePosition, up, forward } = this.truck.mesh;
         const { encounters } = this;
         encounters.forEach(obstacle => {
             const { uiBlip } = obstacle;
             // calculate the polar coordinates of the obstacle relative to the truck
-            let r = Vector3.Distance(obstacle.absolutePosition, absolutePosition);
+            let dir = absolutePosition.subtract(obstacle.position);
+            let r = dir.length();
+            dir.normalize();
+
             // theta is the angle between the center origin and the obstacle
-            let theta = Vector3.GetAngleBetweenVectorsOnPlane(absolutePosition, up, obstacle.absolutePosition);
-            let posLeft = Math.cos(theta) * r; // translate from origin-center
-            let posTop = -1 * Math.sin(theta) * r; // translate from origin-center
-            uiBlip.left = posLeft * 4.96 - (r * 0.5); // scale by size of radar mesh
-            uiBlip.top = posTop * 4.96 - (r * 0.5);
+            let theta = Vector3.GetAngleBetweenVectorsOnPlane(dir, forward, Axis.Y);
+            let posLeft = Math.sin(theta) * r; // translate from origin-center
+            let posTop = Math.cos(theta) * r; // translate from origin-center
+            uiBlip.left = posLeft - 0.5; // scale by size of radar mesh
+            uiBlip.top = posTop - 0.5;
         });
     }
 
@@ -304,7 +379,12 @@ class SpaceTruckerDrivingScreen {
         SpaceTruckerInputManager.unPatchControlMap(inputMapPatches);
         this.scene.onAfterRenderObservable.remove(this.gui.sceneObserver);
         this.scene.dispose();
+    }
 
+    ACTIVATE(state) {
+        if (!state && this.currentState === DRIVING_STATE.RouteStart) {
+            this.start();
+        }
     }
 
     MOVE_UP(state) {

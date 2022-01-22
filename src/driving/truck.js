@@ -1,3 +1,4 @@
+import { Observable } from "@babylonjs/core/Misc/observable";
 import { SceneLoader } from "@babylonjs/core/Loading/sceneLoader";
 import { Vector3 } from "@babylonjs/core/Maths/math.vector";
 import { PhysicsImpostor } from "@babylonjs/core/Physics/physicsImpostor";
@@ -6,11 +7,23 @@ import BaseGameObject from "../baseGameObject";
 import { truckSetup, screenConfig } from "./gameData.js";
 
 const { SCENE_MASK } = screenConfig;
-const ANGULAR_DAMPING = 0.1;
+const ANGULAR_DAMPING = 0.025;
 class Truck extends BaseGameObject {
     currentVelocity = truckSetup.initialVelocity.clone();
     currentAcceleration = truckSetup.maxAcceleration;
     currentAngularVelocity = Vector3.Zero();
+    onDestroyedObservable = new Observable();
+    
+    #currentHealth = 100;
+    get health() {
+        return this.#currentHealth;
+    }
+    set health(value) {
+        this.#currentHealth = value;
+        if (this.#currentHealth <= 0) {
+            this.onDestroyedObservable.notifyObservers();
+        }
+    }
 
     static async loadTruck(scene) {
         const { modelUrl, physicsConfig } = truckSetup;
