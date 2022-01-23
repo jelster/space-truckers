@@ -19,7 +19,8 @@ class CargoUnit extends OrbitingGameObject {
     routePath = [];
     launchForce = 0.0;
     encounterManager;
-    samplingFrequency = 10; //Hz
+    samplingFrequency = 5; //Hz
+    samplingCounter = 0;
     get lastFlightPoint() {
         return this.routePath[this.routePath.length - 1];
     }
@@ -77,7 +78,13 @@ class CargoUnit extends OrbitingGameObject {
             this.distanceTraveled += this.lastVelocity.length() * deltaTime;
             this.rotation = Vector3.Cross(this.mesh.up, linVel);
 
-            this.captureRouteData();
+            if (this.samplingCounter < this.samplingFrequency) {
+                this.samplingCounter += 1;
+            }
+            else {
+                this.captureRouteData();
+                this.samplingCounter = 0;
+            }
 
             this.encounterManager.update(deltaTime);
             this.physicsImpostor.applyImpulse(this.currentGravity.scale(deltaTime), this.mesh.getAbsolutePosition());
