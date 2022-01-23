@@ -11,7 +11,9 @@ import SpaceTruckerDrivingScreen from "./driving/spaceTruckerDrivingScreen";
 
 // TODO: conditionally include sample data in the build
 import sampleRoute from "./driving/sample-route.json";
+import sampleRoute2 from "./driving/sample-route2.json";
 
+const sampleRoutes = { "sample-route": sampleRoute, "sample-route2": sampleRoute2 };
 class SpaceTruckerApplication {
     *appStateMachine() {
         let previousState = null;
@@ -104,16 +106,7 @@ class SpaceTruckerApplication {
                 this._splashScreen.update(gameTime);
                 if (this._splashScreen.skipRequested) {
                     logger.logInfo("in application onRender - skipping splash screen message");
-                    // for debugging driving phase
-                    const queryString = window.location.search;
-                    if (queryString.includes("testDrive")) {
-                        this.goToDrivingState(sampleRoute);
-                        this._splashScreen.scene.dispose();
-                        this._splashScreen = null;
-                    }
-                    else {
-                        this.goToMainMenu();
-                    }
+                    this.goToMainMenu();
                     break;
                 }
                 break;
@@ -150,6 +143,15 @@ class SpaceTruckerApplication {
         this._currentScene.actionProcessor.detachControl();
         this._splashScreen.scene.dispose();
         this._splashScreen = null;
+
+        const queryString = window.location.search;
+        if (queryString.toLowerCase().includes("testdrive")) {
+            let routeParam = queryString.substring(queryString.indexOf("route=") + 6);
+            let lookupRoute = sampleRoutes[routeParam];
+            this.goToDrivingState(lookupRoute);
+            return;
+        }
+        
         this._currentScene = this._mainMenu;
         this.moveNextAppState(AppStates.MENU);
         this._currentScene.actionProcessor.attachControl();
@@ -157,6 +159,14 @@ class SpaceTruckerApplication {
 
     goToRunningState() {
         this._currentScene.actionProcessor.detachControl();
+
+        this._engine.loadingUIText = "Loading Route Planning...";
+        this._routePlanningScene = new SpaceTruckerPlanningScreen(this._engine, this.inputManager, appData);
+
+        this._routePlanningScene.routeAcceptedObservable.add(() => {
+            const routeData = this._routePlanningScene.routeData;
+            this.goToDrivingState(routeData);
+        });
         this._currentScene = this._routePlanningScene;
         this.moveNextAppState(AppStates.PLANNING);
         this._currentScene.actionProcessor.attachControl();
