@@ -6,8 +6,8 @@ import { Vector3 } from '@babylonjs/core/Maths/math.vector';
 const screenConfig = {
     GUI_MASK: 0x2,
     SCENE_MASK: 0x1,
-    radarTextureResolution: 4096,
-    guiViewportSize: 4.96,
+    radarTextureResolution:2048,
+    guiViewportSize: 2.48,
     routeDataScalingFactor: 1.0,
     followCamSetup: {
         lowerAlphaLimit: -1.25,

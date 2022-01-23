@@ -15,9 +15,10 @@ import { CreatePlane } from "@babylonjs/core/Meshes/Builders/planeBuilder";
 import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial";
 import { GlowLayer } from '@babylonjs/core/Layers/glowLayer';
 
+import fsGuiDef from "../guis/fs-driving-gui.json";
 
 
-const { GUI_MASK } = screenConfig;
+const { GUI_MASK, SCENE_MASK } = screenConfig;
 const initializeGui = async (screen) => {
     const { scene, encounters } = screen;
     const { guiViewportSize, radarTextureResolution } = screenConfig;
@@ -50,6 +51,7 @@ const initializeGui = async (screen) => {
     radarMaterial.ambientTexture = radarTexture;
     radarMaterial.emissiveTexture = radarTexture;
     radarTexture.TextureMode = Texture.PLANAR_MODE;
+    radarMesh.visibility = 0.67;
 
     guiCamera.lockedTarget = radarMesh;
 
@@ -65,7 +67,17 @@ const initializeGui = async (screen) => {
 
     });
     var gl = new GlowLayer("gl", scene, { blurKernelSize: 4, camera: guiCamera });
-    return { radarGui, radarMesh, radarMaterial, radarTexture, guiCamera };
+
+    let fsGui = AdvancedDynamicTexture.CreateFullscreenUI("fsGui", true, scene, Texture.NEAREST_NEAREST);
+    fsGui.parseContent(fsGuiDef, true);
+    fsGui.layer.layerMask = SCENE_MASK;
+
+    fsGui.healthSlider = fsGui.getControlByName("healthSlider");
+    fsGui.timeText = fsGui.getControlByName("elapsedTimeText");
+    fsGui.centerText = fsGui.getControlByName("centerText");
+
+    return { radarGui, radarMesh, radarMaterial, radarTexture, guiCamera, fsGui };
 };
+
 
 export default initializeGui;
