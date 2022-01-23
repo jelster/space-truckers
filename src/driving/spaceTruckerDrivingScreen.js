@@ -40,7 +40,7 @@ import SpaceTruckerInputManager from "../spaceTruckerInput";
 import createScoringDialog from "../scoring/scoringDialog";
 import SpaceTruckerSoundManager from "../spaceTruckerSoundManager";
 import computeScores from "../scoring/spaceTruckerScoreManager";
-
+import truckExploderSPS from "./truckExploderSPS";
 
 const { GUI_MASK, SCENE_MASK } = screenConfig;
 const { followCamSetup } = screenConfig;
@@ -189,8 +189,14 @@ class SpaceTruckerDrivingScreen {
                 this.encounters.push(enc);
             }
         }
+        truckExploderSPS(this.truck, this.scene);
         this.truck.onDestroyedObservable.add(() => {
             this.currentState = DRIVING_STATE.RouteComplete;
+            setAndStartTimer({
+                timeout: 6500,
+                onEnded: () => this.reset(),
+                contextObservable: this.scene.onBeforeRenderObservable
+            });
             // TODO: display cargo destroyed dialog
         });
         setTimeout(() => {
@@ -240,7 +246,7 @@ class SpaceTruckerDrivingScreen {
         for (let i = 0; i < pathPoints.length; i++) {
             let curvePoint = curve[i]; // TODO: use tangent normal and binormal to orient the road
             let { position, gravity, velocity, rotationQuaternion } = pathPoints[i];
-            let speed = Scalar.Clamp(velocity.length(), 25, 200);  
+            let speed = Scalar.Clamp(velocity.length(), 25, 200);
             for (let pathIdx = 0; pathIdx < numberOfRoadSegments; pathIdx++) {
                 tmpVector.copyFromFloats(
                     position.x,
@@ -302,7 +308,7 @@ class SpaceTruckerDrivingScreen {
 
         console.log('resetting...');
         this.currentTransitTime = 0.0;
-        this.truck.health = 100;
+        this.truck.reset();
         const point = path3d.getPointAt(0);
         const tang = path3d.getTangentAt(0);
 
@@ -319,18 +325,13 @@ class SpaceTruckerDrivingScreen {
     }
 
     killTruck() {
-        const { currentVelocity, currentAngularVelocity, physicsImpostor, mesh } = this.truck;
         const { path3d } = this.route;
-        currentVelocity.setAll(0);
-        currentAngularVelocity.setAll(0);
-        physicsImpostor.setLinearVelocity(Vector3.Zero());
-        physicsImpostor.setAngularVelocity(Vector3.Zero());
-
+        const { mesh } = this.truck;
         // check to see if the player has completed the route or if it's just blown through the tube
         let closestPathPosition = path3d.getClosestPositionTo(mesh.absolutePosition);
         // not close enough!
         if (closestPathPosition < 0.976) {
-            this.reset();
+            this.truck.health = 0;
             return;
         }
         this.completeRound();
@@ -378,6 +379,20 @@ class SpaceTruckerDrivingScreen {
             uiBlip.left = posLeft - 0.5; // scale by size of radar mesh
             uiBlip.top = posTop - 0.5;
         });
+        let { fsGui } = this.gui;
+        let { healthSlider, centerText, timeText } = fsGui;
+        let { health } = this.truck;
+        healthSlider.value = health;
+        centerText.text = '';
+        if (this.currentState === DRIVING_STATE.RouteStart) {
+            centerText.text = "Press Enter to Start";
+        }
+        if (this.currentState === DRIVING_STATE.Driving && health <= 0) {
+            centerText.text = "Cargo Destroyed!";
+
+        }
+        let timeString = (this.currentTransitTime / 60).toFixed(0) + "m:" + (this.currentTransitTime % 60).toFixed(2) + "s";
+        timeText.text = timeString;
     }
 
     dispose() {
