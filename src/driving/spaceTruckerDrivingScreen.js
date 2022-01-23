@@ -1,5 +1,5 @@
 import { Scene } from "@babylonjs/core/scene";
-import { Vector3, Vector2, Matrix } from "@babylonjs/core/Maths/math.vector";
+import { Vector3 } from "@babylonjs/core/Maths";
 import { Viewport } from "@babylonjs/core/Maths/math.viewport";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
 import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
@@ -213,7 +213,7 @@ class SpaceTruckerDrivingScreen {
         console.log(routeData);
         const { routeDataScalingFactor } = screenConfig;
         let pathPoints = Array.isArray(routeData) ? routeData : routeData.route;
-        pathPoints = pathPoints.map(p => {
+        pathPoints = pathPoints.map((p, i) => {
             return {
                 position: (typeof p.position !== 'Vector3' ? new Vector3(p.position.x, p.position.y, p.position.z) : p.position)
                     .scaleInPlace(routeDataScalingFactor),
@@ -222,6 +222,7 @@ class SpaceTruckerDrivingScreen {
                 velocity: (typeof p.velocity !== 'Vector3' ? new Vector3(p.velocity.x, p.velocity.y, p.velocity.z) : p.velocity)
                     .scaleInPlace(routeDataScalingFactor),
                 encounter: p.encounter,
+                rotationQuaternion: new Quaternion(p.rotationQuaternion.x, p.rotationQuaternion.y, p.rotationQuaternion.z, p.rotationQuaternion.w)
             };
         });
 
@@ -235,22 +236,26 @@ class SpaceTruckerDrivingScreen {
         for (let i = 0; i < numberOfRoadSegments; i++) {
             paths.push([]);
         }
-
+        let tmpVector = new Vector3();
         for (let i = 0; i < pathPoints.length; i++) {
-            let { position, gravity, velocity } = pathPoints[i];
-            let speed = Scalar.Clamp(velocity.length(), 20, 200);
-            let last = position.clone();
+            let curvePoint = curve[i]; // TODO: use tangent normal and binormal to orient the road
+            let { position, gravity, velocity, rotationQuaternion } = pathPoints[i];
+            let speed = Scalar.Clamp(velocity.length(), 25, 200);  
             for (let pathIdx = 0; pathIdx < numberOfRoadSegments; pathIdx++) {
+                tmpVector.copyFromFloats(
+                    position.x,
+                    position.y,
+                    position.z);
                 let radiix = (pathIdx / numberOfRoadSegments) * Scalar.TwoPi;
                 let path = paths[pathIdx];
-                let xScale = Math.cos(radiix);
-                let yScale = Math.sin(radiix);
-
-                path.push(last.clone()
-                    .addInPlaceFromFloats(
-                        xScale * speed,
-                        yScale * speed,
-                        0));
+                let xScale = Math.sin(radiix);
+                let yScale = Math.cos(radiix);
+                let zScale = 0;
+                tmpVector.addInPlaceFromFloats(
+                    xScale * speed,
+                    yScale * speed,
+                    zScale * speed);
+                path.push(tmpVector.clone());
             }
         }
         //paths.push(paths[0]);
