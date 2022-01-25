@@ -81,11 +81,10 @@ class SpaceTruckerApplication {
 
         this._engine.loadingUIText = "Loading Route Planning...";
         this._routePlanningScene = new SpaceTruckerPlanningScreen(this._engine, this.inputManager, appData);
-
         this._routePlanningScene.routeAcceptedObservable.add(() => {
-            const routeData = this._routePlanningScene.routeData;
-            this.goToDrivingState(routeData);
+            this.goToDrivingState();
         });
+
         engine.hideLoadingUI();
     }
 
@@ -151,22 +150,15 @@ class SpaceTruckerApplication {
             this.goToDrivingState(lookupRoute);
             return;
         }
-        
+
         this._currentScene = this._mainMenu;
         this.moveNextAppState(AppStates.MENU);
+        this._mainMenu._onMenuEnter(1200);
         this._currentScene.actionProcessor.attachControl();
     }
 
     goToRunningState() {
-        this._currentScene.actionProcessor.detachControl();
-
-        this._engine.loadingUIText = "Loading Route Planning...";
-        this._routePlanningScene = new SpaceTruckerPlanningScreen(this._engine, this.inputManager, appData);
-
-        this._routePlanningScene.routeAcceptedObservable.add(() => {
-            const routeData = this._routePlanningScene.routeData;
-            this.goToDrivingState(routeData);
-        });
+        this._currentScene.actionProcessor.detachControl();        
         this._currentScene = this._routePlanningScene;
         this.moveNextAppState(AppStates.PLANNING);
         this._currentScene.actionProcessor.attachControl();

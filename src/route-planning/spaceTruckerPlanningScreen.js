@@ -121,6 +121,7 @@ class SpaceTruckerPlanningScreen {
         planetData.forEach(planData => {
             let planet = new Planet(this.scene, planData);
             this.planets.push(planet);
+            planet.mesh.computeWorldMatrix(true);
         });
 
         this.asteroidBelt = new AsteroidBelt(this.scene, config.asteroidBeltOptions);
@@ -160,7 +161,7 @@ class SpaceTruckerPlanningScreen {
             new Vector3(1, 0, 0)
 
         ];
-        this.launchArrow = MeshBuilder.CreateDashedLines("launchArrow", { points: arrowLines });
+        this.launchArrow = MeshBuilder.CreateLines("launchArrow", { points: arrowLines });
         this.launchArrow.scaling.scaleInPlace(10);
         this.launchArrow.rotation = new Vector3(0, Math.PI, 0);
         this.launchArrow.bakeCurrentTransformIntoVertices();
@@ -189,6 +190,7 @@ class SpaceTruckerPlanningScreen {
         this.scene.onReadyObservable.addOnce(() => {
             this.ui = new PlanningScreenGui(this);
             this.ui.bindToScreen();
+            this.gameState = PLANNING_STATE.Initialized;
 
         });
         ammoReadyPromise.then(res => {
@@ -196,7 +198,7 @@ class SpaceTruckerPlanningScreen {
             // this.initializePhysics();
         });
         this.actionProcessor = new SpaceTruckerInputProcessor(this, inputManager, preFlightActionList);
-        this.gameState = PLANNING_STATE.Initialized;
+
         this.camera.useFramingBehavior = true;
         this.camera.attachControl(true);
 

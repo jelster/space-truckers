@@ -187,6 +187,7 @@ class MainMenuScene {
         titleText.shadowOffsetY = 6;
         titleText.shadowBlur = 2;
         menuContainer.addControl(titleText);
+        menuContainer.alpha = 0;
     }
 
     _addMenuItems() {
