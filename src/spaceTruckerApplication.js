@@ -12,8 +12,9 @@ import SpaceTruckerDrivingScreen from "./driving/spaceTruckerDrivingScreen";
 // TODO: conditionally include sample data in the build
 import sampleRoute from "./driving/sample-route.json";
 import sampleRoute2 from "./driving/sample-route2.json";
+import sampleRoute3 from "./driving/sample-route3.json";
 
-const sampleRoutes = { "sample-route": sampleRoute, "sample-route2": sampleRoute2 };
+const sampleRoutes = { "sample-route": sampleRoute, "sample-route2": sampleRoute2, "sample-route3": sampleRoute3 };
 class SpaceTruckerApplication {
     *appStateMachine() {
         let previousState = null;
