@@ -25,6 +25,7 @@ function initialize(truck, scene) {
     sps.vars.justClicked = false;                                                           // flag to compute or not the initial velocities
     sps.vars.radius = 0.25;
     sps.vars.minY = -100;
+    sps.vars.boom = false;
     sps.digest(truckModel, { facetNb: 8, delta: 240 });
 
     let s = sps.buildMesh();
@@ -36,6 +37,7 @@ function initialize(truck, scene) {
     let collOb = truckModel.physicsImpostor.registerOnPhysicsCollide(impostors, truckOnPhysicsCollide);
     let destroyOb = truck.onDestroyedObservable.add(onTruckDestroyed);
     let renderOb = scene.onBeforeRenderObservable.add(() => sps.setParticles());
+
     function onTruckDestroyed() {
         console.log('truck destroyed');
         truckModel.isVisible = false;
@@ -47,10 +49,10 @@ function initialize(truck, scene) {
         sps.vars.target.addInPlace(lastCollidePoint);
         sps.vars.justClicked = true;
         sps.setParticles();
-        boom = true;
+        sps.vars.boom = true;
         
     }
-    let lastCollidePoint = null;
+    let lastCollidePoint = Vector3.Zero();
     function truckOnPhysicsCollide(collider, against, point) {
         if (truck.currentState == 'alive') {
             lastCollidePoint = point;
@@ -80,23 +82,18 @@ function initialize(truck, scene) {
             }
         }
         // move the particle
-        if (boom && !sps.vars.justClicked) {
-            if (p.position.y < sps.vars.minY) {
-                p.position.y = sps.vars.minY;
-                p.velocity.y = 0;
-                p.velocity.x = 0;
-                p.velocity.z = 0;
-            } else {
-                // p.velocity.y += sps.vars.gravity;
-                p.position.x += p.velocity.x;
-                p.position.y += p.velocity.y;
-                p.position.z += p.velocity.z;
-                // rotate
-                p.rotation.x += (p.velocity.z) * p.rand;
-                p.rotation.y += (p.velocity.x) * p.rand;
-                p.rotation.z += (p.velocity.y) * p.rand;
-            }
+        if (sps.vars.boom && !sps.vars.justClicked) {
+            // p.velocity.y += sps.vars.gravity;
+            p.position.x += p.velocity.x;
+            p.position.y += p.velocity.y;
+            p.position.z += p.velocity.z;
+            // rotate
+            p.rotation.x += (p.velocity.z) * p.rand;
+            p.rotation.y += (p.velocity.x) * p.rand;
+            p.rotation.z += (p.velocity.y) * p.rand;
         }
     }
+
+    return sps;
 }
 export default initialize;

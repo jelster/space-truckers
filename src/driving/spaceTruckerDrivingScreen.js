@@ -103,6 +103,7 @@ class SpaceTruckerDrivingScreen {
     scoreDialog;
     soundManager;
     currentState = DRIVING_STATE.Created;
+    sps;
 
     get currentTransitTime() {
         return this?.route?.actualTransitTime;
@@ -189,21 +190,23 @@ class SpaceTruckerDrivingScreen {
                 this.encounters.push(enc);
             }
         }
-        truckExploderSPS(this.truck, this.scene);
-        this.truck.onDestroyedObservable.add(() => {
-            this.currentState = DRIVING_STATE.RouteComplete;
-            setAndStartTimer({
-                timeout: 6500,
-                onEnded: () => this.reset(),
-                contextObservable: this.scene.onBeforeRenderObservable
-            });
-            // TODO: display cargo destroyed dialog
-        });
+        this.sps = truckExploderSPS(this.truck, this.scene);
+        this.truck.onDestroyedObservable.add(() => this.onTruckDestroyed());
         setTimeout(() => {
             this.reset();
         }, 1000);
     }
 
+    onTruckDestroyed() {
+        this.currentState = DRIVING_STATE.RouteComplete;
+
+        setAndStartTimer({
+            timeout: 6500,
+            onEnded: () => this.reset(),
+            contextObservable: this.scene.onBeforeRenderObservable
+        });
+        // TODO: display cargo destroyed dialog
+    }
     setupKillMesh() {
         let killAm = new ActionManager(this.scene);
         let zact = new ExecuteCodeAction({
@@ -309,6 +312,7 @@ class SpaceTruckerDrivingScreen {
         console.log('resetting...');
         this.currentTransitTime = 0.0;
         this.truck.reset();
+        this.sps.vars.boom = false;
         const point = path3d.getPointAt(0);
         const tang = path3d.getTangentAt(0);
 
@@ -326,12 +330,12 @@ class SpaceTruckerDrivingScreen {
 
     killTruck() {
         const { path3d } = this.route;
-        const { mesh } = this.truck;
+        const { mesh } = this.truck;        
         // check to see if the player has completed the route or if it's just blown through the tube
         let closestPathPosition = path3d.getClosestPositionTo(mesh.absolutePosition);
         // not close enough!
         if (closestPathPosition < 0.976) {
-            this.truck.health = 0;
+            this.truck.kill();
             return;
         }
         this.completeRound();
