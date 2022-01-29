@@ -144,6 +144,13 @@ class SpaceTruckerApplication {
         this._splashScreen.scene.dispose();
         this._splashScreen = null;
 
+        this._currentScene = this._mainMenu;
+        this.moveNextAppState(AppStates.MENU);
+        this._mainMenu._onMenuEnter(1200);
+        this._currentScene.actionProcessor.attachControl();
+    }
+
+    goToRunningState() {
         const queryString = window.location.search;
         if (queryString.toLowerCase().includes("testdrive")) {
             let routeParam = queryString.substring(queryString.indexOf("route=") + 6);
@@ -152,14 +159,7 @@ class SpaceTruckerApplication {
             return;
         }
 
-        this._currentScene = this._mainMenu;
-        this.moveNextAppState(AppStates.MENU);
-        this._mainMenu._onMenuEnter(1200);
-        this._currentScene.actionProcessor.attachControl();
-    }
-
-    goToRunningState() {
-        this._currentScene.actionProcessor.detachControl();        
+        this._currentScene.actionProcessor.detachControl();
         this._currentScene = this._routePlanningScene;
         this.moveNextAppState(AppStates.PLANNING);
         this._currentScene.actionProcessor.attachControl();
@@ -169,13 +169,15 @@ class SpaceTruckerApplication {
     goToDrivingState(routeData) {
         routeData = routeData ?? this._routePlanningScene.routeData;
         this._currentScene.actionProcessor.detachControl();
-        this._routePlanningScene.dispose();
+        this._routePlanningScene?.dispose();
         this._routePlanningScene = null;
         this._drivingScene = new SpaceTruckerDrivingScreen(this._engine, routeData, this.inputManager);
         this._currentScene = this._drivingScene;
-        this.moveNextAppState(AppStates.DRIVING);
-        this._drivingScene.onReadyObservable.addOnce(() => {
+
+        this._drivingScene.initialize().then(() => {
+            this.moveNextAppState(AppStates.DRIVING);
             this._currentScene.actionProcessor.attachControl();
+            this._drivingScene.reset();
         });
     }
 
