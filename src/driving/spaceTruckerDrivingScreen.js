@@ -231,7 +231,7 @@ class SpaceTruckerDrivingScreen {
             };
         });
 
-        let path3d = new Path3D(pathPoints.map(p => p.position), new Vector3(0, 1, 0), false, true);
+        let path3d = new Path3D(pathPoints.map(p => p.position), new Vector3(0, 1, 0), true, true);
         let curve = path3d.getCurve();
         console.log("Curve and Path sample set sizes", curve.length, pathPoints.length);
 
@@ -242,11 +242,11 @@ class SpaceTruckerDrivingScreen {
             paths.push([]);
         }
         let tmpVector = new Vector3();
-        for (let i = 0; i < pathPoints.length; i++) {
-            let curvePoint = curve[i]; // TODO: use tangent normal and binormal to orient the road
-            let { position, gravity, velocity, rotationQuaternion } = pathPoints[i];
+        for (let i = 0; i < curve.length; i++) {
+            let { gravity, velocity, rotationQuaternion } = pathPoints[i];
+            let position = curve[i];
+            let speed = Scalar.Clamp(velocity.length(), 25, 100);
 
-            let speed = Scalar.Clamp(velocity.length(), 25, 200);
             for (let pathIdx = 0; pathIdx < numberOfRoadSegments; pathIdx++) {
                 tmpVector.copyFromFloats(
                     position.x,
@@ -254,13 +254,13 @@ class SpaceTruckerDrivingScreen {
                     position.z);
                 let radiix = (pathIdx / numberOfRoadSegments) * Scalar.TwoPi;
                 let path = paths[pathIdx];
-                let xScale = Math.cos(radiix);
-                let yScale = Math.sin(radiix);
+                let xScale = Math.cos(radiix) * speed;
+                let yScale = Math.sin(radiix) * speed;
                 let zScale = 0;
-                tmpVector.addInPlaceFromFloats(
-                    xScale * speed,
-                    yScale * speed,
-                    zScale * speed);
+                tmpVector.addInPlaceFromFloats(xScale, yScale, zScale);
+
+
+
                 path.push(tmpVector.clone());
             }
         }
@@ -391,7 +391,7 @@ class SpaceTruckerDrivingScreen {
         healthSlider.value = health;
         centerText.text = '';
         if (this.currentState === DRIVING_STATE.RouteStart) {
-            centerText.text = "Press Enter to Start";
+            centerText.text = "Click or Press Enter to Start";
         }
         if (currentState === 'dying') {
             centerText.text = "Cargo Destroyed!";
