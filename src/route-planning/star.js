@@ -1,4 +1,4 @@
-import { SphereBuilder} from "@babylonjs/core/Meshes/Builders/sphereBuilder";
+import { CreateSphere } from "@babylonjs/core/Meshes/Builders/sphereBuilder";
 import {StandardMaterial} from "@babylonjs/core/Materials/standardMaterial";
 import { Texture } from "@babylonjs/core/Materials/Textures/texture";
 import OrbitingGameObject from "../orbitingGameObject";
@@ -21,9 +21,10 @@ class Star extends OrbitingGameObject {
         this.autoUpdatePosition = false;
         const starData = options;
         
-        this.mesh = SphereBuilder.CreateSphere("star", { diameter: starData.scale }, this.scene);
+        this.mesh = CreateSphere("star", { diameter: starData.scale }, this.scene);
         this.material = new StandardMaterial("starMat", this.scene);
         this.material.diffuseTexture = new Texture(starData.diffuseTexture, this.scene);
+        this.material.ambientTexture = this.material.diffuseTexture;
         
 
         this.scene.onReadyObservable.add(() => {
