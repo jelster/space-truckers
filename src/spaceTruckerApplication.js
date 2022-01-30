@@ -114,7 +114,7 @@ class SpaceTruckerApplication {
                 this._mainMenu.update(gameTime);
                 break;
             case AppStates.PLANNING:
-                this?._routePlanningScene.update(gameTime);
+                this?._routePlanningScene?.update(gameTime);
                 break;
             case AppStates.DRIVING:
                 this._drivingScene.update(gameTime);
@@ -173,9 +173,8 @@ class SpaceTruckerApplication {
         this._routePlanningScene = null;
         this._drivingScene = new SpaceTruckerDrivingScreen(this._engine, routeData, this.inputManager);
         this._currentScene = this._drivingScene;
-
+        this.moveNextAppState(AppStates.DRIVING);
         this._drivingScene.initialize().then(() => {
-            this.moveNextAppState(AppStates.DRIVING);
             this._currentScene.actionProcessor.attachControl();
             this._drivingScene.reset();
         });
