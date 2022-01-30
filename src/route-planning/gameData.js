@@ -16,7 +16,7 @@ import neptuneUrl from "../../assets/textures/nep0fds1.jpg";
 
 import sunTextureUrl from "../../assets/textures/2k_sun.jpg";
 
-import environmentTextureUrl from "../../assets/environment/milkyway-pbr-hdr.env";
+import environmentTextureUrl from "../../assets/environment/crab-nebula-pbr-hdr.env";
 
 import hazard_icon from '../../assets/Space-trucker-ui-asteroid-warning.png';
 
@@ -219,7 +219,10 @@ const gameData = {
         mass: primaryReferenceMass
     },
     environment: {
-        environmentTexture: environmentTextureUrl
+        environmentTexture: environmentTextureUrl,
+        blurParameter: 1 - 0.9759,
+        IBLIntensity: 0.42,
+        lightIntensity: 20000000
     }
 };
 

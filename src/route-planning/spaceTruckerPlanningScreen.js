@@ -110,6 +110,7 @@ class SpaceTruckerPlanningScreen {
 
         this.scene = new Scene(engine);
         this.config = config;
+        const { blurParameter, environmentTexture, IBLIntensity, lightIntensity } = config.environment;
 
         this.soundManager = new SpaceTruckerSoundManager(this.scene, overworldMusic, ambientSound);
 
@@ -127,17 +128,17 @@ class SpaceTruckerPlanningScreen {
         this.asteroidBelt = new AsteroidBelt(this.scene, config.asteroidBeltOptions);
 
         //let skyTexture = CubeTexture.CreateFromImages(skyBoxfiles, this.scene);
-        const skyTexture = new CubeTexture(config.environment.environmentTexture, this.scene);
+        const skyTexture = new CubeTexture(environmentTexture, this.scene);
         skyTexture.coordinatesMode = Texture.SKYBOX_MODE;
         this.scene.reflectionTexture = skyTexture;
-        this.skybox = this.scene.createDefaultSkybox(skyTexture, false, 20000);
-
+        this.skybox = this.scene.createDefaultSkybox(skyTexture, true, 20000, blurParameter, true);
+        this.scene.environmentIntensity = IBLIntensity;
         this.camera = new ArcRotateCamera("cam", 0, 1.35, 3000, Vector3.Zero(), this.scene);
         this.camera.maxZ = 100000;
         this.camera.position.y += 10000;
 
         this.light = new PointLight("starLight", new Vector3(), this.scene);
-        this.light.intensity = 10000000;
+        this.light.intensity = lightIntensity;
 
         this.origin = this.planets.filter(p => p.name ===
             this.config.startingPlanet)[0];
