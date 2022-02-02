@@ -25,7 +25,7 @@ import gameData from "./gameData";
 import { ActionManager } from "@babylonjs/core/Actions/actionManager";
 import { Ray } from "@babylonjs/core/Culling/ray"; // used by ActionManager
 import { ExecuteCodeAction } from "@babylonjs/core/Actions/directActions";
-import { Axis, Scalar, Space } from "@babylonjs/core";
+import { ArcFollowCamera, Axis, Scalar, Space } from "@babylonjs/core";
 import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
 import DialogBox from "../guis/guiDialog";
 
@@ -110,7 +110,7 @@ class SpaceTruckerPlanningScreen {
 
         this.scene = new Scene(engine);
         this.config = config;
-        const { blurParameter, environmentTexture, IBLIntensity, lightIntensity } = config.environment;
+        const { blurParameter, environmentTexture, IBLIntensity, lightIntensity, skyboxScale } = config.environment;
 
         this.soundManager = new SpaceTruckerSoundManager(this.scene, overworldMusic, ambientSound);
 
@@ -131,7 +131,7 @@ class SpaceTruckerPlanningScreen {
         const skyTexture = new CubeTexture(environmentTexture, this.scene);
         skyTexture.coordinatesMode = Texture.SKYBOX_MODE;
         this.scene.reflectionTexture = skyTexture;
-        this.skybox = this.scene.createDefaultSkybox(skyTexture, true, 20000, blurParameter, true);
+        this.skybox = this.scene.createDefaultSkybox(skyTexture, true, skyboxScale, blurParameter, true);
         this.scene.environmentIntensity = IBLIntensity;
         this.camera = new ArcRotateCamera("cam", 0, 1.35, 3000, Vector3.Zero(), this.scene);
         this.camera.maxZ = 100000;

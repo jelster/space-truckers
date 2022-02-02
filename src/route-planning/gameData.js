@@ -222,7 +222,8 @@ const gameData = {
         environmentTexture: environmentTextureUrl,
         blurParameter: 1 - 0.9759,
         IBLIntensity: 0.42,
-        lightIntensity: 20000000
+        lightIntensity: 20000000,
+        skyboxScale: 20000
     }
 };
 
