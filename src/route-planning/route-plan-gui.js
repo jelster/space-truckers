@@ -5,7 +5,7 @@ import { TextBlock } from "@babylonjs/gui/2D/controls/textBlock";
 import { Control } from "@babylonjs/gui/2D/controls/control";
 import { PLAN_STATE_KEYS, PLANNING_STATE } from "./spaceTruckerPlanningScreen";
 import { Grid, Image, Slider, StackPanel } from "@babylonjs/gui";
-
+import guiScreen from "../guis/route-planning-gui.json";
 
 class PlanningScreenGui {
     gui;
@@ -16,81 +16,123 @@ class PlanningScreenGui {
     gameStage;
     encounterPanels = [];
 
+    #launchSlider;
+    get launchForce() {
+        return this.#launchSlider.value;
+    }
+    set launchForce(value) {
+        this.#launchSlider.value = value;
+    }
+
+    #centerText;
+    get centerText() {
+        return this.#centerText.text;
+    }
+    set centerText(text) {
+        this.#centerText.text = text;
+    }
+
+    #currentVelocityText;
+    get currentVelocityText() {
+        return this.#currentVelocityText.text;
+    }
+    set currentVelocityText(text) {
+        this.#currentVelocityText.text = `Velocity: ${text} m/s`;
+    }
+
+    #currentAccelerationText;
+    get currentAccelerationText() {
+        return this.#currentAccelerationText.text;
+    }
+    set currentAccelerationText(text) {
+        this.#currentAccelerationText.text = `Acceleration: ${text} m/s/s`;
+    }
+
+    #distanceText;
+    get distanceText() {
+        return this.#distanceText.text;
+    }
+    set distanceText(text) {
+        this.#distanceText.text = `Distance: ${text} m`;
+    }
+
+    #simTimeText;
+    get simTimeText() {
+        return this.#simTimeText.text;
+    }
+    set simTimeText(timeInSeconds) {
+        let timeString = (timeInSeconds / 60).toFixed(0) + "m:" + (timeInSeconds % 60).toFixed(2) + "s";
+        this.#simTimeText.text = timeString;
+    }
+    #launchResetButton;
+    get launchResetButton() {
+        return this.#launchResetButton;
+    }
+
+    #routeSimulationText;
+    get routeSimulationTextBox() {
+        return this.#routeSimulationText;
+    }
+
     constructor(planningScreen) {
         this.scene = planningScreen.scene;
         //this.scene.autoClear = false;
 
         this.planningScreen = planningScreen;
-        this.gui = AdvancedDynamicTexture.CreateFullscreenUI("ui", true, this.planningScreen.scene);
+        let gui = this.gui = AdvancedDynamicTexture.CreateFullscreenUI("ui",
+            true,
+            this.planningScreen.scene,
+            AdvancedDynamicTexture.NEAREST_NEAREST,
+            true);
+        gui.parseContent(guiScreen);
+        this.#launchSlider = gui.getControlByName("launchSlider");
+        this.#centerText = gui.getControlByName("centerText");
+        this.#currentAccelerationText = gui.getControlByName("currentAccelerationText");
+        this.#currentVelocityText = gui.getControlByName("currentVelocityText");
+        this.#distanceText = gui.getControlByName("distanceText");
+        this.#simTimeText = gui.getControlByName("simTimeText");
+        this.#launchResetButton = gui.getControlByName("launchResetButton");
+        this.#routeSimulationText = gui.getControlByName("routeSimulationText");
 
-
-        this.planningScreen.onStateChangeObservable.add(state => {
-            const currentState = state.currentState;
-            this.onScreenStateChange(currentState);
-        });
-
-        this.scene.onBeforeRenderObservable.add(() => {
-            this.update();
-        });
     }
 
 
     update() {
-        if (this.planningScreen.gameState === PLANNING_STATE.Initialized) {
+        let { gameState } = this.planningScreen;
+        if (gameState === PLANNING_STATE.Created || gameState === PLANNING_STATE.Initialized) {
             return;
         }
-        const gameStage = PLAN_STATE_KEYS[this.planningScreen.gameState],
-            transitTime = this.planningScreen.cargo.timeInTransit,
+        if (!this.gui) {
+            return;
+        }
+        const transitTime = this.planningScreen.cargo.timeInTransit,
             transitDistance = this.planningScreen.cargo.distanceTraveled,
-            launchForce = this.planningScreen.launchForce,
+            launchF = this.planningScreen.launchForce,
             currentVelocity = this.planningScreen.cargo.lastVelocity.length(),
-            currentGravity = this.planningScreen.cargo.lastGravity,
-            encounterManager = this.planningScreen.encounterManager;
+            currentAcceleration = this.planningScreen.cargo.lastGravity.length();
 
-        this.launchSlider.value = launchForce;
-        this.launchForce.text = `Launch Force: ${launchForce.toFixed(2)} N`;
+        this.launchForce = launchF;
+        this.distanceText = transitDistance.toFixed(2);
+        this.currentVelocityText = currentVelocity.toFixed(2);
+        this.currentAccelerationText = currentAcceleration.toFixed(2);
+        this.simTimeText = transitTime.toFixed(4);
 
-        this.transitTime.text = `Time in transit: ${transitTime.toFixed(2)} s`;
-        this.transitDistance.text = `Transit distance: ${transitDistance.toFixed(2)} m`;
-        this.currentVelocity.text = `Current velocity: ${currentVelocity.toFixed(2)} m/s`;
-        this.gameStage.text = `Current State: ${gameStage}`;
-        this.currentGravity.text = `Grav. Accel.: ${currentGravity.length().toFixed(3)} m/s^2`;
-        this.currentZone.text = `Current Zone (in/out): ${encounterManager.currentZone?.name}`;
-
-        this.planningScreen.launchArrow.scaling.setAll(launchForce * 0.05);
+        this.planningScreen.launchArrow.scaling.setAll(launchF * 0.05);
 
     }
     onScreenStateChange(newState) {
         switch (newState) {
             case PLANNING_STATE.ReadyToLaunch:
-                this.gameStage.color = "white";
-
-                this.currentVelocity.isVisible = false;
-                this.transitDistance.isVisible = false;
-                this.transitTime.isVisible = false;
-                this.currentZone.isVisible = false;
-
-                this.launchForce.isVisible = true;
-                this.launchSlider.isVisible = true;
-                this.encounterPanels.forEach(panel => {
-                    panel.children.forEach(child => child.dispose());
-                    panel.dispose();
-                });
+                this.centerText = "";
+                this.launchResetButton.text = "LAUNCH";
                 break;
             case PLANNING_STATE.InFlight:
-                this.gameStage.color = "lightblue";
-
-                this.currentVelocity.isVisible = true;
-                this.transitDistance.isVisible = true;
-                this.transitTime.isVisible = true;
-                this.currentGravity.isVisible = true;
-                this.currentZone.isVisible = true;
-
-
-                this.launchSlider.isVisible = false;
+                this.centerText = "";
+                this.launchResetButton.text = "RESET";
                 break;
             case PLANNING_STATE.CargoDestroyed:
-                this.gameStage.color = "red";
+                this.centerText = "Invalid Route - Cargo Destroyed";
+                this.launchResetButton.text = "RESET";
                 break;
             default:
                 break;
@@ -99,6 +141,7 @@ class PlanningScreenGui {
 
     bindToScreen() {
         console.log("initializing route planning UI");
+
         const cargo = this.planningScreen.cargo;
         const planets = this.planningScreen.planets;
 
@@ -121,91 +164,23 @@ class PlanningScreenGui {
             marker.linkOffsetY = "6px";
         });
 
-        this.screenUi = new Grid("screen-ui");
-        this.screenUi.setPadding(20, 20, 20, 20);
-        this.screenUi.addRowDefinition(0.2, false);
-        this.screenUi.addRowDefinition(0.4, false);
-        this.screenUi.addRowDefinition(0.4, false);
-        this.screenUi.isHitTestVisible = false;
-        this.screenUi.isPointerBlocker = false;
-        this.gui.addControl(this.screenUi);
-
-        this.bottomDisplayPanel = new StackPanel("bottom-display-panel");
-        this.bottomDisplayPanel.height = "100%";
-        this.bottomDisplayPanel.isVertical = false;
-        this.bottomDisplayPanel.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
-        this.screenUi.addControl(this.bottomDisplayPanel, 2);
-
-        this.topDisplayPanel = new StackPanel("top-display-panel");
-        this.topDisplayPanel.width = "100%";
-        this.screenUi.addControl(this.topDisplayPanel, 0);
-
-        this.gameStage = new TextBlock("route-planning-stage", "Current State: Unknown");
-        this.gameStage.fontSize = "48pt";
-        this.gameStage.color = "white";
-        this.gameStage.height = "60px";
-        this.topDisplayPanel.addControl(this.gameStage);
-
-        this.transitTime = new TextBlock("transit-time", "Transit time: 0s");
-        this.transitTime.fontSize = "36pt";
-        this.transitTime.color = "white";
-        this.transitTime.height = "40px";
-        this.topDisplayPanel.addControl(this.transitTime);
-        this.transitTime.isVisible = false;
-
-        this.transitDistance = new TextBlock("transit-distance", "Transit distance: 0m");
-        this.transitDistance.fontSize = "36pt";
-        this.transitDistance.color = "white";
-        this.transitDistance.height = "40px";
-        this.topDisplayPanel.addControl(this.transitDistance);
-        this.transitDistance.isVisible = false;
-
-        this.launchForce = new TextBlock("launch-force", "Launch force: 0 N");
-        this.launchForce.fontSize = "36pt";
-        this.launchForce.color = "white";
-        this.launchForce.height = "40px";
-
-        this.topDisplayPanel.addControl(this.launchForce);
-
-        this.currentVelocity = new TextBlock("current-velocity", "Current velocity: 0 m/s");
-        this.currentVelocity.fontSize = "36pt";
-        this.currentVelocity.color = "white";
-        this.currentVelocity.height = "40px";
-        this.currentVelocity.isVisible = false;
-        this.topDisplayPanel.addControl(this.currentVelocity);
-
-        this.currentGravity = new TextBlock("current-gravity", "Current gravity: 0 m/s^2");
-        this.currentGravity.fontSize = "36pt";
-        this.currentGravity.color = "white";
-        this.currentGravity.height = "40px";
-        this.currentGravity.isVisible = false;
-        this.topDisplayPanel.addControl(this.currentGravity);
-
-        this.currentZone = new TextBlock("current-zone", "Current zone: Unknown");
-        this.currentZone.fontSize = "36pt";
-        this.currentZone.color = "white";
-        this.currentZone.height = "40px";
-        this.currentZone.isVisible = false;
-        this.topDisplayPanel.addControl(this.currentZone);
-
-        this.launchSlider = new Slider("launchSlider");
-        this.launchSlider.height = "600px";
-        this.launchSlider.width = "90px";
-        //this.launchSlider.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
-        this.launchSlider.isThumbClamped = true;
-        this.launchSlider.isVertical = true;
-        this.launchSlider.thumbColor = "black";
-        this.launchSlider.barOffset = "15px"
-        this.launchSlider.color = "white";
-        this.launchSlider.maximum = this.planningScreen.launchForceMax;
-        this.launchSlider.minimum = 10;
-        this.launchSlider.displayValueBar = true;
-        this.launchSlider.step = this.planningScreen.launchIncrement;
-        this.launchSlider.value = this.planningScreen.launchForce;
-        this.launchSlider.onValueChangedObservable.add((ev, es) => {
+        this.#launchSlider.maximum = this.planningScreen.launchForceMax;
+        this.#launchSlider.minimum = 10;
+        this.#launchSlider.displayValueBar = true;
+        this.#launchSlider.step = this.planningScreen.launchIncrement;
+        this.#launchSlider.value = this.planningScreen.launchForce;
+        this.#launchSlider.onValueChangedObservable.add((ev, es) => {
             this.planningScreen.launchForce = ev;
         });
-        this.bottomDisplayPanel.addControl(this.launchSlider);
+
+        this.planningScreen.onStateChangeObservable.add(state => {
+            const currentState = state.currentState;
+            this.onScreenStateChange(currentState);
+        });
+
+        this.scene.onBeforeRenderObservable.add(() => {
+            this.update();
+        });
 
     }
 
