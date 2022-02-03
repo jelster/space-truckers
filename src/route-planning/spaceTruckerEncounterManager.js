@@ -60,6 +60,9 @@ class SpaceTruckerEncounterManager {
             return;
         }
         const cargoData = this.cargo.lastFlightPoint;
+        if (!cargoData) {
+            return;
+        }
         cargoData.encounter = encounter;
         const idx = this.encounterEvents.push({ encounter, cargoData });
         this.onNewEncounterObservable.notifyObservers(idx - 1);

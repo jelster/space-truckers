@@ -19,7 +19,7 @@ class CargoUnit extends OrbitingGameObject {
     routePath = [];
     launchForce = 0.0;
     encounterManager;
-    samplingFrequency = 5; //Hz
+    samplingFrequency = 8; //Hz
     samplingCounter = 0;
     get lastFlightPoint() {
         return this.routePath[this.routePath.length - 1];
