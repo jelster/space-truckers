@@ -5,6 +5,8 @@ import { TextBlock } from "@babylonjs/gui/2D/controls/textBlock";
 import { Control } from "@babylonjs/gui/2D/controls/control";
 import { PLAN_STATE_KEYS, PLANNING_STATE } from "./spaceTruckerPlanningScreen";
 import { Grid, Image, Slider, StackPanel } from "@babylonjs/gui";
+import { Scalar } from "@babylonjs/core/Maths/math.scalar";
+import { Tools } from "@babylonjs/core/Misc/tools";
 import guiScreen from "../guis/route-planning-gui.json";
 
 class PlanningScreenGui {
@@ -139,6 +141,41 @@ class PlanningScreenGui {
         }
     }
 
+    *routeSimulationTextCoroutine() {
+        const routeSimulationCornerText = this.#routeSimulationText;
+        let frameCount = 0;
+        const totalFrames = 30;
+        let direction = 1;
+        while (true) {
+            let { gameState } = this.planningScreen;
+            if (gameState === PLANNING_STATE.CargoDestroyed) {
+                routeSimulationCornerText.text = "CARGO DESTROYED";
+                yield;
+            }
+            if (gameState === PLANNING_STATE.ReadyToLaunch || gameState === PLANNING_STATE.InFlight) {
+                routeSimulationCornerText.text = "SIMULATING ROUTE...";
+                let progress = frameCount / totalFrames;
+                if (direction > 0) {
+                    routeSimulationCornerText.alpha = Scalar.SmoothStep(0, 1, progress);
+                }
+                else {
+                    routeSimulationCornerText.alpha = Scalar.SmoothStep(1, 0, progress);
+                }                
+                if (frameCount >= totalFrames) {
+                    direction *= -1;
+                    frameCount = 0;
+                }
+                frameCount++;
+                yield;
+            }
+            else {
+                routeSimulationCornerText.alpha = 1;
+                routeSimulationCornerText.text = "SIMULATION PAUSED";
+            }
+            yield;
+        }
+    }
+
     bindToScreen() {
         console.log("initializing route planning UI");
 
@@ -181,6 +218,7 @@ class PlanningScreenGui {
         this.scene.onBeforeRenderObservable.add(() => {
             this.update();
         });
+        this.scene.onBeforeRenderObservable.runCoroutineAsync(this.routeSimulationTextCoroutine());
 
     }
 
