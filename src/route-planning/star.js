@@ -3,7 +3,9 @@ import {StandardMaterial} from "@babylonjs/core/Materials/standardMaterial";
 import { Texture } from "@babylonjs/core/Materials/Textures/texture";
 import OrbitingGameObject from "../orbitingGameObject";
 import sunParticles from "../systems/sun.json";
-import { ParticleSystemSet } from "@babylonjs/core";
+import { ParticleSystemSet } from "@babylonjs/core/Particles/particleSystemSet";
+import { Color3 } from "@babylonjs/core/Maths/math.color";
+
 import T_SunFlare from "../../assets/textures/T_SunFlare.png";
 import T_SunSurface from "../../assets/textures/T_SunSurface.png";
 import T_sun from "../../assets/textures/2k_sun.jpg";
@@ -25,7 +27,7 @@ class Star extends OrbitingGameObject {
         this.material = new StandardMaterial("starMat", this.scene);
         this.material.diffuseTexture = new Texture(starData.diffuseTexture, this.scene);
         this.material.ambientTexture = this.material.diffuseTexture;
-        
+        this.material.emissiveColor = Color3.White();        
 
         this.scene.onReadyObservable.add(() => {
             this.starParticleSystem = ParticleSystemSet.Parse(sunParticles, this.scene, true);
