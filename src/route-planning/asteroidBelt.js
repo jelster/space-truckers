@@ -36,6 +36,8 @@ class AsteroidBelt extends OrbitingGameObject {
         const outerBeltRadius = asteroidBeltOptions.outerBeltRadius;
         const maxScale = asteroidBeltOptions.maxScale;
 
+        super.setOrbitalParameters(outerBeltRadius + innerBeltRadius / 2);
+
         const rockMat = new PBRMaterial("rockMat", this.scene);
         rockMat.albedoTexture = new Texture(rockTextureUrl, this.scene);
         rockMat.bumpTexture = new Texture(rockNormalUrl, this.scene);
@@ -82,11 +84,11 @@ class AsteroidBelt extends OrbitingGameObject {
     };
 
     update(deltaTime) {
-        this.rotation.y = Scalar.Repeat(this.rotation.y + 0.0009, Scalar.TwoPi);
+        this.rotation.y = Scalar.Repeat(this.rotation.y + (this.angularVelocity * deltaTime), Scalar.TwoPi);
 
         for (let i = 0; i < this.numAsteroids; ++i) {
             this.rotations[i].x += Math.random() * 0.01;
-            this.rotations[i].y += Math.random() * 0.01;
+            this.rotations[i].y += Math.random() * 0.02;
             this.rotations[i].z += Math.random() * 0.01;
         }
         this.updateMatrices();
