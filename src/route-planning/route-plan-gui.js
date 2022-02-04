@@ -149,20 +149,20 @@ class PlanningScreenGui {
         cargoDisplay.color = "green";
         cargoDisplay.linkWithMesh(cargo.mesh);
 
-        planets.forEach(p => {
-            let marker = this.createDisplayCageUi(p.mesh.name);
+        // planets.forEach(p => {
+        //     let marker = this.createDisplayCageUi(p.mesh.name);
 
-            let planetRec = marker.children[0];
+        //     let planetRec = marker.children[0];
 
-            if (this.planningScreen.origin === p) {
-                planetRec.color = "blue";
-            }
-            else if (this.planningScreen.destination === p) {
-                planetRec.color = "yellow";
-            }
-            marker.linkWithMesh(p.mesh);
-            marker.linkOffsetY = "6px";
-        });
+        //     if (this.planningScreen.origin === p) {
+        //         planetRec.color = "blue";
+        //     }
+        //     else if (this.planningScreen.destination === p) {
+        //         planetRec.color = "yellow";
+        //     }
+        //     marker.linkWithMesh(p.mesh);
+        //     marker.linkOffsetY = "6px";
+        // });
 
         this.#launchSlider.maximum = this.planningScreen.launchForceMax;
         this.#launchSlider.minimum = 10;

@@ -169,7 +169,7 @@ class SpaceTruckerPlanningScreen {
 
         this.destinationMesh = MeshBuilder.CreateIcoSphere("destination", {
             radius: this.destination.diameter * 1.5,
-            subdivisions: 6,
+            subdivisions: 4,
             flat: false
         }, this.scene);
         this.destinationMesh.visibility = 0.38;
@@ -179,7 +179,9 @@ class SpaceTruckerPlanningScreen {
             new ExecuteCodeAction(
                 {
                     trigger: ActionManager.OnIntersectionEnterTrigger,
-                    parameter: this.cargo.mesh
+                    parameter: this.cargo.mesh,
+                    usePreciseIntersection: true
+                    
                 },
                 (ev) => {
                     console.log('mesh intersection triggered!', ev);
