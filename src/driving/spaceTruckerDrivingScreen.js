@@ -338,7 +338,7 @@ class SpaceTruckerDrivingScreen {
     }
 
     completeRound() {
-        this.gui.isForeground = false;
+        this.gui.fsGui.isForeground = false;
         this.gui.guiCamera.layerMask = 0x0;
         this.currentState = DRIVING_STATE.RouteComplete;
         this.route.actualTransitTime = this.currentTransitTime;
@@ -409,6 +409,9 @@ class SpaceTruckerDrivingScreen {
         if (!state && this.currentState === DRIVING_STATE.RouteStart) {
             console.log('starting...');
             this.start();
+        }
+        if (this.currentState === DRIVING_STATE.RouteComplete && this.scoreDialog) {
+            this.scoreDialog.userActionSkip = true;
         }
     }
 
