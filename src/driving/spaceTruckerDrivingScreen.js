@@ -163,7 +163,8 @@ class SpaceTruckerDrivingScreen {
         this.ground = MeshBuilder.CreateRibbon("road", {
             pathArray: route.paths,
             sideOrientation: Mesh.DOUBLESIDE,
-            closeArray: true
+            closeArray: true,
+            closePath: false
         }, this.scene);
 
         this.ground.layerMask = SCENE_MASK;
@@ -242,9 +243,8 @@ class SpaceTruckerDrivingScreen {
             paths.push([]);
         }
         let tmpVector = new Vector3();
-        for (let i = 0; i < curve.length; i++) {
-            let { gravity, velocity, rotationQuaternion } = pathPoints[i];
-            let position = curve[i];
+        for (let i = 0; i < pathPoints.length; i++) {
+            let { gravity, velocity, rotationQuaternion, position } = pathPoints[i];
             let speed = Scalar.Clamp(velocity.length(), 25, 100);
 
             for (let pathIdx = 0; pathIdx < numberOfRoadSegments; pathIdx++) {
@@ -252,15 +252,13 @@ class SpaceTruckerDrivingScreen {
                     position.x,
                     position.y,
                     position.z);
+                tmpVector.rotateByQuaternionAroundPointToRef(rotationQuaternion, position, tmpVector);
                 let radiix = (pathIdx / numberOfRoadSegments) * Scalar.TwoPi;
                 let path = paths[pathIdx];
                 let xScale = Math.cos(radiix) * speed;
                 let yScale = Math.sin(radiix) * speed;
-                let zScale = 0;
+                let zScale = -Math.cos(radiix) * speed;
                 tmpVector.addInPlaceFromFloats(xScale, yScale, zScale);
-
-
-
                 path.push(tmpVector.clone());
             }
         }
