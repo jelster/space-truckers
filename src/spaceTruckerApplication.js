@@ -13,8 +13,14 @@ import SpaceTruckerDrivingScreen from "./driving/spaceTruckerDrivingScreen";
 import sampleRoute from "./driving/sample-route.json";
 import sampleRoute2 from "./driving/sample-route2.json";
 import sampleRoute3 from "./driving/sample-route3.json";
+import sampleRoute4 from "./driving/sample-route4.json";
 
-const sampleRoutes = { "sample-route": sampleRoute, "sample-route2": sampleRoute2, "sample-route3": sampleRoute3 };
+const sampleRoutes = {
+    "sample-route": sampleRoute,
+    "sample-route2": sampleRoute2,
+    "sample-route3": sampleRoute3,
+    "sample-route4": sampleRoute4
+};
 class SpaceTruckerApplication {
     *appStateMachine() {
         let previousState = null;
