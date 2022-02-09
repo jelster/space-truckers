@@ -50,7 +50,7 @@ function createScoringDialog(scoreData, drivingScreen) {
     scoreDialog.userActionSkip = false;
     scoreDialog.dialogContainer.height = "98%";
     let scoringCo = scoringAnimationCo();
-    scene.onBeforeRenderObservable.runCoroutineAsync(scoringCo);
+    scoreDialog.scoreCoInvoke = scene.onBeforeRenderObservable.runCoroutineAsync(scoringCo);
     return scoreDialog;
 
     function* scoringAnimationCo() {
@@ -74,26 +74,21 @@ function createScoringDialog(scoreData, drivingScreen) {
             yield Tools.DelayAsync(1800);
 
             let skipCountUp = label.toLowerCase().includes("bonus");
-            if (skipCountUp || scoreDialog.userActionSkip) {
-                scoreBlock.text = `${label}.........${score.toFixed().toLocaleString()}`;
+            const MAX_COUNT = 100;
+            while (frameCounter <= MAX_COUNT) {
                 sound.play();
-                scoreDialog.userActionSkip = false;
-            }
-            else {
-                const MAX_COUNT = 100;
-                while (frameCounter <= MAX_COUNT) {
-                    sound.play();
-                    if (scoreDialog.userActionSkip) {
-                        scoreBlock.text = `${label}.........${score.toFixed().toLocaleString()}`;
-                        break;
-                    }
-                    let currProgress = frameCounter / MAX_COUNT;
-                    let speed = Scalar.SmoothStep(0, score, currProgress);
-                    scoreBlock.text = `${label}.........${speed.toFixed().toLocaleString()}`;
-                    frameCounter++;
-                    yield Tools.DelayAsync(10);
+                if (scoreDialog.userActionSkip || skipCountUp) {
+                    scoreDialog.userActionSkip = false;
+                    break;
                 }
+                let currProgress = frameCounter / MAX_COUNT;
+                let speed = Scalar.Lerp(0, score, currProgress);
+                scoreBlock.text = `${label}.........${speed.toFixed().toLocaleString()}`;
+                frameCounter++;
+                yield Tools.DelayAsync(10);
             }
+            scoreBlock.text = `${label}.........${score.toFixed().toLocaleString()}`;
+
             yield;
         }
         return;
