@@ -141,6 +141,7 @@ class SpaceTruckerDrivingScreen {
         this.followCamera.layerMask = SCENE_MASK;
         //this.followCamera.attachControl(undefined, true);
         this.scene.activeCameras.push(this.followCamera);
+        this.scene.cameraToUseForPointers = this.followCamera;
 
         initializeEnvironment(this);
         this.route = this.calculateRouteParameters(routeData);
@@ -246,19 +247,20 @@ class SpaceTruckerDrivingScreen {
         for (let i = 0; i < pathPoints.length; i++) {
             let { gravity, velocity, rotationQuaternion, position } = pathPoints[i];
             let speed = Scalar.Clamp(velocity.length(), 25, 100);
+            tmpVector.rotateByQuaternionAroundPointToRef(rotationQuaternion, position, tmpVector);
 
             for (let pathIdx = 0; pathIdx < numberOfRoadSegments; pathIdx++) {
                 tmpVector.copyFromFloats(
                     position.x,
                     position.y,
                     position.z);
-                tmpVector.rotateByQuaternionAroundPointToRef(rotationQuaternion, position, tmpVector);
                 let radiix = (pathIdx / numberOfRoadSegments) * Scalar.TwoPi;
                 let path = paths[pathIdx];
                 let xScale = Math.cos(radiix) * speed;
                 let yScale = Math.sin(radiix) * speed;
-                let zScale = -Math.cos(radiix) * speed;
+                let zScale = 0;
                 tmpVector.addInPlaceFromFloats(xScale, yScale, zScale);
+
                 path.push(tmpVector.clone());
             }
         }
@@ -320,7 +322,12 @@ class SpaceTruckerDrivingScreen {
         mesh.rotationQuaternion = Quaternion.FromLookDirectionRH(tang, up);
         physicsImpostor.setAngularVelocity(Vector3.Zero());
         this.currentState = DRIVING_STATE.RouteStart;
-        this.gui.guiCamera.layerMask = GUI_MASK;
+        this.gui.fsGui.isForeground = true;
+        this.gui.radarMesh.isVisible = true;
+        if (this.scoreDialog) {
+            this.scoreDialog.hide();
+            this.scene.onBeforeRenderObservable.cancelAllCoroutines(); // I'll regret this later... need a way to cancel a single coRoutine
+        }
     }
 
     killTruck() {
@@ -330,16 +337,16 @@ class SpaceTruckerDrivingScreen {
         // check to see if the player has completed the route or if it's just blown through the tube
         let closestPathPosition = path3d.getClosestPositionTo(mesh.absolutePosition);
         // not close enough!
-        if (closestPathPosition < 0.976) {
-            this.truck.kill();
+        if (closestPathPosition >= 0.976) {
+            this.completeRound();
             return;
         }
-        this.completeRound();
+        this.truck.kill();
     }
 
     completeRound() {
         this.gui.fsGui.isForeground = false;
-        this.gui.guiCamera.layerMask = 0x0;
+        this.gui.radarMesh.isVisible = false;
         this.currentState = DRIVING_STATE.RouteComplete;
         this.route.actualTransitTime = this.currentTransitTime;
         // gather data for score computation
