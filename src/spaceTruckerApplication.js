@@ -14,12 +14,14 @@ import sampleRoute from "./driving/sample-route.json";
 import sampleRoute2 from "./driving/sample-route2.json";
 import sampleRoute3 from "./driving/sample-route3.json";
 import sampleRoute4 from "./driving/sample-route4.json";
+import sampleRoute5 from "./driving/sample-route5.json";
 
 const sampleRoutes = {
     "sample-route": sampleRoute,
     "sample-route2": sampleRoute2,
     "sample-route3": sampleRoute3,
-    "sample-route4": sampleRoute4
+    "sample-route4": sampleRoute4,
+    "sample-route5": sampleRoute5
 };
 class SpaceTruckerApplication {
     *appStateMachine() {
@@ -67,7 +69,8 @@ class SpaceTruckerApplication {
 
     initialize() {
         const engine = this._engine;
-        engine.enterFullscreen(false);
+        // TODO: conditionally enable or disable fullscreen based on checkbox or config
+        //engine.enterFullscreen(false);
 
         engine.displayLoadingUI();
 

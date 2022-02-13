@@ -246,21 +246,20 @@ class SpaceTruckerDrivingScreen {
         let tmpVector = new Vector3();
         for (let i = 0; i < pathPoints.length; i++) {
             let { gravity, velocity, rotationQuaternion, position } = pathPoints[i];
-            let speed = Scalar.Clamp(velocity.length(), 25, 100);
-            tmpVector.rotateByQuaternionAroundPointToRef(rotationQuaternion, position, tmpVector);
-
+            let posLength = position.length();
+            let speed = Scalar.Clamp(velocity.length(), 40, 500);
+            let posN = position.normalizeToNew();
             for (let pathIdx = 0; pathIdx < numberOfRoadSegments; pathIdx++) {
-                tmpVector.copyFromFloats(
-                    position.x,
-                    position.y,
-                    position.z);
+                tmpVector.copyFrom(posN);
                 let radiix = (pathIdx / numberOfRoadSegments) * Scalar.TwoPi;
                 let path = paths[pathIdx];
                 let xScale = Math.cos(radiix) * speed;
                 let yScale = Math.sin(radiix) * speed;
-                let zScale = 0;
-                tmpVector.addInPlaceFromFloats(xScale, yScale, zScale);
-
+                let zScale = -Math.cos(radiix) * speed;
+                tmpVector
+                //    .rotateByQuaternionAroundPointToRef(rotationQuaternion, posN, tmpVector)
+                    .scaleInPlace(posLength)
+                    .addInPlaceFromFloats(xScale, yScale, zScale);
                 path.push(tmpVector.clone());
             }
         }
