@@ -137,9 +137,9 @@ class SpaceTruckerPlanningScreen {
         this.camera.maxZ = 100000;
         this.camera.position.y += 10000;
 
-        this.light = new PointLight("starLight", new Vector3(), this.scene);
+        let light = this.light = new PointLight("starLight", new Vector3(), this.scene);
         this.light.intensity = lightIntensity;
-
+        light.radius = config.starData.scale;
         this.origin = this.planets.filter(p => p.name ===
             this.config.startingPlanet)[0];
 
