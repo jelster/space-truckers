@@ -36,7 +36,7 @@ const planetData = [
         scale: 40 * scaleMultiplier,
         color: new Color3(0.45, 0.33, 0.18),
         diffuseTexture: ceresDiffuseUrl,
-        normalTexture: ceresBumpUrl,
+        normalTexture: null,
         specularTexture: null,
         lightMapUrl: null,
         directIntensity: 0.25,
@@ -202,9 +202,9 @@ const encounterZones = {
 const gameData = {
     planetaryInfo: planetData,
     asteroidBeltOptions: {
-        density: 380,
+        density: 400,
         maxScale: new Vector3(10.25, 10.25, 10.25),
-        number: 1000,
+        number: 880,
         innerBeltRadius: 1000 * distanceMultiplier,
         outerBeltRadius: 1700 * distanceMultiplier,
         posRadians: 0,

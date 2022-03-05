@@ -160,7 +160,7 @@ class PlanningScreenGui {
                 }
                 else {
                     routeSimulationCornerText.alpha = Scalar.SmoothStep(1, 0, progress);
-                }                
+                }
                 if (frameCount >= totalFrames) {
                     direction *= -1;
                     frameCount = 0;
@@ -186,20 +186,18 @@ class PlanningScreenGui {
         cargoDisplay.color = "green";
         cargoDisplay.linkWithMesh(cargo.mesh);
 
-        // planets.forEach(p => {
-        //     let marker = this.createDisplayCageUi(p.mesh.name);
+        planets.forEach(p => {
 
-        //     let planetRec = marker.children[0];
+            if (this.planningScreen.destination === p) {
+                let marker = this.createDisplayCageUi(p.mesh.name);
 
-        //     if (this.planningScreen.origin === p) {
-        //         planetRec.color = "blue";
-        //     }
-        //     else if (this.planningScreen.destination === p) {
-        //         planetRec.color = "yellow";
-        //     }
-        //     marker.linkWithMesh(p.mesh);
-        //     marker.linkOffsetY = "6px";
-        // });
+                let planetRec = marker.children[0];
+                planetRec.color = "yellow";
+                marker.linkWithMesh(p.mesh);
+                marker.linkOffsetY = "6px";
+            }
+
+        });
 
         this.#launchSlider.maximum = this.planningScreen.launchForceMax;
         this.#launchSlider.minimum = 10;
