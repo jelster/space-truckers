@@ -150,8 +150,8 @@ class SpaceTruckerApplication {
 
     goToMainMenu() {
         this._currentScene.actionProcessor.detachControl();
-        this._splashScreen.scene.dispose();
-        this._splashScreen = null;
+        this._currentScene.scene.dispose();
+        this._currentScene = null;
 
         this._currentScene = this._mainMenu;
         this.moveNextAppState(AppStates.MENU);
@@ -178,14 +178,17 @@ class SpaceTruckerApplication {
     goToDrivingState(routeData) {
         routeData = routeData ?? this._routePlanningScene.routeData;
         this._currentScene.actionProcessor.detachControl();
-        this._routePlanningScene?.dispose();
-        this._routePlanningScene = null;
+        this._currentScene?.dispose();
+        this._currentScene = null;
         this._drivingScene = new SpaceTruckerDrivingScreen(this._engine, routeData, this.inputManager);
         this._currentScene = this._drivingScene;
         this.moveNextAppState(AppStates.DRIVING);
         this._drivingScene.initialize().then(() => {
             this._currentScene.actionProcessor.attachControl();
             this._drivingScene.reset();
+        });
+        this._drivingScene.onExitObservable.addOnce(() => {
+            this.goToMainMenu();
         });
     }
 

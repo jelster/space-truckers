@@ -74,7 +74,7 @@ function createScoringDialog(scoreData, drivingScreen) {
             yield Tools.DelayAsync(1800);
 
             let skipCountUp = label.toLowerCase().includes("bonus");
-            const MAX_COUNT = 100;
+            const MAX_COUNT = (60 / (60 + scene.getEngine().getFps())) * 60;
             while (frameCounter <= MAX_COUNT) {
                 sound.play();
                 if (scoreDialog.userActionSkip || skipCountUp) {
@@ -82,10 +82,10 @@ function createScoringDialog(scoreData, drivingScreen) {
                     break;
                 }
                 let currProgress = frameCounter / MAX_COUNT;
-                let speed = Scalar.Lerp(0, score, currProgress);
+                let speed = Scalar.SmoothStep(0, score, currProgress);
                 scoreBlock.text = `${label}.........${speed.toFixed().toLocaleString()}`;
                 frameCounter++;
-                yield Tools.DelayAsync(10);
+                yield Tools.DelayAsync(5);
             }
             scoreBlock.text = `${label}.........${score.toFixed().toLocaleString()}`;
 
