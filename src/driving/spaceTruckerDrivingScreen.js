@@ -41,6 +41,7 @@ import createScoringDialog from "../scoring/scoringDialog";
 import SpaceTruckerSoundManager from "../spaceTruckerSoundManager";
 import computeScores from "../scoring/spaceTruckerScoreManager";
 import truckExploderSPS from "./truckExploderSPS";
+import postProcesses from "../post-processes";
 
 const { GUI_MASK, SCENE_MASK } = screenConfig;
 const { followCamSetup } = screenConfig;
@@ -193,6 +194,8 @@ class SpaceTruckerDrivingScreen {
         this.gui = await gP;
         this.currentState = DRIVING_STATE.Initialized;
         this.onReadyObservable.notifyObservers(this);
+        let renderPipeline = postProcesses.applyPostProcessesToScene(this.scene, this.followCamera);
+        this._renderPipeline = renderPipeline;
     }
 
     onTruckDestroyed() {

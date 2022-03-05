@@ -29,6 +29,8 @@ import { ArcFollowCamera, Axis, Scalar, Space } from "@babylonjs/core";
 import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
 import DialogBox from "../guis/guiDialog";
 
+import postProcesses from "../post-processes";
+
 const preFlightActionList = [
     { action: 'ACTIVATE', shouldBounce: () => true },
     { action: 'MOVE_OUT', shouldBounce: () => false },
@@ -139,7 +141,7 @@ class SpaceTruckerPlanningScreen {
 
         let light = this.light = new PointLight("starLight", new Vector3(), this.scene);
         this.light.intensity = lightIntensity;
-        light.radius = config.starData.scale;
+        light.radius = config.starData.scale/2;
         this.origin = this.planets.filter(p => p.name ===
             this.config.startingPlanet)[0];
 
@@ -172,7 +174,7 @@ class SpaceTruckerPlanningScreen {
             subdivisions: 4,
             flat: false
         }, this.scene);
-        this.destinationMesh.visibility = 0.38;
+        this.destinationMesh.visibility = 0;
         this.destinationMesh.parent = this.destination.mesh;
         this.destinationMesh.actionManager = new ActionManager(this.scene);
         this.destinationMesh.actionManager.registerAction(
@@ -221,7 +223,8 @@ class SpaceTruckerPlanningScreen {
             this.routeConfirmationDialog.hide();
             this.setReadyToLaunchState();
         });
-
+        let renderPipeline = postProcesses.applyPostProcessesToScene(this.scene, this.camera);
+        this._renderPipeline = renderPipeline;
     }
 
     update(deltaTime) {
