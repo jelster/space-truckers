@@ -15,13 +15,15 @@ import sampleRoute2 from "./driving/sample-route2.json";
 import sampleRoute3 from "./driving/sample-route3.json";
 import sampleRoute4 from "./driving/sample-route4.json";
 import sampleRoute5 from "./driving/sample-route5.json";
+import sampleRoute6 from "./driving/sample-route6.json";
 
 const sampleRoutes = {
     "sample-route": sampleRoute,
     "sample-route2": sampleRoute2,
     "sample-route3": sampleRoute3,
     "sample-route4": sampleRoute4,
-    "sample-route5": sampleRoute5
+    "sample-route5": sampleRoute5,
+    "sample-route6": sampleRoute6
 };
 class SpaceTruckerApplication {
     *appStateMachine() {
@@ -178,7 +180,10 @@ class SpaceTruckerApplication {
     goToDrivingState(routeData) {
         routeData = routeData ?? this._routePlanningScene.routeData;
         this._currentScene.actionProcessor.detachControl();
-        this._currentScene?.dispose();
+        if (this._currentScene.dispose) {
+            this._currentScene?.dispose();
+        }
+
         this._currentScene = null;
         this._drivingScene = new SpaceTruckerDrivingScreen(this._engine, routeData, this.inputManager);
         this._currentScene = this._drivingScene;

@@ -254,13 +254,13 @@ class SpaceTruckerDrivingScreen {
             let posN = position.normalizeToNew();
             for (let pathIdx = 0; pathIdx < numberOfRoadSegments; pathIdx++) {
                 tmpVector.copyFrom(posN);
-                let radiix = (pathIdx / numberOfRoadSegments) * Scalar.TwoPi;
+                let radiix = Scalar.TwoPi / numberOfRoadSegments;
                 let path = paths[pathIdx];
-                let xScale = Math.cos(radiix) * speed;
-                let yScale = Math.sin(radiix) * speed;
-                let zScale = -Math.cos(radiix) * speed;
+                let xScale = Math.cos(radiix * pathIdx) * speed;
+                let yScale = Math.sin(radiix * pathIdx) * speed;
+                let zScale = 0;
                 tmpVector
-                //    .rotateByQuaternionAroundPointToRef(rotationQuaternion, posN, tmpVector)
+                    .rotateByQuaternionAroundPointToRef(rotationQuaternion, posN, tmpVector)
                     .scaleInPlace(posLength)
                     .addInPlaceFromFloats(xScale, yScale, zScale);
                 path.push(tmpVector.clone());
@@ -314,14 +314,14 @@ class SpaceTruckerDrivingScreen {
         this.sps.vars.boom = false;
         const point = path3d.getPointAt(0);
         const tang = path3d.getTangentAt(0);
-
-        currentVelocity.copyFrom(pathPoints[0].velocity);
+        let firstPoint = pathPoints[0];
+        currentVelocity.copyFrom(firstPoint.velocity);
         currentAngularVelocity.setAll(0);
 
         mesh.position.copyFrom(point);
         physicsImpostor.setLinearVelocity(Vector3.Zero());
-
-        mesh.rotationQuaternion = Quaternion.FromLookDirectionRH(tang, up);
+        let firstVelocityNorm = firstPoint.velocity.normalizeToNew();
+        mesh.rotationQuaternion = Quaternion.FromLookDirectionRH(firstVelocityNorm, Vector3.Cross(up, firstVelocityNorm));
         physicsImpostor.setAngularVelocity(Vector3.Zero());
         this.currentState = DRIVING_STATE.RouteStart;
         this.gui.fsGui.isForeground = true;
