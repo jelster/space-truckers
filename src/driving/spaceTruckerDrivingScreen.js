@@ -1,5 +1,5 @@
 import { Scene } from "@babylonjs/core/scene";
-import { Vector3 } from "@babylonjs/core/Maths";
+import { Vector3, Matrix } from "@babylonjs/core/Maths";
 import { Viewport } from "@babylonjs/core/Maths/math.viewport";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
 import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
@@ -247,22 +247,25 @@ class SpaceTruckerDrivingScreen {
             paths.push([]);
         }
         let tmpVector = new Vector3();
+        let radiix = Scalar.TwoPi / numberOfRoadSegments;
         for (let i = 0; i < pathPoints.length; i++) {
             let { gravity, velocity, rotationQuaternion, position } = pathPoints[i];
-            let posLength = position.length();
-            let speed = Scalar.Clamp(velocity.length(), 40, 500);
-            let posN = position.normalizeToNew();
+             
+            let speed = Scalar.Clamp(velocity.length(), 45, 250);
+            let velN = velocity.normalizeToNew();
+            let rotQ = Quaternion.FromLookDirectionRH(velN, Vector3.Cross(velN, Axis.Y));
+            let xMatrix = Matrix.Compose(new Vector3(speed, speed, speed), rotQ, position);
             for (let pathIdx = 0; pathIdx < numberOfRoadSegments; pathIdx++) {
-                tmpVector.copyFrom(posN);
-                let radiix = Scalar.TwoPi / numberOfRoadSegments;
+                tmpVector.setAll(0);
+                
                 let path = paths[pathIdx];
-                let xScale = Math.cos(radiix * pathIdx) * speed;
-                let yScale = Math.sin(radiix * pathIdx) * speed;
+                let xScale = Math.cos(radiix * pathIdx);
+                let yScale = Math.sin(radiix * pathIdx);
                 let zScale = 0;
-                tmpVector
-                    .rotateByQuaternionAroundPointToRef(rotationQuaternion, posN, tmpVector)
-                    .scaleInPlace(posLength)
-                    .addInPlaceFromFloats(xScale, yScale, zScale);
+                tmpVector.x = xScale;
+                tmpVector.y = yScale;
+                tmpVector.z = zScale;
+                Vector3.TransformCoordinatesToRef(tmpVector, xMatrix, tmpVector);
                 path.push(tmpVector.clone());
             }
         }
@@ -318,10 +321,10 @@ class SpaceTruckerDrivingScreen {
         currentVelocity.copyFrom(firstPoint.velocity);
         currentAngularVelocity.setAll(0);
 
-        mesh.position.copyFrom(point);
+        mesh.position.copyFrom(firstPoint.position);
         physicsImpostor.setLinearVelocity(Vector3.Zero());
         let firstVelocityNorm = firstPoint.velocity.normalizeToNew();
-        mesh.rotationQuaternion = Quaternion.FromLookDirectionRH(firstVelocityNorm, Vector3.Cross(up, firstVelocityNorm));
+        mesh.rotationQuaternion = Quaternion.FromLookDirectionRH(firstVelocityNorm,  up);
         physicsImpostor.setAngularVelocity(Vector3.Zero());
         this.currentState = DRIVING_STATE.RouteStart;
         this.gui.fsGui.isForeground = true;

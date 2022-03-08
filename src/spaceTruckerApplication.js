@@ -6,7 +6,7 @@ import SplashScene from "./splashScene";
 import SpaceTruckerInputManager from "./spaceTruckerInput";
 
 import appData from "./route-planning/gameData";
-import SpaceTruckerPlanningScreen from "./route-planning/spaceTruckerPlanningScreen";
+import SpaceTruckerPlanningScreen, { PLANNING_STATE } from "./route-planning/spaceTruckerPlanningScreen";
 import SpaceTruckerDrivingScreen from "./driving/spaceTruckerDrivingScreen";
 
 // TODO: conditionally include sample data in the build
@@ -91,11 +91,7 @@ class SpaceTruckerApplication {
         this._mainMenu.onExitActionObservable.addOnce(() => this.exit());
         this._mainMenu.onPlayActionObservable.add(() => this.goToRunningState());
 
-        this._engine.loadingUIText = "Loading Route Planning...";
-        this._routePlanningScene = new SpaceTruckerPlanningScreen(this._engine, this.inputManager, appData);
-        this._routePlanningScene.routeAcceptedObservable.add(() => {
-            this.goToDrivingState();
-        });
+
 
         engine.hideLoadingUI();
     }
@@ -169,27 +165,39 @@ class SpaceTruckerApplication {
             this.goToDrivingState(lookupRoute);
             return;
         }
+        this._engine.loadingUIText = "Loading Route Planning...";
+        this._routePlanningScene = new SpaceTruckerPlanningScreen(this._engine, this.inputManager, appData);
 
-        this._currentScene.actionProcessor.detachControl();
-        this._currentScene = this._routePlanningScene;
-        this.moveNextAppState(AppStates.PLANNING);
-        this._currentScene.actionProcessor.attachControl();
-        this._routePlanningScene.setReadyToLaunchState();
+        this._routePlanningScene.onStateChangeObservable.add((ev, es) => {
+            if (ev.currentState === PLANNING_STATE.Initialized) {
+                this._currentScene.actionProcessor.detachControl();
+                this._currentScene = this._routePlanningScene;
+                this.moveNextAppState(AppStates.PLANNING);
+                this._currentScene.actionProcessor.attachControl();
+                this._routePlanningScene.setReadyToLaunchState();
+                this._routePlanningScene.routeAcceptedObservable.add(() => {
+                    this.goToDrivingState();
+                });
+            }
+        });
     }
 
     goToDrivingState(routeData) {
+        this._engine.displayLoadingUI();
         routeData = routeData ?? this._routePlanningScene.routeData;
         this._currentScene.actionProcessor.detachControl();
-        if (this._currentScene.dispose) {
-            this._currentScene?.dispose();
-        }
-
-        this._currentScene = null;
         this._drivingScene = new SpaceTruckerDrivingScreen(this._engine, routeData, this.inputManager);
-        this._currentScene = this._drivingScene;
+        
         this.moveNextAppState(AppStates.DRIVING);
         this._drivingScene.initialize().then(() => {
+            if (this._currentScene.dispose) {
+                this._currentScene?.dispose();
+            }
+            this._currentScene.actionProcessor.detachControl();
+            this._currentScene = null;
+            this._currentScene = this._drivingScene;
             this._currentScene.actionProcessor.attachControl();
+            this._engine.hideLoadingUI();
             this._drivingScene.reset();
         });
         this._drivingScene.onExitObservable.addOnce(() => {
