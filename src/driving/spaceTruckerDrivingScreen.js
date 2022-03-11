@@ -46,17 +46,7 @@ import postProcesses from "../post-processes";
 const { GUI_MASK, SCENE_MASK } = screenConfig;
 const { followCamSetup } = screenConfig;
 
-const inputMapPatches = {
-    w: "MOVE_IN", W: "MOVE_IN",
-    s: "MOVE_OUT", S: "MOVE_OUT",
-    ArrowUp: 'MOVE_UP',
-    ArrowDown: 'MOVE_DOWN',
-    ArrowLeft: 'ROTATE_LEFT',
-    ArrowRight: 'ROTATE_RIGHT',
-
-};
-
-const actionList = [
+ const actionList = [
     { action: 'ACTIVATE', shouldBounce: () => true },
     { action: 'MOVE_UP', shouldBounce: () => false },
     { action: 'MOVE_DOWN', shouldBounce: () => false },
@@ -128,7 +118,7 @@ class SpaceTruckerDrivingScreen {
         this.tempObstacleMesh.layerMask = 0;
 
         this.scene.clearColor = new Color3(0, 0, 0);
-        SpaceTruckerInputManager.patchControlMap(inputMapPatches);
+         
         this.inputManager = inputManager;
         this.actionProcessor = new SpaceTruckerInputProcessor(this, inputManager, actionList);
 

@@ -25,6 +25,15 @@ const sampleRoutes = {
     "sample-route5": sampleRoute5,
     "sample-route6": sampleRoute6
 };
+
+const driveModeInputMapPatches = {
+    w: "MOVE_IN", W: "MOVE_IN",
+    s: "MOVE_OUT", S: "MOVE_OUT",
+    ArrowUp: 'MOVE_UP',
+    ArrowDown: 'MOVE_DOWN',
+    ArrowLeft: 'ROTATE_LEFT',
+    ArrowRight: 'ROTATE_RIGHT',
+};
 class SpaceTruckerApplication {
     *appStateMachine() {
         let previousState = null;
@@ -185,7 +194,11 @@ class SpaceTruckerApplication {
         this._engine.displayLoadingUI();
         routeData = routeData ?? this._routePlanningScene.routeData;
         this._currentScene.actionProcessor.detachControl();
-        this._drivingScene = new SpaceTruckerDrivingScreen(this._engine, routeData, this.inputManager);
+        let driveControls = {...this.inputManager.controlsMap, ...driveModeInputMapPatches};
+        console.log(driveControls);
+        let driveInputManager = new SpaceTruckerInputManager(this._engine, driveControls);
+        
+        this._drivingScene = new SpaceTruckerDrivingScreen(this._engine, routeData, driveInputManager);
         
         this.moveNextAppState(AppStates.DRIVING);
         this._drivingScene.initialize().then(() => {
