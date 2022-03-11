@@ -83,16 +83,10 @@ class SpaceTruckerApplication {
         this._engine.loadingUIText = "Loading Splash Scene...";
         this._splashScreen = new SplashScene(this._engine, this.inputManager);
 
-        this._engine.loadingUIText = "Loading Main Menu...";
-        this._mainMenu = new MainMenuScene(this._engine, this.inputManager);
         this._splashScreen.onReadyObservable.addOnce(() => {
             this.goToOpeningCutscene();
         });
-        this._mainMenu.onExitActionObservable.addOnce(() => this.exit());
-        this._mainMenu.onPlayActionObservable.add(() => this.goToRunningState());
-
-
-
+        
         engine.hideLoadingUI();
     }
 
@@ -148,9 +142,13 @@ class SpaceTruckerApplication {
 
     goToMainMenu() {
         this._currentScene.actionProcessor.detachControl();
-        this._currentScene.scene.dispose();
+        if (this._currentScene.scene) {
+            this._currentScene.scene.dispose();
+        }
         this._currentScene = null;
-
+        this._mainMenu = new MainMenuScene(this._engine, this.inputManager);
+        this._mainMenu.onExitActionObservable.addOnce(() => this.exit());
+        this._mainMenu.onPlayActionObservable.addOnce(() => this.goToRunningState());
         this._currentScene = this._mainMenu;
         this.moveNextAppState(AppStates.MENU);
         this._mainMenu._onMenuEnter(1200);
@@ -159,6 +157,7 @@ class SpaceTruckerApplication {
 
     goToRunningState() {
         const queryString = window.location.search;
+        this._currentScene.actionProcessor.detachControl();
         if (queryString.toLowerCase().includes("testdrive")) {
             let routeParam = queryString.substring(queryString.indexOf("route=") + 6);
             let lookupRoute = sampleRoutes[routeParam];
@@ -170,7 +169,7 @@ class SpaceTruckerApplication {
 
         this._routePlanningScene.onStateChangeObservable.add((ev, es) => {
             if (ev.currentState === PLANNING_STATE.Initialized) {
-                this._currentScene.actionProcessor.detachControl();
+                
                 this._currentScene = this._routePlanningScene;
                 this.moveNextAppState(AppStates.PLANNING);
                 this._currentScene.actionProcessor.attachControl();
@@ -193,7 +192,6 @@ class SpaceTruckerApplication {
             if (this._currentScene.dispose) {
                 this._currentScene?.dispose();
             }
-            this._currentScene.actionProcessor.detachControl();
             this._currentScene = null;
             this._currentScene = this._drivingScene;
             this._currentScene.actionProcessor.attachControl();
