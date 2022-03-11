@@ -95,7 +95,7 @@ class SpaceTruckerApplication {
         this._splashScreen.onReadyObservable.addOnce(() => {
             this.goToOpeningCutscene();
         });
-        
+
         engine.hideLoadingUI();
     }
 
@@ -142,15 +142,13 @@ class SpaceTruckerApplication {
     // State transition commands
     goToOpeningCutscene() {
         this.moveNextAppState(AppStates.CUTSCENE);
-
         this._splashScreen.onReadyObservable.addOnce(() => this._engine.hideLoadingUI());
-        this._splashScreen.actionProcessor.attachControl();
         this._currentScene = this._splashScreen;
         this._splashScreen.run();
     }
 
     goToMainMenu() {
-        this._currentScene.actionProcessor.detachControl();
+        this._currentScene?.actionProcessor?.detachControl();
         if (this._currentScene.scene) {
             this._currentScene.scene.dispose();
         }
@@ -175,10 +173,8 @@ class SpaceTruckerApplication {
         }
         this._engine.loadingUIText = "Loading Route Planning...";
         this._routePlanningScene = new SpaceTruckerPlanningScreen(this._engine, this.inputManager, appData);
-
         this._routePlanningScene.onStateChangeObservable.add((ev, es) => {
             if (ev.currentState === PLANNING_STATE.Initialized) {
-                
                 this._currentScene = this._routePlanningScene;
                 this.moveNextAppState(AppStates.PLANNING);
                 this._currentScene.actionProcessor.attachControl();
@@ -194,12 +190,11 @@ class SpaceTruckerApplication {
         this._engine.displayLoadingUI();
         routeData = routeData ?? this._routePlanningScene.routeData;
         this._currentScene.actionProcessor.detachControl();
-        let driveControls = {...this.inputManager.controlsMap, ...driveModeInputMapPatches};
-        console.log(driveControls);
+
+        let driveControls = { ...this.inputManager.controlsMap, ...driveModeInputMapPatches };
         let driveInputManager = new SpaceTruckerInputManager(this._engine, driveControls);
-        
         this._drivingScene = new SpaceTruckerDrivingScreen(this._engine, routeData, driveInputManager);
-        
+
         this.moveNextAppState(AppStates.DRIVING);
         this._drivingScene.initialize().then(() => {
             if (this._currentScene.dispose) {
@@ -225,5 +220,4 @@ class SpaceTruckerApplication {
         }
     }
 }
-
 export default SpaceTruckerApplication

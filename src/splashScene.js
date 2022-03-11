@@ -1,7 +1,7 @@
 
 import { ArcRotateCamera } from "@babylonjs/core/Cameras/arcRotateCamera";
 import { Scene } from "@babylonjs/core/scene";
-import { HemisphericLight } from "@babylonjs/core";
+import { HemisphericLight, PointerEventTypes } from "@babylonjs/core";
 import { Vector3 } from "@babylonjs/core/Maths/math";
 import { Color3 } from "@babylonjs/core/Maths/math";
 import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial";
@@ -23,13 +23,10 @@ import spaceTruckerRigUrl from "../assets/space-trucker-and-rig.png";
 import babylonLogoUrl from "../assets/babylonjs_identity_color.png";
 import SpaceTruckerSoundManager from "./spaceTruckerSoundManager";
 
-
 const animationFps = 60;
 const flipAnimation = new Animation("flip", "rotation.x", animationFps, Animation.ANIMATIONTYPE_FLOAT, 0, true);
 const fadeAnimation = new Animation("entranceAndExitFade", "visibility", animationFps, Animation.ANIMATIONTYPE_FLOAT, 0, true);
 const scaleAnimation = new Animation("scaleTarget", "scaling", animationFps, Animation.ANIMATIONTYPE_VECTOR3, Animation.ANIMATIONLOOPMODE_CYCLE, true);
-
-const actionList = [{ action: "ACTIVATE", shouldBounce: () => true }];
 
 class SplashScene {
     // currentSegment;
@@ -45,7 +42,7 @@ class SplashScene {
     get scene() {
         return this._scene;
     }
-    constructor(engine, inputManager) {
+    constructor(engine) {
         this.skipRequested = false;
         this.onReadyObservable = new Observable();
         let scene = this._scene = new Scene(engine);
@@ -119,11 +116,10 @@ class SplashScene {
             console.log("callToAction end");
             ctaBlock.isVisible = true;
         });       
-
-        this.actionProcessor = new SpaceTruckerInputProcessor(this, inputManager, actionList);
-
         this.audioManager = new SpaceTruckerSoundManager(scene, 'title');
         this.audioManager.onReadyObservable.addOnce(_ => this.onReadyObservable.notifyObservers());
+        this.scene.onPointerObservable.addOnce((ev) => ev.type === PointerEventTypes.POINTERDOWN ? this.ACTIVATE() : null);
+        this.scene.onKeyboardObservable.addOnce((ev) => ev.type === this.ACTIVATE());
     }
 
     run() {
