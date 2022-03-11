@@ -87,12 +87,18 @@ class SpaceTruckerInputManager {
     }
 
     enableMouse(scene) {
+        let mouseDown = false;
         const obs = scene.onPointerObservable.add((pointerInfo) => {
-
-            if (pointerInfo.type === PointerEventTypes.POINTERDOWN) {
-                this.inputMap["PointerTap"] = pointerInfo;
+            if (!mouseDown && pointerInfo.type === PointerEventTypes.POINTERDOWN) {
+                mouseDown = true;
+                return;
             }
-            else if (pointerInfo.type === PointerEventTypes.POINTERUP) {
+            if (mouseDown && pointerInfo.type === PointerEventTypes.POINTERUP) {
+                this.inputMap["PointerTap"] = pointerInfo.event;
+                mouseDown = false;
+                return;
+            }
+            if (!mouseDown) {
                 delete this.inputMap["PointerTap"];
             }
 
