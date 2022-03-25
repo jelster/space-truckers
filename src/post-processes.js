@@ -6,10 +6,19 @@ function applyPostProcessesToScene(scene, camera) {
     let defaultPipeline = new DefaultRenderingPipeline("default", true, scene, [camera]);
     defaultPipeline.samples = 4;
     defaultPipeline.fxaaEnabled = true;
-    defaultPipeline.imageProcessingEnabled = true;
-    defaultPipeline.imageProcessing.toneMappingEnabled = true;
-    defaultPipeline.imageProcessing.toneMappingType = ImageProcessingConfiguration.TONEMAPPING_ACES;
 
+    let imageProcessing = defaultPipeline.imageProcessing;
+    defaultPipeline.imageProcessingEnabled = true;
+    imageProcessing.toneMappingEnabled = true;
+    imageProcessing.toneMappingType = ImageProcessingConfiguration.TONEMAPPING_ACES;
+    imageProcessing.colorCurvesEnabled = true;
+    imageProcessing.colorGradingEnabled = true;
+
+
+    defaultPipeline.grainEnabled = true;
+    defaultPipeline.grainAmount = 0.5;
+    defaultPipeline.grain.animated = true;
+    defaultPipeline.sharpenEnabled = true;
     defaultPipeline.bloomEnabled = true;
     return defaultPipeline;
 }

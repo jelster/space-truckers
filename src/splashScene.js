@@ -118,8 +118,8 @@ class SplashScene {
         });       
         this.audioManager = new SpaceTruckerSoundManager(scene, 'title');
         this.audioManager.onReadyObservable.addOnce(_ => this.onReadyObservable.notifyObservers());
-        this.scene.onPointerObservable.addOnce((ev) => ev.type === PointerEventTypes.POINTERDOWN ? this.ACTIVATE() : null);
-        this.scene.onKeyboardObservable.addOnce((ev) => ev.type === this.ACTIVATE());
+        this.scene.onPointerObservable.add((ev) => ev.type === PointerEventTypes.POINTERUP ? this.ACTIVATE() : null);
+        this.scene.onKeyboardObservable.add((ev) => ev.type === this.ACTIVATE());
     }
 
     run() {
