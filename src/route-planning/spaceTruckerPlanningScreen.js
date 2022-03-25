@@ -141,7 +141,7 @@ class SpaceTruckerPlanningScreen {
 
         let light = this.light = new PointLight("starLight", new Vector3(), this.scene);
         this.light.intensity = lightIntensity;
-        light.radius = config.starData.scale/2;
+        light.radius = config.starData.scale / 2;
         this.origin = this.planets.filter(p => p.name ===
             this.config.startingPlanet)[0];
 
@@ -183,7 +183,7 @@ class SpaceTruckerPlanningScreen {
                     trigger: ActionManager.OnIntersectionEnterTrigger,
                     parameter: this.cargo.mesh,
                     usePreciseIntersection: true
-                    
+
                 },
                 (ev) => {
                     console.log('mesh intersection triggered!', ev);
@@ -265,19 +265,13 @@ class SpaceTruckerPlanningScreen {
     }
 
     ACTIVATE(state, args) {
-        if (state) {
+        if (args.pointerType || this.gameState !== PLANNING_STATE.ReadyToLaunch) {
             return;
         }
-        const what = args?.pickInfo;
-        if (what?.pickInfo) {
-            console.log(args);
-        }
-        const shouldActivate = this.gameState === PLANNING_STATE.ReadyToLaunch && (!what
-            || what && what.hit && what.pickedMesh === this.cargo.mesh);
+        console.log(state, args);
 
-        if (shouldActivate) {
-            this.launchCargo(this.cargo.forward.scale(this.launchForce));
-        }
+        this.launchCargo(this.cargo.forward.scale(this.launchForce));
+
 
         return true;
     }
