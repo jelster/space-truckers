@@ -1,4 +1,4 @@
-import { TrailMesh, TransformNode } from "@babylonjs/core";
+import { PBRMaterial, TrailMesh, TransformNode } from "@babylonjs/core";
 import { Quaternion, Vector3 } from "@babylonjs/core/Maths/math.vector";
 import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
 
@@ -19,8 +19,9 @@ class CargoUnit extends OrbitingGameObject {
     routePath = [];
     launchForce = 0.0;
     encounterManager;
-    samplingFrequency = 5; //Hz
+    samplingFrequency = 8; //Hz
     samplingCounter = 0;
+    trailMeshMaterial;
     get lastFlightPoint() {
         return this.routePath[this.routePath.length - 1];
     }
@@ -38,12 +39,15 @@ class CargoUnit extends OrbitingGameObject {
         this.mesh = MeshBuilder.CreateBox("cargo", { width: 1, height: 1, depth: 2 }, this.scene);
         this.mesh.rotation = Vector3.Zero();
         this.encounterManager = new SpaceTruckerEncounterManager(this, scene);
+        this.trailMeshMaterial = new PBRMaterial("cargoTrailMaterial", this.scene);
+        this.mesh.material = this.trailMeshMaterial;
 
     }
 
     launch(impulse) {
         this.isInFlight = true;
         this.trailMesh = new TrailMesh("cargoTrail", this.mesh, this.scene, 3, 10000);
+        this.trailMesh.material = this.trailMeshMaterial;
         this.physicsImpostor.applyImpulse(impulse, this.mesh.getAbsolutePosition());
     }
 

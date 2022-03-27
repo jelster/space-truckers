@@ -25,9 +25,11 @@ import gameData from "./gameData";
 import { ActionManager } from "@babylonjs/core/Actions/actionManager";
 import { Ray } from "@babylonjs/core/Culling/ray"; // used by ActionManager
 import { ExecuteCodeAction } from "@babylonjs/core/Actions/directActions";
-import { Axis, Scalar, Space } from "@babylonjs/core";
+import { ArcFollowCamera, Axis, Scalar, Space } from "@babylonjs/core";
 import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
 import DialogBox from "../guis/guiDialog";
+
+import postProcesses from "../post-processes";
 
 const preFlightActionList = [
     { action: 'ACTIVATE', shouldBounce: () => true },
@@ -110,6 +112,7 @@ class SpaceTruckerPlanningScreen {
 
         this.scene = new Scene(engine);
         this.config = config;
+        const { blurParameter, environmentTexture, IBLIntensity, lightIntensity, skyboxScale } = config.environment;
 
         this.soundManager = new SpaceTruckerSoundManager(this.scene, overworldMusic, ambientSound);
 
@@ -127,18 +130,18 @@ class SpaceTruckerPlanningScreen {
         this.asteroidBelt = new AsteroidBelt(this.scene, config.asteroidBeltOptions);
 
         //let skyTexture = CubeTexture.CreateFromImages(skyBoxfiles, this.scene);
-        const skyTexture = new CubeTexture(config.environment.environmentTexture, this.scene);
+        const skyTexture = new CubeTexture(environmentTexture, this.scene);
         skyTexture.coordinatesMode = Texture.SKYBOX_MODE;
         this.scene.reflectionTexture = skyTexture;
-        this.skybox = this.scene.createDefaultSkybox(skyTexture, false, 20000);
-
+        this.skybox = this.scene.createDefaultSkybox(skyTexture, true, skyboxScale, blurParameter, true);
+        this.scene.environmentIntensity = IBLIntensity;
         this.camera = new ArcRotateCamera("cam", 0, 1.35, 3000, Vector3.Zero(), this.scene);
         this.camera.maxZ = 100000;
         this.camera.position.y += 10000;
 
-        this.light = new PointLight("starLight", new Vector3(), this.scene);
-        this.light.intensity = 10000000;
-
+        let light = this.light = new PointLight("starLight", new Vector3(), this.scene);
+        this.light.intensity = lightIntensity;
+        light.radius = config.starData.scale / 2;
         this.origin = this.planets.filter(p => p.name ===
             this.config.startingPlanet)[0];
 
@@ -168,17 +171,19 @@ class SpaceTruckerPlanningScreen {
 
         this.destinationMesh = MeshBuilder.CreateIcoSphere("destination", {
             radius: this.destination.diameter * 1.5,
-            subdivisions: 6,
+            subdivisions: 4,
             flat: false
         }, this.scene);
-        this.destinationMesh.visibility = 0.38;
+        this.destinationMesh.visibility = 0;
         this.destinationMesh.parent = this.destination.mesh;
         this.destinationMesh.actionManager = new ActionManager(this.scene);
         this.destinationMesh.actionManager.registerAction(
             new ExecuteCodeAction(
                 {
                     trigger: ActionManager.OnIntersectionEnterTrigger,
-                    parameter: this.cargo.mesh
+                    parameter: this.cargo.mesh,
+                    usePreciseIntersection: true
+
                 },
                 (ev) => {
                     console.log('mesh intersection triggered!', ev);
@@ -218,7 +223,8 @@ class SpaceTruckerPlanningScreen {
             this.routeConfirmationDialog.hide();
             this.setReadyToLaunchState();
         });
-
+        let renderPipeline = postProcesses.applyPostProcessesToScene(this.scene, this.camera);
+        this._renderPipeline = renderPipeline;
     }
 
     update(deltaTime) {
@@ -259,19 +265,13 @@ class SpaceTruckerPlanningScreen {
     }
 
     ACTIVATE(state, args) {
-        if (state) {
+        if (args.pointerType || this.gameState !== PLANNING_STATE.ReadyToLaunch) {
             return;
         }
-        const what = args?.pickInfo;
-        if (what?.pickInfo) {
-            console.log(args);
-        }
-        const shouldActivate = this.gameState === PLANNING_STATE.ReadyToLaunch && (!what
-            || what && what.hit && what.pickedMesh === this.cargo.mesh);
+        console.log(state, args);
 
-        if (shouldActivate) {
-            this.launchCargo(this.cargo.forward.scale(this.launchForce));
-        }
+        this.launchCargo(this.cargo.forward.scale(this.launchForce));
+
 
         return true;
     }

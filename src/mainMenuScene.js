@@ -131,7 +131,7 @@ class MainMenuScene {
 
         }
         // indicate interest in maintaining state by returning anything other than 0, null, undefined, or false
-        return true;
+        return false;
     }
 
     GO_BACK() {
@@ -142,7 +142,7 @@ class MainMenuScene {
         const light = new HemisphericLight("light", new Vector3(0, 0.5, 0), this._scene);
         const starfieldPT = new StarfieldProceduralTexture("starfieldPT", 512, this._scene);
         const starfieldMat = new StandardMaterial("starfield", this._scene);
-        const space = CylinderBuilder.CreateCylinder("space", { height: 100, diameterTop: 0, diameterBottom: 60 }, this._scene);
+        const space = CylinderBuilder.CreateCylinder("space", { height: 100, diameterTop: 0, diameterBottom: 60, tessellation: 12 }, this._scene);
         starfieldMat.diffuseTexture = starfieldPT;
         starfieldMat.diffuseTexture.coordinatesMode = Texture.SKYBOX_MODE;
         starfieldMat.backFaceCulling = false;
@@ -154,6 +154,7 @@ class MainMenuScene {
     _setupUi() {
         const gui = AdvancedDynamicTexture.CreateFullscreenUI("UI");
         gui.renderAtIdealSize = true;
+        gui.isForeground = true;
         this._guiMenu = gui;
         const menuContainer = new Rectangle("menuContainer");
         menuContainer.width = 0.8;

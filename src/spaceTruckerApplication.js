@@ -6,15 +6,34 @@ import SplashScene from "./splashScene";
 import SpaceTruckerInputManager from "./spaceTruckerInput";
 
 import appData from "./route-planning/gameData";
-import SpaceTruckerPlanningScreen from "./route-planning/spaceTruckerPlanningScreen";
+import SpaceTruckerPlanningScreen, { PLANNING_STATE } from "./route-planning/spaceTruckerPlanningScreen";
 import SpaceTruckerDrivingScreen from "./driving/spaceTruckerDrivingScreen";
 
 // TODO: conditionally include sample data in the build
 import sampleRoute from "./driving/sample-route.json";
 import sampleRoute2 from "./driving/sample-route2.json";
 import sampleRoute3 from "./driving/sample-route3.json";
+import sampleRoute4 from "./driving/sample-route4.json";
+import sampleRoute5 from "./driving/sample-route5.json";
+import sampleRoute6 from "./driving/sample-route6.json";
 
-const sampleRoutes = { "sample-route": sampleRoute, "sample-route2": sampleRoute2, "sample-route3": sampleRoute3 };
+const sampleRoutes = {
+    "sample-route": sampleRoute,
+    "sample-route2": sampleRoute2,
+    "sample-route3": sampleRoute3,
+    "sample-route4": sampleRoute4,
+    "sample-route5": sampleRoute5,
+    "sample-route6": sampleRoute6
+};
+
+const driveModeInputMapPatches = {
+    w: "MOVE_IN", W: "MOVE_IN",
+    s: "MOVE_OUT", S: "MOVE_OUT",
+    ArrowUp: 'MOVE_UP',
+    ArrowDown: 'MOVE_DOWN',
+    ArrowLeft: 'ROTATE_LEFT',
+    ArrowRight: 'ROTATE_RIGHT',
+};
 class SpaceTruckerApplication {
     *appStateMachine() {
         let previousState = null;
@@ -61,7 +80,8 @@ class SpaceTruckerApplication {
 
     initialize() {
         const engine = this._engine;
-        engine.enterFullscreen(false);
+        // TODO: conditionally enable or disable fullscreen based on checkbox or config
+        //engine.enterFullscreen(false);
 
         engine.displayLoadingUI();
 
@@ -72,18 +92,8 @@ class SpaceTruckerApplication {
         this._engine.loadingUIText = "Loading Splash Scene...";
         this._splashScreen = new SplashScene(this._engine, this.inputManager);
 
-        this._engine.loadingUIText = "Loading Main Menu...";
-        this._mainMenu = new MainMenuScene(this._engine, this.inputManager);
         this._splashScreen.onReadyObservable.addOnce(() => {
             this.goToOpeningCutscene();
-        });
-        this._mainMenu.onExitActionObservable.addOnce(() => this.exit());
-        this._mainMenu.onPlayActionObservable.add(() => this.goToRunningState());
-
-        this._engine.loadingUIText = "Loading Route Planning...";
-        this._routePlanningScene = new SpaceTruckerPlanningScreen(this._engine, this.inputManager, appData);
-        this._routePlanningScene.routeAcceptedObservable.add(() => {
-            this.goToDrivingState();
         });
 
         engine.hideLoadingUI();
@@ -132,18 +142,20 @@ class SpaceTruckerApplication {
     // State transition commands
     goToOpeningCutscene() {
         this.moveNextAppState(AppStates.CUTSCENE);
-
         this._splashScreen.onReadyObservable.addOnce(() => this._engine.hideLoadingUI());
-        this._splashScreen.actionProcessor.attachControl();
         this._currentScene = this._splashScreen;
         this._splashScreen.run();
     }
 
     goToMainMenu() {
-        this._currentScene.actionProcessor.detachControl();
-        this._splashScreen.scene.dispose();
-        this._splashScreen = null;
-
+        this._currentScene?.actionProcessor?.detachControl();
+        if (this._currentScene.scene) {
+            this._currentScene.scene.dispose();
+        }
+        this._currentScene = null;
+        this._mainMenu = new MainMenuScene(this._engine, this.inputManager);
+        this._mainMenu.onExitActionObservable.addOnce(() => this.exit());
+        this._mainMenu.onPlayActionObservable.addOnce(() => this.goToRunningState());
         this._currentScene = this._mainMenu;
         this.moveNextAppState(AppStates.MENU);
         this._mainMenu._onMenuEnter(1200);
@@ -152,31 +164,50 @@ class SpaceTruckerApplication {
 
     goToRunningState() {
         const queryString = window.location.search;
+        this._currentScene.actionProcessor.detachControl();
         if (queryString.toLowerCase().includes("testdrive")) {
             let routeParam = queryString.substring(queryString.indexOf("route=") + 6);
             let lookupRoute = sampleRoutes[routeParam];
             this.goToDrivingState(lookupRoute);
             return;
         }
-
-        this._currentScene.actionProcessor.detachControl();
-        this._currentScene = this._routePlanningScene;
-        this.moveNextAppState(AppStates.PLANNING);
-        this._currentScene.actionProcessor.attachControl();
-        this._routePlanningScene.setReadyToLaunchState();
+        this._engine.loadingUIText = "Loading Route Planning...";
+        this._routePlanningScene = new SpaceTruckerPlanningScreen(this._engine, this.inputManager, appData);
+        this._routePlanningScene.onStateChangeObservable.add((ev, es) => {
+            if (ev.currentState === PLANNING_STATE.Initialized) {
+                this._currentScene = this._routePlanningScene;
+                this.moveNextAppState(AppStates.PLANNING);
+                this._currentScene.actionProcessor.attachControl();
+                this._routePlanningScene.setReadyToLaunchState();
+                this._routePlanningScene.routeAcceptedObservable.add(() => {
+                    this.goToDrivingState();
+                });
+            }
+        });
     }
 
     goToDrivingState(routeData) {
+        this._engine.displayLoadingUI();
         routeData = routeData ?? this._routePlanningScene.routeData;
         this._currentScene.actionProcessor.detachControl();
-        this._routePlanningScene?.dispose();
-        this._routePlanningScene = null;
-        this._drivingScene = new SpaceTruckerDrivingScreen(this._engine, routeData, this.inputManager);
-        this._currentScene = this._drivingScene;
+
+        let driveControls = { ...this.inputManager.controlsMap, ...driveModeInputMapPatches };
+        let driveInputManager = new SpaceTruckerInputManager(this._engine, driveControls);
+        this._drivingScene = new SpaceTruckerDrivingScreen(this._engine, routeData, driveInputManager);
+
         this.moveNextAppState(AppStates.DRIVING);
         this._drivingScene.initialize().then(() => {
+            if (this._currentScene.dispose) {
+                this._currentScene?.dispose();
+            }
+            this._currentScene = null;
+            this._currentScene = this._drivingScene;
             this._currentScene.actionProcessor.attachControl();
+            this._engine.hideLoadingUI();
             this._drivingScene.reset();
+        });
+        this._drivingScene.onExitObservable.addOnce(() => {
+            this.goToMainMenu();
         });
     }
 
@@ -189,5 +220,4 @@ class SpaceTruckerApplication {
         }
     }
 }
-
 export default SpaceTruckerApplication

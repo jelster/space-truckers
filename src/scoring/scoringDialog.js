@@ -46,13 +46,11 @@ function createScoringDialog(scoreData, drivingScreen) {
     };
     const { scene, soundManager } = drivingScreen;
     const sound = soundManager.sound('scoring');
-    
     let scoreDialog = new DialogBox(opts, scene);
-    let dialog = { scoreDialog };
-    dialog.height = "98%";
+    scoreDialog.userActionSkip = false;
+    scoreDialog.dialogContainer.height = "98%";
     let scoringCo = scoringAnimationCo();
-    
-    scene.onBeforeRenderObservable.runCoroutineAsync(scoringCo);
+    scoreDialog.scoreCoInvoke = scene.onBeforeRenderObservable.runCoroutineAsync(scoringCo);
     return scoreDialog;
 
     function* scoringAnimationCo() {
@@ -61,6 +59,7 @@ function createScoringDialog(scoreData, drivingScreen) {
         let scrollBar = scoreDialog.bodyContainer.verticalBar;
         bodyStack.height = '100%';
         let computedHeight = 0;
+
         for (let i in finalScores) {
             yield Tools.DelayAsync(500);
             scoreDialog.bodyText = '';
@@ -75,21 +74,21 @@ function createScoringDialog(scoreData, drivingScreen) {
             yield Tools.DelayAsync(1800);
 
             let skipCountUp = label.toLowerCase().includes("bonus");
-            if (skipCountUp) {
-                scoreBlock.text = `${label}.........${score.toFixed().toLocaleString()}`;
+            const MAX_COUNT = (60 / (60 + scene.getEngine().getFps())) * 60;
+            while (frameCounter <= MAX_COUNT) {
                 sound.play();
-            }
-            else {
-                const MAX_COUNT = 50;
-                while (frameCounter <= MAX_COUNT) {
-                    let currProgress = frameCounter / MAX_COUNT;
-                    sound.play();
-                    let speed = Scalar.SmoothStep(0, score, currProgress);
-                    scoreBlock.text = `${label}.........${speed.toFixed().toLocaleString()}`;
-                    frameCounter++;
-                    yield Tools.DelayAsync(50);
+                if (scoreDialog.userActionSkip || skipCountUp) {
+                    scoreDialog.userActionSkip = false;
+                    break;
                 }
+                let currProgress = frameCounter / MAX_COUNT;
+                let speed = Scalar.SmoothStep(0, score, currProgress);
+                scoreBlock.text = `${label}.........${speed.toFixed().toLocaleString()}`;
+                frameCounter++;
+                yield Tools.DelayAsync(5);
             }
+            scoreBlock.text = `${label}.........${score.toFixed().toLocaleString()}`;
+
             yield;
         }
         return;

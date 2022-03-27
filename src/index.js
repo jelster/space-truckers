@@ -55,6 +55,7 @@ window.addEventListener("keydown", (ev) => {
         }
         else {
             scene.debugLayer.show();
-        } 
+        }
+        return false; 
     }
 });

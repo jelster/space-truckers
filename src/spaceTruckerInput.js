@@ -1,21 +1,13 @@
 import { Gamepad, KeyboardEventTypes, Logger, PointerEventTypes } from "@babylonjs/core";
-import {Observable} from "@babylonjs/core/Misc/observable";
+import { Observable } from "@babylonjs/core/Misc/observable";
 import logger from "./logger";
 
 import SpaceTruckerControls from "./inputActionMaps";
 
 
-const controlsMap = SpaceTruckerControls.inputControlsMap;
-let tempControlsMap = {};
+const defaultControlsMap = SpaceTruckerControls.inputControlsMap;
 class SpaceTruckerInputManager {
-    static patchControlMap(newMaps) {
-        tempControlsMap = Object.assign({}, controlsMap);
-        Object.assign(controlsMap, newMaps);
-    }
-    static unPatchControlMap() {
-        Object.assign(controlsMap, tempControlsMap);
-        tempControlsMap = {};
-    }
+
     get hasInput() {
         return this._inputKeys?.length > 0;
     }
@@ -37,12 +29,14 @@ class SpaceTruckerInputManager {
         }
         return this._inputSubscriptions;
     }
-    constructor(engine) {
+    controlsMap;
+    constructor(engine, controlsMap = defaultControlsMap) {
         this._inputMap = {};
         this._engine = engine;
         this._onInputAvailable = new Observable();
         this.gamepad = null;
         this._inputSubscriptions = [];
+        this.controlsMap = controlsMap;
     }
 
     registerInputForScene(sceneToRegister) {
@@ -80,6 +74,7 @@ class SpaceTruckerInputManager {
         sceneInputHandler.subscriptions.forEach(s => s.checkInputs());
         const im = this.inputMap;
         const ik = Object.keys(im);
+        let { controlsMap } = this;
 
         const inputs = ik
             .map((key) => {
@@ -92,15 +87,21 @@ class SpaceTruckerInputManager {
     }
 
     enableMouse(scene) {
+        let mouseDown = false;
         const obs = scene.onPointerObservable.add((pointerInfo) => {
-            
-            if (pointerInfo.type === PointerEventTypes.POINTERDOWN) {
-                this.inputMap["PointerTap"] = pointerInfo;
+            if (!mouseDown && pointerInfo.type === PointerEventTypes.POINTERDOWN) {
+                mouseDown = true;
+                return;
             }
-            else if (pointerInfo.type === PointerEventTypes.POINTERUP) {
+            if (mouseDown && pointerInfo.type === PointerEventTypes.POINTERUP) {
+                this.inputMap["PointerTap"] = pointerInfo.event;
+                mouseDown = false;
+                return;
+            }
+            if (!mouseDown) {
                 delete this.inputMap["PointerTap"];
             }
-            
+
         });
 
         const checkInputs = () => { };
@@ -109,6 +110,7 @@ class SpaceTruckerInputManager {
 
     enableKeyboard(scene) {
         const observer = scene.onKeyboardObservable.add((kbInfo) => {
+            let {controlsMap} = this;
             const key = kbInfo.event.key;
             const keyMapped = controlsMap[key];
             if (!keyMapped) {
@@ -205,7 +207,6 @@ class SpaceTruckerInputManager {
                 this.gamepad = null;
                 manager.onGamepadConnectedObservable.remove(gamepadConnectedObserver);
                 manager.onGamepadDisconnectedObservable.remove(gamepadDisconnectedObserver);
-                SpaceTruckerInputManager.unPatchControlMap();
             }
         };
     }

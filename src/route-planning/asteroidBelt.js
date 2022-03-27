@@ -9,6 +9,9 @@ import rockTextureUrl from "../../assets/textures/rock.png";
 import rockNormalUrl from "../../assets/textures/rockn.png";
 import { Matrix, Quaternion, Vector3 } from "@babylonjs/core";
 
+import getGaussianRandom from "../randomGenerator";
+
+
 class AsteroidBelt extends OrbitingGameObject {
     asteroidData;
     rockMat;
@@ -36,7 +39,10 @@ class AsteroidBelt extends OrbitingGameObject {
         const outerBeltRadius = asteroidBeltOptions.outerBeltRadius;
         const maxScale = asteroidBeltOptions.maxScale;
 
+        super.setOrbitalParameters(outerBeltRadius + innerBeltRadius / 2);
+
         const rockMat = new PBRMaterial("rockMat", this.scene);
+        rockMat.forceIrradianceInFragment = true;
         rockMat.albedoTexture = new Texture(rockTextureUrl, this.scene);
         rockMat.bumpTexture = new Texture(rockNormalUrl, this.scene);
         rockMat.roughness = 0.9;
@@ -45,14 +51,14 @@ class AsteroidBelt extends OrbitingGameObject {
         aSphere.material = rockMat;
 
         for (let i = 0; i < numAsteroids; ++i) {
-            this.scalings.push(new Vector3(Math.random() * 2 + 1, Math.random() + 1, Math.random() * 2 + 1));
+            this.scalings.push(new Vector3(getGaussianRandom() * 2 + 1, getGaussianRandom() + 1, getGaussianRandom() * 2 + 1));
 
             let theta = Math.random() * 2 * Math.PI;
             let rTheta = Scalar.RandomRange(innerBeltRadius + density * 0.5, outerBeltRadius - density * 0.5);
 
             this.positions.push(new Vector3(
                 Math.sin(theta) * rTheta,
-                (Math.random() - 0.5) * density,
+                (getGaussianRandom() - 0.5) * density,
                 Math.cos(theta) * rTheta
             ));
 
@@ -82,11 +88,11 @@ class AsteroidBelt extends OrbitingGameObject {
     };
 
     update(deltaTime) {
-        this.rotation.y = Scalar.Repeat(this.rotation.y + 0.0009, Scalar.TwoPi);
+        this.rotation.y = Scalar.Repeat(this.rotation.y + (this.angularVelocity * deltaTime), Scalar.TwoPi);
 
         for (let i = 0; i < this.numAsteroids; ++i) {
             this.rotations[i].x += Math.random() * 0.01;
-            this.rotations[i].y += Math.random() * 0.01;
+            this.rotations[i].y += Math.random() * 0.02;
             this.rotations[i].z += Math.random() * 0.01;
         }
         this.updateMatrices();

@@ -34,6 +34,7 @@ class Planet extends OrbitingGameObject {
         }
         if (planData.normalTexture) {
             planetMat.bumpTexture = new Texture(planData.normalTexture, this.scene);
+            planetMat.forceIrradianceInFragment = true;
         }
         if (planData.specularTexture) {
             planetMat.reflectivityTexture = new Texture(planData.specularTexture, this.scene);

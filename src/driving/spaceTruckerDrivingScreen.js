@@ -1,5 +1,5 @@
 import { Scene } from "@babylonjs/core/scene";
-import { Vector3 } from "@babylonjs/core/Maths";
+import { Vector3, Matrix } from "@babylonjs/core/Maths";
 import { Viewport } from "@babylonjs/core/Maths/math.viewport";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
 import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
@@ -41,21 +41,12 @@ import createScoringDialog from "../scoring/scoringDialog";
 import SpaceTruckerSoundManager from "../spaceTruckerSoundManager";
 import computeScores from "../scoring/spaceTruckerScoreManager";
 import truckExploderSPS from "./truckExploderSPS";
+import postProcesses from "../post-processes";
 
 const { GUI_MASK, SCENE_MASK } = screenConfig;
 const { followCamSetup } = screenConfig;
 
-const inputMapPatches = {
-    w: "MOVE_IN", W: "MOVE_IN",
-    s: "MOVE_OUT", S: "MOVE_OUT",
-    ArrowUp: 'MOVE_UP',
-    ArrowDown: 'MOVE_DOWN',
-    ArrowLeft: 'ROTATE_LEFT',
-    ArrowRight: 'ROTATE_RIGHT',
-
-};
-
-const actionList = [
+ const actionList = [
     { action: 'ACTIVATE', shouldBounce: () => true },
     { action: 'MOVE_UP', shouldBounce: () => false },
     { action: 'MOVE_DOWN', shouldBounce: () => false },
@@ -127,7 +118,7 @@ class SpaceTruckerDrivingScreen {
         this.tempObstacleMesh.layerMask = 0;
 
         this.scene.clearColor = new Color3(0, 0, 0);
-        SpaceTruckerInputManager.patchControlMap(inputMapPatches);
+         
         this.inputManager = inputManager;
         this.actionProcessor = new SpaceTruckerInputProcessor(this, inputManager, actionList);
 
@@ -141,6 +132,7 @@ class SpaceTruckerDrivingScreen {
         this.followCamera.layerMask = SCENE_MASK;
         //this.followCamera.attachControl(undefined, true);
         this.scene.activeCameras.push(this.followCamera);
+        this.scene.cameraToUseForPointers = this.followCamera;
 
         initializeEnvironment(this);
         this.route = this.calculateRouteParameters(routeData);
@@ -163,7 +155,8 @@ class SpaceTruckerDrivingScreen {
         this.ground = MeshBuilder.CreateRibbon("road", {
             pathArray: route.paths,
             sideOrientation: Mesh.DOUBLESIDE,
-            closeArray: true
+            closeArray: true,
+            closePath: false
         }, this.scene);
 
         this.ground.layerMask = SCENE_MASK;
@@ -191,6 +184,8 @@ class SpaceTruckerDrivingScreen {
         this.gui = await gP;
         this.currentState = DRIVING_STATE.Initialized;
         this.onReadyObservable.notifyObservers(this);
+        let renderPipeline = postProcesses.applyPostProcessesToScene(this.scene, this.followCamera);
+        this._renderPipeline = renderPipeline;
     }
 
     onTruckDestroyed() {
@@ -242,25 +237,25 @@ class SpaceTruckerDrivingScreen {
             paths.push([]);
         }
         let tmpVector = new Vector3();
-        for (let i = 0; i < curve.length; i++) {
-            let { gravity, velocity, rotationQuaternion } = pathPoints[i];
-            let position = curve[i];
-            let speed = Scalar.Clamp(velocity.length(), 25, 100);
-
+        let radiix = Scalar.TwoPi / numberOfRoadSegments;
+        for (let i = 0; i < pathPoints.length; i++) {
+            let { gravity, velocity, rotationQuaternion, position } = pathPoints[i];
+             
+            let speed = Scalar.Clamp(velocity.length(), 45, 250);
+            let velN = velocity.normalizeToNew();
+            let rotQ = Quaternion.FromLookDirectionRH(velN, Vector3.Cross(velN, Axis.Y));
+            let xMatrix = Matrix.Compose(new Vector3(speed, speed, speed), rotQ, position);
             for (let pathIdx = 0; pathIdx < numberOfRoadSegments; pathIdx++) {
-                tmpVector.copyFromFloats(
-                    position.x,
-                    position.y,
-                    position.z);
-                let radiix = (pathIdx / numberOfRoadSegments) * Scalar.TwoPi;
+                tmpVector.setAll(0);
+                
                 let path = paths[pathIdx];
-                let xScale = Math.cos(radiix) * speed;
-                let yScale = Math.sin(radiix) * speed;
+                let xScale = Math.cos(radiix * pathIdx);
+                let yScale = Math.sin(radiix * pathIdx);
                 let zScale = 0;
-                tmpVector.addInPlaceFromFloats(xScale, yScale, zScale);
-
-
-
+                tmpVector.x = xScale;
+                tmpVector.y = yScale;
+                tmpVector.z = zScale;
+                Vector3.TransformCoordinatesToRef(tmpVector, xMatrix, tmpVector);
                 path.push(tmpVector.clone());
             }
         }
@@ -312,17 +307,22 @@ class SpaceTruckerDrivingScreen {
         this.sps.vars.boom = false;
         const point = path3d.getPointAt(0);
         const tang = path3d.getTangentAt(0);
-
-        currentVelocity.copyFrom(pathPoints[0].velocity);
+        let firstPoint = pathPoints[0];
+        currentVelocity.copyFrom(firstPoint.velocity);
         currentAngularVelocity.setAll(0);
 
-        mesh.position.copyFrom(point);
+        mesh.position.copyFrom(firstPoint.position);
         physicsImpostor.setLinearVelocity(Vector3.Zero());
-
-        mesh.rotationQuaternion = Quaternion.FromLookDirectionRH(tang, up);
+        let firstVelocityNorm = firstPoint.velocity.normalizeToNew();
+        mesh.rotationQuaternion = Quaternion.FromLookDirectionRH(firstVelocityNorm,  up);
         physicsImpostor.setAngularVelocity(Vector3.Zero());
         this.currentState = DRIVING_STATE.RouteStart;
-        this.gui.guiCamera.layerMask = GUI_MASK;
+        this.gui.fsGui.isForeground = true;
+        this.gui.radarMesh.isVisible = true;
+        if (this.scoreDialog) {
+            this.scoreDialog.hide();
+            this.scene.onBeforeRenderObservable.cancelAllCoroutines(); // I'll regret this later... need a way to cancel a single coRoutine
+        }
     }
 
     killTruck() {
@@ -332,16 +332,16 @@ class SpaceTruckerDrivingScreen {
         // check to see if the player has completed the route or if it's just blown through the tube
         let closestPathPosition = path3d.getClosestPositionTo(mesh.absolutePosition);
         // not close enough!
-        if (closestPathPosition < 0.976) {
-            this.truck.kill();
+        if (closestPathPosition >= 0.976) {
+            this.completeRound();
             return;
         }
-        this.completeRound();
+        this.truck.kill();
     }
 
     completeRound() {
-        this.gui.isForeground = false;
-        this.gui.guiCamera.layerMask = 0x0;
+        this.gui.fsGui.isForeground = false;
+        this.gui.radarMesh.isVisible = false;
         this.currentState = DRIVING_STATE.RouteComplete;
         this.route.actualTransitTime = this.currentTransitTime;
         // gather data for score computation
@@ -411,6 +411,9 @@ class SpaceTruckerDrivingScreen {
         if (!state && this.currentState === DRIVING_STATE.RouteStart) {
             console.log('starting...');
             this.start();
+        }
+        if (this.currentState === DRIVING_STATE.RouteComplete && this.scoreDialog) {
+            this.scoreDialog.userActionSkip = true;
         }
     }
 

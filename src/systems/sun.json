@@ -5,7 +5,7 @@
       "name": "sunSystem",
       "id": "sunSystem",
       "capacity": 1600,
-      "renderingGroupId": 3,
+      "renderingGroupId": 0,
       "isBillboardBased": false,
       "particleEmitterType": {
         "type": "SphereParticleEmitter",
@@ -53,7 +53,7 @@
       ],
       "updateSpeed": 0.005,
       "targetStopDuration": 0,
-      "blendMode": 4,
+      "blendMode": 2,
       "preWarmCycles": 100,
       "preWarmStepOffset": 10,
       "minInitialRotation": -6.283185307179586,
@@ -116,7 +116,7 @@
       "name": "flareParticles",
       "id": "flareParticles",
       "capacity": 20,
-      "renderingGroupId": 2,
+      "renderingGroupId": 0,
       "particleEmitterType": {
         "type": "SphereParticleEmitter",
         "radius": 250,
@@ -163,7 +163,7 @@
       ],
       "updateSpeed": 0.01,
       "targetStopDuration": 0,
-      "blendMode": 4,
+      "blendMode": 2,
       "preWarmCycles": 100,
       "preWarmStepOffset": 10,
       "minInitialRotation": -6.283185307179586,
@@ -226,7 +226,7 @@
     {
       "name": "glareParticles",
       "id": "glareParticles",
-      "renderingGroupId": 1,
+      "renderingGroupId": 0,
       "capacity": 600,
       "particleEmitterType": {
         "type": "SphereParticleEmitter",
@@ -274,7 +274,7 @@
       ],
       "updateSpeed": 0.01,
       "targetStopDuration": 0,
-      "blendMode": 4,
+      "blendMode": 2,
       "preWarmCycles": 100,
       "preWarmStepOffset": 10,
       "minInitialRotation": -6.283185307179586,

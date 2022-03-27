@@ -16,7 +16,7 @@ import neptuneUrl from "../../assets/textures/nep0fds1.jpg";
 
 import sunTextureUrl from "../../assets/textures/2k_sun.jpg";
 
-import environmentTextureUrl from "../../assets/environment/milkyway-pbr-hdr.env";
+import environmentTextureUrl from "../../assets/environment/crab-nebula-ibl.env";
 
 import hazard_icon from '../../assets/Space-trucker-ui-asteroid-warning.png';
 
@@ -33,10 +33,10 @@ const planetData = [
         name: "hermes",
         posRadians: Scalar.RandomRange(0, 2 * Math.PI),
         posRadius: 450 * distanceMultiplier,
-        scale: 10 * scaleMultiplier,
+        scale: 40 * scaleMultiplier,
         color: new Color3(0.45, 0.33, 0.18),
         diffuseTexture: ceresDiffuseUrl,
-        normalTexture: ceresBumpUrl,
+        normalTexture: null,
         specularTexture: null,
         lightMapUrl: null,
         directIntensity: 0.25,
@@ -46,7 +46,7 @@ const planetData = [
         name: "tellus",
         posRadians: Scalar.RandomRange(0, 2 * Math.PI),
         posRadius: 750 * distanceMultiplier,
-        scale: 30 * scaleMultiplier,
+        scale: 80 * scaleMultiplier,
         color: new Color3(0.91, 0.89, 0.72),
         diffuseTexture: earthDiffuseUrl,
         normalTexture: earthNormalUrl,
@@ -58,7 +58,7 @@ const planetData = [
         name: "zeus",
         posRadians: Scalar.RandomRange(0, 2 * Math.PI),
         posRadius: 2500 * distanceMultiplier,
-        scale: 200 * scaleMultiplier,
+        scale: 350 * scaleMultiplier,
         color: new Color3(0.17, 0.63, 0.05),
         diffuseTexture: jupiterTextureUrl,
         normalTexture: null,
@@ -70,7 +70,7 @@ const planetData = [
         name: "janus",
         posRadians: Scalar.RandomRange(0, 2 * Math.PI),
         posRadius: 4000 * distanceMultiplier,
-        scale: 110 * scaleMultiplier,
+        scale: 300 * scaleMultiplier,
         color: new Color3(0.55, 0, 0),
         diffuseTexture: neptuneUrl,
         normalTexture: null,
@@ -202,9 +202,9 @@ const encounterZones = {
 const gameData = {
     planetaryInfo: planetData,
     asteroidBeltOptions: {
-        density: 280,
+        density: 400,
         maxScale: new Vector3(10.25, 10.25, 10.25),
-        number: 1000,
+        number: 880,
         innerBeltRadius: 1000 * distanceMultiplier,
         outerBeltRadius: 1700 * distanceMultiplier,
         posRadians: 0,
@@ -219,7 +219,11 @@ const gameData = {
         mass: primaryReferenceMass
     },
     environment: {
-        environmentTexture: environmentTextureUrl
+        environmentTexture: environmentTextureUrl,
+        blurParameter: 0,
+        IBLIntensity: 0.42,
+        lightIntensity: 6000000,
+        skyboxScale: 16384
     }
 };
 
