@@ -45,6 +45,8 @@ const preFlightActionList = [
 const overworldMusic = "overworld";
 const ambientSound = "ambient";
 
+const PLANNING_SCREEN_LAYER_MASK = 1;
+
 const PLANNING_STATE = Object.freeze({
     Created: 0,
     Initialized: 1,
@@ -111,6 +113,8 @@ class SpaceTruckerPlanningScreen {
         engine.loadingUIText = 'Loading Route Planning Simulation...';
 
         this.scene = new Scene(engine);
+        this.scene.onNewMeshAddedObservable.add(mesh => mesh.layerMask = PLANNING_SCREEN_LAYER_MASK);
+
         this.config = config;
         const { blurParameter, environmentTexture, IBLIntensity, lightIntensity, skyboxScale } = config.environment;
 
@@ -136,6 +140,9 @@ class SpaceTruckerPlanningScreen {
         this.skybox = this.scene.createDefaultSkybox(skyTexture, true, skyboxScale, blurParameter, true);
         this.scene.environmentIntensity = IBLIntensity;
         this.camera = new ArcRotateCamera("cam", 0, 1.35, 3000, Vector3.Zero(), this.scene);
+        this.scene.activeCamera = this.camera;
+        this.scene.activeCameras.push(this.camera);
+        this.camera.layerMask = PLANNING_SCREEN_LAYER_MASK;
         this.camera.maxZ = 100000;
         this.camera.position.y += 10000;
 

@@ -8,7 +8,10 @@ import { Grid, Image, Slider, StackPanel } from "@babylonjs/gui";
 import { Scalar } from "@babylonjs/core/Maths/math.scalar";
 import { Tools } from "@babylonjs/core/Misc/tools";
 import guiScreen from "../guis/route-planning-gui.json";
+import { ArcRotateCamera } from "@babylonjs/core/Cameras/arcRotateCamera";
+import { Vector3 } from "@babylonjs/core";
 
+const GUI_LAYER_MASK = 2;
 class PlanningScreenGui {
     gui;
     scene;
@@ -17,6 +20,7 @@ class PlanningScreenGui {
     transitDistance;
     gameStage;
     encounterPanels = [];
+    guiCamera;
 
     #launchSlider;
     get launchForce() {
@@ -87,6 +91,7 @@ class PlanningScreenGui {
             AdvancedDynamicTexture.NEAREST_NEAREST,
             true);
         gui.parseContent(guiScreen);
+        gui.layer.layerMask = GUI_LAYER_MASK;
         this.#launchSlider = gui.getControlByName("launchSlider");
         this.#centerText = gui.getControlByName("centerText");
         this.#currentAccelerationText = gui.getControlByName("currentAccelerationText");
@@ -96,6 +101,15 @@ class PlanningScreenGui {
         this.#launchResetButton = gui.getControlByName("launchResetButton");
         this.#routeSimulationText = gui.getControlByName("routeSimulationText");
 
+        this.guiCamera = new ArcRotateCamera("guiCamera", 0, 0.8, 100, Vector3.Zero(), this.scene);
+        this.guiCamera.position = this.planningScreen.camera.position;
+        this.guiCamera.rotation = this.planningScreen.camera.rotation;
+        this.guiCamera.parent = this.planningScreen.camera;
+        
+        this.guiCamera.layerMask = GUI_LAYER_MASK;
+        this.guiCamera.maxZ = 10;
+        this.scene.activeCameras.push(this.guiCamera);
+         
     }
 
 
