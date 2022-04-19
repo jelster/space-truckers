@@ -46,7 +46,7 @@ import postProcesses from "../post-processes";
 const { GUI_MASK, SCENE_MASK } = screenConfig;
 const { followCamSetup } = screenConfig;
 
- const actionList = [
+const actionList = [
     { action: 'ACTIVATE', shouldBounce: () => true },
     { action: 'MOVE_UP', shouldBounce: () => false },
     { action: 'MOVE_DOWN', shouldBounce: () => false },
@@ -118,7 +118,7 @@ class SpaceTruckerDrivingScreen {
         this.tempObstacleMesh.layerMask = 0;
 
         this.scene.clearColor = new Color3(0, 0, 0);
-         
+
         this.inputManager = inputManager;
         this.actionProcessor = new SpaceTruckerInputProcessor(this, inputManager, actionList);
 
@@ -183,11 +183,15 @@ class SpaceTruckerDrivingScreen {
         let gP = initializeGui(this);
         this.gui = await gP;
         this.currentState = DRIVING_STATE.Initialized;
-        this.onReadyObservable.notifyObservers(this);
-        let cruiseSong = this.soundManager.sound("cruising");
-        cruiseSong.setVolume(0.01);
-        cruiseSong.play();
-        cruiseSong.setVolume(0.65, 50);
+        this.soundManager.onReadyObservable.addOnce(() => {
+            let cruiseSong = this.soundManager.sound("cruising");
+            cruiseSong.setVolume(0.01);
+            cruiseSong.play();
+            cruiseSong.setVolume(0.65, 50);
+            this.onReadyObservable.notifyObservers(this);
+
+        });
+
         let renderPipeline = postProcesses.applyPostProcessesToScene(this.scene, this.followCamera);
         this._renderPipeline = renderPipeline;
     }
@@ -244,14 +248,14 @@ class SpaceTruckerDrivingScreen {
         let radiix = Scalar.TwoPi / numberOfRoadSegments;
         for (let i = 0; i < pathPoints.length; i++) {
             let { gravity, velocity, rotationQuaternion, position } = pathPoints[i];
-             
+
             let speed = Scalar.Clamp(velocity.length(), 45, 250);
             let velN = velocity.normalizeToNew();
             let rotQ = Quaternion.FromLookDirectionRH(velN, Vector3.Cross(velN, Axis.Y));
             let xMatrix = Matrix.Compose(new Vector3(speed, speed, speed), rotQ, position);
             for (let pathIdx = 0; pathIdx < numberOfRoadSegments; pathIdx++) {
                 tmpVector.setAll(0);
-                
+
                 let path = paths[pathIdx];
                 let xScale = Math.cos(radiix * pathIdx);
                 let yScale = Math.sin(radiix * pathIdx);
@@ -318,7 +322,7 @@ class SpaceTruckerDrivingScreen {
         mesh.position.copyFrom(firstPoint.position);
         physicsImpostor.setLinearVelocity(Vector3.Zero());
         let firstVelocityNorm = firstPoint.velocity.normalizeToNew();
-        mesh.rotationQuaternion = Quaternion.FromLookDirectionRH(firstVelocityNorm,  up);
+        mesh.rotationQuaternion = Quaternion.FromLookDirectionRH(firstVelocityNorm, up);
         physicsImpostor.setAngularVelocity(Vector3.Zero());
         this.currentState = DRIVING_STATE.RouteStart;
         this.gui.fsGui.isForeground = true;
