@@ -3,12 +3,6 @@ import { Scalar } from "@babylonjs/core/Maths/math.scalar";
 import { Vector3 } from "@babylonjs/core/Maths/math.vector";
 
 import ceresDiffuseUrl from "../../assets/textures/2k_ceres_fictional.jpg";
-import ceresBumpUrl from "../../assets/textures/2k_ceres_fictional.dds";
-
-import earthDiffuseUrl from "../../assets/textures/2k_earth_daymap.jpg";
-import earthNormalUrl from "../../assets/textures/2k_earth_normal_map.png";
-import earthSpecularUrl from "../../assets/textures/2k_earth_specular_map.png";
-import earthCloudsUrl from "../../assets/textures/2k_earth_clouds.jpg";
 
 import jupiterTextureUrl from "../../assets/textures/jupiter-globalmap.jpg";
 
@@ -20,6 +14,7 @@ import environmentTextureUrl from "../../assets/environment/crab-nebula-ibl.env"
 
 import hazard_icon from '../../assets/Space-trucker-ui-asteroid-warning.png';
 
+import planetEarthNode from "../nme/materials/planetEarthMaterial.json"
 
 
 const primaryReferenceMass = 4e16;
@@ -48,10 +43,11 @@ const planetData = [
         posRadius: 750 * distanceMultiplier,
         scale: 80 * scaleMultiplier,
         color: new Color3(0.91, 0.89, 0.72),
-        diffuseTexture: earthDiffuseUrl,
-        normalTexture: earthNormalUrl,
-        specularTexture: earthSpecularUrl,
-        lightMapUrl: earthCloudsUrl,
+        nodeMaterial: planetEarthNode,
+        //diffuseTexture: earthDiffuseUrl,
+        //normalTexture: earthNormalUrl,
+        //specularTexture: earthSpecularUrl,
+        //lightMapUrl: earthCloudsUrl,
         mass: 3e14
     },
     {

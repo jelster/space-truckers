@@ -1,5 +1,6 @@
 import { Axis } from "@babylonjs/core";
 import { PBRMaterial } from "@babylonjs/core/Materials/PBR/pbrMaterial";
+import { NodeMaterial } from "@babylonjs/core/Materials/Node/nodeMaterial";
 import { Texture } from "@babylonjs/core/Materials/Textures/texture";
 import { Color3 } from "@babylonjs/core/Maths/math.color";
 import { Scalar } from "@babylonjs/core/Maths/math.scalar";
@@ -22,6 +23,26 @@ class Planet extends OrbitingGameObject {
         this.diameter = planData.scale;
 
         planet.rotation.x = Math.PI;
+        let planetMat;
+        if (planData.nodeMaterial) {
+            planetMat = this.#createNodeMaterial(planData);
+        }
+        else {
+            planetMat = this.#createPBRMaterial(planData);
+        }
+        planet.material = planetMat;
+    }
+
+    update(deltaTime) {
+        this.mesh.rotate(Axis.Y,0.01);
+        super.update(deltaTime);
+    }
+
+    #createNodeMaterial(planData) {
+        let planetMat = NodeMaterial.Parse(planData.nodeMaterial, this.scene, "");
+        return planetMat;
+    }
+    #createPBRMaterial(planData) {
         let planetMat = new PBRMaterial(planData.name + "-mat", this.scene);
         planetMat.roughness = 0.988;
         planetMat.metallic = 0.001;
@@ -46,13 +67,7 @@ class Planet extends OrbitingGameObject {
             planetMat.lightmapTexture = new Texture(planData.lightMapUrl, this.scene);
         }
         planetMat.directIntensity = planData.directIntensity ?? 1.0;
-        planet.material = planetMat;
-      //  this.update();
-    }
-
-    update(deltaTime) {
-        this.mesh.rotate(Axis.Y,0.01);
-        super.update(deltaTime);
+        return planetMat;
     }
 
 }
