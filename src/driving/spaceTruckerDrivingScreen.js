@@ -122,7 +122,7 @@ class SpaceTruckerDrivingScreen {
         this.inputManager = inputManager;
         this.actionProcessor = new SpaceTruckerInputProcessor(this, inputManager, actionList);
 
-        this.soundManager = new SpaceTruckerSoundManager(this.scene, "scoring", "encounter", "error");
+        this.soundManager = new SpaceTruckerSoundManager(this.scene, "scoring", "encounter", "error", "cruising");
 
         this.followCamera = new ArcRotateCamera("followCam", 4.712, 1.078, 80, Vector3.Zero(), this.scene);
         for (var k in followCamSetup) {
@@ -184,6 +184,10 @@ class SpaceTruckerDrivingScreen {
         this.gui = await gP;
         this.currentState = DRIVING_STATE.Initialized;
         this.onReadyObservable.notifyObservers(this);
+        let cruiseSong = this.soundManager.sound("cruising");
+        cruiseSong.setVolume(0.01);
+        cruiseSong.play();
+        cruiseSong.setVolume(0.65, 50);
         let renderPipeline = postProcesses.applyPostProcessesToScene(this.scene, this.followCamera);
         this._renderPipeline = renderPipeline;
     }
