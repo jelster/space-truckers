@@ -6,6 +6,7 @@
   - [How to Play](#how-to-play)
     - [Menus](#menus)
     - [Route Planning](#route-planning)
+    - [Driving](#driving)
   - [Building the Application from Source](#building-the-application-from-source)
   - [Concepts](#concepts)
   - [Getting Help and Providing Feedback](#getting-help-and-providing-feedback)
@@ -36,27 +37,41 @@ Once it's all said and done, your potential score will be displayed along with t
 
 ### Menus
 
-| Input | Key(s) | Action |
-|------|-------|------ |
-D-Pad Up/L. Stick Up | <kbd>↑</kbd> | Move selection up
-D-Pad Down/L. Stick down | <kbd>↓</kbd>| Move selection down
-A/X  | <kbd>Enter</kbd>/<kbd>Return</kbd> | Confirm/Invoke selection
-B/Circle | <kbd>Backspace</kbd>/<kbd>Delete</kbd> | Cancel/Go back
-B/Circle | <kbd>Spacebar</kbd> | Skip cut scene (where applicable)
+Key(s) | Action |
+|-------|------ |
+<kbd>↑,W</kbd> | Move selection up
+<kbd>↓,S</kbd>| Move selection down
+<kbd>Enter</kbd>/<kbd>Return</kbd> | Confirm/Invoke selection
+<kbd>Backspace</kbd>/<kbd>Delete</kbd> | Cancel/Go back
+<kbd>Spacebar</kbd> | Skip cut scene (where applicable)
 
 ### Route Planning
 
-| Input | Key(s) | Action |
-| -----| ------| ---- |
-Left joystick | <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> | Aim
-Right joystick | Mouse Drag, <kbd>↑</kbd><kbd>↓</kbd><kbd>→</kbd><kbd>←</kbd> | Move camera
-A/X | <kbd>Spacebar</kbd> <kbd>Enter</kbd> | Launch
-X/Square |<kbd>Shift</kbd> <kbd>+</kbd> | Increase launch velocity
-Y/Triangle | <kbd>Ctrl</kbd> <kbd>-</kbd> | Decrease launch velocity
-A/X | <kbd>Spacebar</kbd> <kbd>Enter</kbd> | Confirm route
-B/Circle | <kbd>Backspace</kbd> <kbd>Delete</kbd> | Retry
-Menu/Select | <kbd>Esc</kbd> | Pause Menu
-Start | <kbd>P</kbd> | Pause
+ Key(s) | Action |
+| ------| ---- |
+<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> | Aim
+<kbd>↑</kbd><kbd>↓</kbd><kbd>→</kbd><kbd>←</kbd> | Move camera
+<kbd>Spacebar</kbd>, <kbd>Enter</kbd> | Launch
+<kbd>Shift</kbd> | Increase launch velocity
+<kbd>Ctrl</kbd> | Decrease launch velocity
+<kbd>Spacebar</kbd>, <kbd>Enter</kbd> | Confirm route
+<kbd>Backspace</kbd>, <kbd>Delete</kbd> | Retry
+<kbd>P</kbd> | Pause
+
+### Driving
+
+|  Key(s) | Action |
+| ------ | ------ |
+<kbd>W</kbd> | Apply forward accelleration (speed up)
+<kbd>S</kbd> | Decelerate along forward axis (slow down)
+<kbd>A</kbd> | Left Translate
+<kbd>D</kbd> | Right Translate
+<kbd>←</kbd> | Rotate Left
+<kbd>→</kbd> | Rotate Right
+<kbd>↑</kbd> | Translate Up
+<kbd>↓</kbd> | Translate Down
+<kbd>P</kbd> | Pause
+<kbd>Del</kbd> | Reset
 
 ## Building the Application from Source
 
