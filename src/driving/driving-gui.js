@@ -23,20 +23,21 @@ const initializeGui = async (screen) => {
     const { scene, encounters } = screen;
     const { guiViewportSize, radarTextureResolution } = screenConfig;
     
-    let guiCamera = new UniversalCamera("guiCam", new Vector3(0, 50, 0), scene);
+    let guiCamera = new UniversalCamera("guiCam", new Vector3(0, 10, 0), scene);
     guiCamera.layerMask = GUI_MASK;
-    guiCamera.viewport = new Viewport(0, 0, 1 - 0.6, 1 - 0.6);
+    guiCamera.viewport = new Viewport(0, 0, 1, 1);
     guiCamera.mode = UniversalCamera.ORTHOGRAPHIC_CAMERA;
     guiCamera.orthoTop = guiViewportSize / 2;
     guiCamera.orthoRight = guiViewportSize / 2;
     guiCamera.orthoLeft = -guiViewportSize / 2;
     guiCamera.orthoBottom = -guiViewportSize / 2;
     scene.activeCameras.push(guiCamera);
-
-    let radarMesh = MeshBuilder.CreatePlane("radarMesh", { width: guiViewportSize, height: guiViewportSize }, scene);
+    let size = guiViewportSize / 5;
+    let radarMesh = MeshBuilder.CreatePlane("radarMesh", { width: size, height: size }, scene);
     radarMesh.layerMask = GUI_MASK;
     radarMesh.rotation.x = Math.PI / 2;
-
+    radarMesh.position.x = size * 1.975;
+    radarMesh.position.z = size * 1.975;
     let radarGui = AdvancedDynamicTexture.CreateForMeshTexture(radarMesh, radarTextureResolution, radarTextureResolution, false, false);
     radarGui.background = "black";
     
@@ -51,9 +52,9 @@ const initializeGui = async (screen) => {
     radarMaterial.ambientTexture = radarTexture;
     radarMaterial.emissiveTexture = radarTexture;
     radarTexture.TextureMode = Texture.PLANAR_MODE;
-    radarMesh.visibility = 0.67;
+    radarMesh.visibility = 0.789;
 
-    guiCamera.lockedTarget = radarMesh;
+    guiCamera.lockedTarget = Vector3.Zero();
 
     encounters.forEach((o, i) => {
         let blip = new Rectangle("radar-obstacle-" + i);
@@ -70,7 +71,7 @@ const initializeGui = async (screen) => {
 
     let fsGui = AdvancedDynamicTexture.CreateFullscreenUI("fsGui", true, scene, Texture.NEAREST_NEAREST);
     fsGui.parseContent(fsGuiDef, true);
-    fsGui.layer.layerMask = SCENE_MASK;
+    fsGui.layer.layerMask = GUI_MASK;
 
     fsGui.healthSlider = fsGui.getControlByName("healthSlider");
     fsGui.timeText = fsGui.getControlByName("elapsedTimeText");

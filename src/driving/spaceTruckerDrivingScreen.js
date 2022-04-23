@@ -132,6 +132,7 @@ class SpaceTruckerDrivingScreen {
         this.followCamera.layerMask = SCENE_MASK;
         //this.followCamera.attachControl(undefined, true);
         this.scene.activeCameras.push(this.followCamera);
+        this.scene.activeCamera = this.followCamera;
         this.scene.cameraToUseForPointers = this.followCamera;
 
         initializeEnvironment(this);

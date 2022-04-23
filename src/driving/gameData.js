@@ -7,7 +7,7 @@ const screenConfig = {
     GUI_MASK: 0x2,
     SCENE_MASK: 0x1,
     radarTextureResolution:2048,
-    guiViewportSize: 2.48,
+    guiViewportSize: 1.0,
     routeDataScalingFactor: 1.0,
     followCamSetup: {
         lowerAlphaLimit: -1.25,
