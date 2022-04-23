@@ -25,11 +25,12 @@ import gameData from "./gameData";
 import { ActionManager } from "@babylonjs/core/Actions/actionManager";
 import { Ray } from "@babylonjs/core/Culling/ray"; // used by ActionManager
 import { ExecuteCodeAction } from "@babylonjs/core/Actions/directActions";
-import { ArcFollowCamera, Axis, Scalar, Space } from "@babylonjs/core";
+import { ArcFollowCamera, Axis, NodeMaterial, Scalar, Space } from "@babylonjs/core";
 import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
 import DialogBox from "../guis/guiDialog";
 
 import postProcesses from "../post-processes";
+import destinationMaterial from "../nme/materials/destinationMaterial.json";
 
 const preFlightActionList = [
     { action: 'ACTIVATE', shouldBounce: () => true },
@@ -177,11 +178,12 @@ class SpaceTruckerPlanningScreen {
         this.launchArrow.bakeCurrentTransformIntoVertices();
 
         this.destinationMesh = MeshBuilder.CreateIcoSphere("destination", {
-            radius: this.destination.diameter * 1.5,
+            radius: this.destination.diameter * 1.055,
             subdivisions: 4,
             flat: false
         }, this.scene);
-        this.destinationMesh.visibility = 0;
+        this.destinationMesh.material = NodeMaterial.Parse(destinationMaterial, this.scene);
+        this.destinationMesh.visibility = 0.013;
         this.destinationMesh.parent = this.destination.mesh;
         this.destinationMesh.actionManager = new ActionManager(this.scene);
         this.destinationMesh.actionManager.registerAction(

@@ -378,6 +378,7 @@ class SpaceTruckerDrivingScreen {
 
     }
 
+    // TODO: this should be in the gui class
     updateGui(dT) {
         const { absolutePosition, up, forward } = this.truck.mesh;
         const { encounters } = this;
@@ -401,10 +402,11 @@ class SpaceTruckerDrivingScreen {
         healthSlider.value = health;
         centerText.text = '';
         if (this.currentState === DRIVING_STATE.RouteStart) {
-            centerText.text = "Click or Press Enter to Start";
+            centerText.text = "Press Enter to Start";
         }
         if (currentState === 'dying') {
-            centerText.text = "Cargo Destroyed!";
+            // TODO: use Dialog, ask whether to restart or quit
+            centerText.text = "Cargo Destroyed! Press Del to Restart";
         }
         let timeString = (this.currentTransitTime / 60).toFixed(0) + "m:" + (this.currentTransitTime % 60).toFixed(2) + "s";
         timeText.text = timeString;

@@ -45,7 +45,7 @@ class SpaceTruckerInputManager {
         const registration = {
             scene: sceneToRegister, subscriptions: [
                 this.enableKeyboard(sceneToRegister),
-                this.enableMouse(sceneToRegister),
+         //       this.enableMouse(sceneToRegister),
                 this.enableGamepad(sceneToRegister)
             ]
         };
