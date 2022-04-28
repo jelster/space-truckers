@@ -10,7 +10,7 @@ import rockNormalUrl from "../../assets/textures/rockn.png";
 import { Matrix, Quaternion, Vector3 } from "@babylonjs/core";
 
 import getGaussianRandom from "../randomGenerator";
-
+import thinInstanceCountOptimization from "../thinInstanceCountOptimization";
 
 class AsteroidBelt extends OrbitingGameObject {
     asteroidData;
@@ -31,13 +31,11 @@ class AsteroidBelt extends OrbitingGameObject {
         super(scene, asteroidBeltOptions);
 
         this.asteroidData = asteroidBeltOptions;
-        const numAsteroids = asteroidBeltOptions.number;
-
+        const numAsteroids = asteroidBeltOptions.number * 1.5; // allocate a bit more space for the asteroids
 
         const density = asteroidBeltOptions.density;
         const innerBeltRadius = asteroidBeltOptions.innerBeltRadius;
         const outerBeltRadius = asteroidBeltOptions.outerBeltRadius;
-        const maxScale = asteroidBeltOptions.maxScale;
 
         super.setOrbitalParameters(outerBeltRadius + innerBeltRadius / 2);
 
@@ -72,11 +70,14 @@ class AsteroidBelt extends OrbitingGameObject {
             this.matrices.push(new Matrix());
         }
 
-        this.matrixBuffer = new Float32Array(numAsteroids * 64);
+        this.matrixBuffer = new Float32Array(numAsteroids * 16);
         this.updateMatrices();
         aSphere.thinInstanceSetBuffer("matrix", this.matrixBuffer);
+        aSphere.thinInstanceCount = asteroidBeltOptions.number;
 
         this.mesh = aSphere;
+        let rockOptimizer = thinInstanceCountOptimization(this.mesh);
+        this.scene.onReadyObservable.add(() => rockOptimizer.start());
     }
 
     updateMatrices() {
@@ -90,7 +91,7 @@ class AsteroidBelt extends OrbitingGameObject {
     update(deltaTime) {
         this.rotation.y = Scalar.Repeat(this.rotation.y + (this.angularVelocity * deltaTime), Scalar.TwoPi);
 
-        for (let i = 0; i < this.numAsteroids; ++i) {
+        for (let i = 0; i < this.mesh.thinInstanceCount; ++i) {
             this.rotations[i].x += Math.random() * 0.01;
             this.rotations[i].y += Math.random() * 0.02;
             this.rotations[i].z += Math.random() * 0.01;
