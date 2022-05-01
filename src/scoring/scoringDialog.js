@@ -60,7 +60,6 @@ function createScoringDialog(scoreData, drivingScreen) {
         let bodyStack = scoreDialog.bodyContainer.children[0];
         let scrollBar = scoreDialog.bodyContainer.verticalBar;
         bodyStack.height = '100%';
-        let computedHeight = 0;
 
         for (let i in finalScores) {
             yield Tools.DelayAsync(500);
@@ -69,9 +68,8 @@ function createScoringDialog(scoreData, drivingScreen) {
             let label = i;
             let score = Number(finalScores[i]);
             let scoreBlock = createScoringBlock(label);
-            computedHeight += scoreBlock.heightInPixels;
+
             bodyStack.addControl(scoreBlock);
-            bodyStack.heightInPixels = computedHeight;
             scrollBar.value = scrollBar.maximum;
             yield Tools.DelayAsync(1800);
 
@@ -85,29 +83,39 @@ function createScoringDialog(scoreData, drivingScreen) {
                 }
                 let currProgress = frameCounter / MAX_COUNT;
                 let speed = Scalar.SmoothStep(0, score, currProgress);
-                scoreBlock.text = `${label}.........${speed.toFixed().toLocaleString()}`;
+                let formatted = speed.toFixed().toLocaleString();
+                scoreBlock.text = getText(label, formatted);
                 frameCounter++;
-                yield Tools.DelayAsync(5);
+                yield Tools.DelayAsync(10);
             }
-            scoreBlock.text = `${label}.........${score.toFixed().toLocaleString()}`;
+            let scoreFixed = score.toFixed().toLocaleString();
+            scoreBlock.text = getText(label, scoreFixed);
 
             yield;
         }
         return;
 
+        function getText(label, text) {
+            const maxLength = 23;
+            const labelLength = label.length;
+            let textLength = text.length;
+            let diff = maxLength - (labelLength + textLength);
+            return `${label}${'.'.repeat(diff)}${text}`;
+
+        }
         function createScoringBlock(label) {
             let scoreBlock = new TextBlock("scoreLine", `${label}`);
             scoreBlock.width = "100%";
+            scoreBlock.resizeToFit = true;
             scoreBlock.color = colorPicker.next().value;
-            scoreBlock.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
+            scoreBlock.textHorizontalAlignment = scoreBlock.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
+            scoreBlock.paddingLeft = scoreBlock.paddingBottom = "10px";
             let isFinalScore = label.toLowerCase().includes("final");
             if (isFinalScore) {
-                scoreBlock.height = "104px";
-                scoreBlock.transformCenterX = scoreBlock.transformCenterY = 0;
-                scoreBlock.scaleX = scoreBlock.scaleY = 1.05;
+                scoreBlock.fontSize = "12.5%";
             }
             else {
-                scoreBlock.height = "52px";
+                scoreBlock.fontSize = "7.55%";
             }
             return scoreBlock;
         }
