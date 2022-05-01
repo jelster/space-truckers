@@ -4,6 +4,7 @@ import { Control } from "@babylonjs/gui/2D/controls/control";
 import { Scalar } from "@babylonjs/core/Maths/math.scalar";
 import DialogBox from "../guis/guiDialog";
 
+const GUI_MASK = 0x2;
 const sampleScore = {
     scoreFactors: {
         routeLength: 12450.25,
@@ -47,6 +48,7 @@ function createScoringDialog(scoreData, drivingScreen) {
     const { scene, soundManager } = drivingScreen;
     const sound = soundManager.sound('scoring');
     let scoreDialog = new DialogBox(opts, scene);
+    scoreDialog.advancedTexture.layer.layerMask = GUI_MASK;
     scoreDialog.userActionSkip = false;
     scoreDialog.dialogContainer.height = "98%";
     let scoringCo = scoringAnimationCo();
