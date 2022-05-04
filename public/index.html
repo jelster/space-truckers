@@ -3,8 +3,20 @@
 
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Space-Truckers: The Video Game!</title>
   <link rel="stylesheet" href="./assets/index.css" type="text/css" />
+  <script>
+    if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('service-worker.js').then(registration => {
+        console.log('SW registered: ', registration);
+      }).catch(registrationError => {
+        console.log('SW registration failed: ', registrationError);
+      });
+    });
+  }
+  </script>
 </head>
 
 <body class="disable-selection">
