@@ -6,8 +6,6 @@ import SpaceTruckerLoadingScreen from "./spaceTruckerLoadingScreen";
 import logger from "./logger";
 import "../public/assets/index.css";
 import "../public/assets/space-truckers-landing-logo.jpg";
-import "../public/manifest.json";
-
 
 const CanvasName = "index-canvas";
 const launchButton = document.getElementById("btnLaunch");
