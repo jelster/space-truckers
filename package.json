@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "npx webpack serve --config webpack.dev.js",
-    "build": "npx webpack --config webpack.prod.js && copy ./public/manifest.webmanifest ./dist/manifest.webmanifest",
+    "build": "npx webpack --config webpack.prod.js && copy public/manifest.webmanifest dist/manifest.webmanifest",
     "lint": "npx eslint"
   },
   "repository": {
