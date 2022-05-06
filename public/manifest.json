@@ -1,7 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/web-manifest-combined.json",
   "name": "Space-Truckers: The Video Game!",
-  "theme_color": "#fff",
   "short_name": "Space-Truckers",
   "start_url": ".",
   "display": "standalone",

@@ -7,6 +7,7 @@ import logger from "./logger";
 import "../public/assets/index.css";
 import "../public/assets/space-truckers-landing-logo.jpg";
 
+
 const CanvasName = "index-canvas";
 const launchButton = document.getElementById("btnLaunch");
 const pageLandingContent = document.getElementById("pageContainer");
