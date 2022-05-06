@@ -34,6 +34,7 @@
     "@babylonjs/serializers": "^5.1 < 6.0.0",
     "ammo.js": "github:kripken/ammo.js",
     "clean-webpack-plugin": "^4.0.0",
+    "copy-webpack-plugin": "^10.2.4",
     "eslint": "^8.13.0",
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "^5.0",
