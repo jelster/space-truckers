@@ -341,7 +341,7 @@ class SpaceTruckerDrivingScreen {
         // check to see if the player has completed the route or if it's just blown through the tube
         let closestPathPosition = path3d.getClosestPositionTo(mesh.absolutePosition);
         // not close enough!
-        if (closestPathPosition >= 0.976) {
+        if (closestPathPosition >= 0.976 && this.currentState === DRIVING_STATE.Driving) {
             this.completeRound();
             return;
         }
