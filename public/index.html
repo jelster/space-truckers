@@ -9,14 +9,15 @@
   <link rel="manifest" href="./manifest.webmanifest" />
   <script>
     if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('service-worker.js').then(registration => {
-        console.log('SW registered: ', registration);
-      }).catch(registrationError => {
-        console.log('SW registration failed: ', registrationError);
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js')
+        .then(registration => {
+          console.log('SW registered: ', registration);
+        }).catch(registrationError => {
+          console.log('SW registration failed: ', registrationError);
+        });
       });
-    });
-  }
+    }
   </script>
 </head>
 
@@ -30,7 +31,8 @@
         <button id="btnLaunch">Launch</button>
       </div>
       <div id="footer">
-        Copyright Notice: See <a href="https://github.com/jelster/space-truckers/">here</a> for contributor, license and copyright
+        Copyright Notice: See <a href="https://github.com/jelster/space-truckers/">here</a> for contributor, license and
+        copyright
         info.
       </div>
     </div>
