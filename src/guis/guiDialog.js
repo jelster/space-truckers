@@ -20,10 +20,17 @@ const CONTROL_NAMES = Object.freeze({
     bodyStackPanel: 'bodyStackPanel',
 });
 
+const defaultOptions = {
+    bodyText: '',
+    titleText: 'Dialog Box',
+    acceptText: 'OK',
+    cancelText: 'Cancel',
+    displayOnLoad: false
+};
+
 class DialogBox {
     advancedTexture;
     scene;
-
     onAcceptedObservable = new Observable();
     #acceptPointerObserver = null;
     onCancelledObservable = new Observable();
@@ -88,7 +95,7 @@ class DialogBox {
         return this.advancedTexture.getControlByName(CONTROL_NAMES.cancel);
     }
 
-    constructor(options, scene) {
+    constructor(options = defaultOptions, scene) {
         const {
             bodyText,
             titleText,

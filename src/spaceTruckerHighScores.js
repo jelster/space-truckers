@@ -2,11 +2,11 @@ import { Tools } from "@babylonjs/core/Misc/tools";
 import { InputText } from "@babylonjs/gui/2D/controls/inputText";
 import { VirtualKeyboard } from "@babylonjs/gui/2D/controls/virtualKeyboard";
 import { Control } from "@babylonjs/gui/2D/controls/control";
-
+import { StackPanel } from "@babylonjs/gui/2D/controls/stackPanel";
+import { TextBlock } from "@babylonjs/gui/2D/controls/textBlock";
 
 import DialogBox from './guis/guiDialog';
 import SpaceTruckersDb from './spaceTruckerDatabase';
-import { Scene } from "@babylonjs/core/scene";
 
 const dialogOptions = {
     bodyText: 'Body Text',
@@ -26,7 +26,7 @@ let ScoreBoard = async function (scene) {
     sp.fontFamily = "Courier, Mono";
     dialog.bodyContainer.addControl(sp);
     dialog.dialogContainer.height = "99%";
-    dialog.dialogContainer.width = "97%";
+    dialog.dialogContainer.width = "75%";
     dialog.bodyText = '';
     dialog.accept.isVisible = false;
     return scoreBoardCoro;

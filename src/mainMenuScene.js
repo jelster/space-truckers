@@ -16,6 +16,7 @@ import menuBackground from "../assets/menuBackground.png";
 
 import selectionIcon from "../assets/ui-selection-icon.PNG";
 import SpaceTruckerSoundManager from "./spaceTruckerSoundManager";
+import HighScoreScreen from "./spaceTruckerHighScores";
 
 const menuSoundKey = "menu-slide";
 const menuClickSoundKey = "click";
@@ -38,6 +39,8 @@ class MainMenuScene {
     lastActionState = null;
     onPlayActionObservable = new Observable();
     onExitActionObservable = new Observable();
+    onHighScoreActionObservable = new Observable();
+    highScoreDialog;
 
     get scene() {
         return this._scene;
@@ -86,6 +89,9 @@ class MainMenuScene {
 
         this.actionProcessor = new SpaceTruckerInputProcessor(this, inputManager, menuActionList);
         this.soundManager = new SpaceTruckerSoundManager(this.scene, menuClickSoundKey, menuWhooshSoundKey, menuSoundKey);
+        this.onHighScoreActionObservable.add(async () => {
+            await HighScoreScreen(this.scene);
+        });
     }
 
     update() {
@@ -171,6 +177,9 @@ class MainMenuScene {
         menuGrid.addColumnDefinition(0.33);
         menuGrid.addColumnDefinition(0.33);
         menuGrid.addColumnDefinition(0.33);
+        
+        // TODO: grid rows should be dynamically generated based on the number of menu items
+        menuGrid.addRowDefinition(0.5);
         menuGrid.addRowDefinition(0.5);
         menuGrid.addRowDefinition(0.5);
         menuContainer.addControl(menuGrid);
@@ -223,6 +232,19 @@ class MainMenuScene {
         };
         const playButton = createMenuItem(pbOpts);
         this._menuGrid.addControl(playButton, this._menuGrid.children.length, 1);
+
+        const highScoreOpts = {
+            name: "btHighScores",
+            title: "High Scores",
+            background: "green",
+            color: "black",
+            onInvoked: () => {
+                logger.logInfo("High Scores button clicked");
+                this._onMenuLeave(1000, () => this.onHighScoreActionObservable.notifyObservers());
+            }
+        }
+        const highScoreButton = createMenuItem(highScoreOpts);
+        this._menuGrid.addControl(highScoreButton, this._menuGrid.children.length, 1);
 
         const ebOpts = {
             name: "btExit",
