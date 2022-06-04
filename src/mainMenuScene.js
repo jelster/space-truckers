@@ -41,6 +41,7 @@ class MainMenuScene {
     onExitActionObservable = new Observable();
     onHighScoreActionObservable = new Observable();
     highScoreDialog;
+    isTopMost = true;
 
     get scene() {
         return this._scene;
@@ -90,13 +91,20 @@ class MainMenuScene {
         this.actionProcessor = new SpaceTruckerInputProcessor(this, inputManager, menuActionList);
         this.soundManager = new SpaceTruckerSoundManager(this.scene, menuClickSoundKey, menuWhooshSoundKey, menuSoundKey);
         this.onHighScoreActionObservable.add(async () => {
-            await HighScoreScreen(this.scene);
+            this.isTopMost = false;
+            let scoreDialog = HighScoreScreen(this.scene);
+            scoreDialog.onCancelledObservable.add(() => {
+                this._onMenuEnter(1000);
+                this.isTopMost = true;
+            });
         });
     }
 
     update() {
         // update and reset state variables to prepare for the update cycle
-        this.actionProcessor?.update();
+        if (this.isTopMost) {
+            this.actionProcessor?.update();
+        }
     }
 
 
@@ -109,7 +117,6 @@ class MainMenuScene {
             this.selectedItemIndex = newIdx;
         }
         return true;
-
     }
 
     MOVE_DOWN(state) {
@@ -121,7 +128,6 @@ class MainMenuScene {
             this.selectedItemIndex = newIdx;
         }
         return true;
-
     }
 
     ACTIVATE(state, input) {
@@ -287,17 +293,18 @@ class MainMenuScene {
     _onMenuEnter(duration) {
         let fadeIn = 0;
         const fadeTime = duration || 1500;
+        this._menuContainer.isVisible = true;
+        this._menuContainer.alpha = 0;
         const timer = setAndStartTimer({
             timeout: fadeTime,
             contextObservable: this._scene.onBeforeRenderObservable,
-            onTick: () => {
-                const dT = this._scene.getEngine().getDeltaTime();
-                fadeIn += dT;
-                const currAmt = Scalar.SmoothStep(0, 1, fadeIn / fadeTime);
+            onTick: (d) => {                
+                const currAmt = Scalar.SmoothStep(0, 1, d.completeRate);
                 this._menuContainer.alpha = currAmt;
             },
             onEnded: () => {
                 this.selectedItemIndex = 0;
+                this._menuContainer.alpha = 1.0;
             }
         });
         return timer;
@@ -307,7 +314,7 @@ class MainMenuScene {
         let fadeOut = 0;
         const fadeTime = duration || 1500;
 
-        this._menuContainer.isVisible = false;
+        this._menuContainer.isVisible = true;
 
         const timer = setAndStartTimer({
             timeout: fadeTime,
@@ -320,6 +327,8 @@ class MainMenuScene {
 
             },
             onEnded: () => {
+                this._menuContainer.alpha = 0;
+                this._menuContainer.isVisible = false;
                 if (onEndedAction && typeof onEndedAction === 'function') {
                     onEndedAction();
                 }
