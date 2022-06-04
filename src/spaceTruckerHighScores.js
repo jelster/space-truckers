@@ -16,7 +16,7 @@ const dialogOptions = {
     displayOnLoad: false
 };
 
-let ScoreBoard = async function (scene) {
+let ScoreBoard = function (scene) {
 
     const dialog = new DialogBox(dialogOptions, scene);
     
@@ -29,7 +29,7 @@ let ScoreBoard = async function (scene) {
     dialog.dialogContainer.width = "75%";
     dialog.bodyText = '';
     dialog.accept.isVisible = false;
-    return scoreBoardCoro;
+    return {dialog, scoreBoardCoro};
     async function* scoreBoardCoro(newScore) {
 
         yield databaseManager.readyPromise;
@@ -117,9 +117,10 @@ let ScoreBoard = async function (scene) {
     }
 }
 
-let HighScoreScreen = async function (scene, score) {
-    let scoreBo = await ScoreBoard(scene);
-    scene.onBeforeRenderObservable.runCoroutineAsync(scoreBo(score));
+let HighScoreScreen = function (scene, score) {
+    let scoreBo = ScoreBoard(scene);   
+    scene.onBeforeRenderObservable.runCoroutineAsync(scoreBo.scoreBoardCoro(score));
+    return scoreBo.dialog;
 };
 
 export default HighScoreScreen;

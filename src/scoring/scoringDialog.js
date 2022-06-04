@@ -54,9 +54,11 @@ function createScoringDialog(scoreData, drivingScreen) {
     scoreDialog.dialogContainer.height = "98%";
     scoreDialog.onAcceptedObservable.add(async () => {
         let score = scoreData.finalScores['Final Total'];
+        await scoreDialog.hide();
         let scoreScreen = HighScoreScreen(scene, score);
-        await scoreScreen;
-        scoreDialog.onCancelledObservable.notifyObservers();
+        scoreScreen.onCancelledObservable.add(async () => {
+            await scoreDialog.show();
+        });
     });
     let scoringCo = scoringAnimationCo();
     scoreDialog.scoreCoInvoke = scene.onBeforeRenderObservable.runCoroutineAsync(scoringCo);
