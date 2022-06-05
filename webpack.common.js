@@ -1,6 +1,9 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const WorkboxPlugin = require('workbox-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
+
 const appDirectory = __dirname;
 
 module.exports = {
@@ -41,6 +44,17 @@ module.exports = {
         new HtmlWebpackPlugin({
             template: path.resolve(appDirectory, "public/index.html"),
             inject: true
+        }),
+        new WorkboxPlugin.GenerateSW({
+            clientsClaim: true,
+            skipWaiting: true,
+            maximumFileSizeToCacheInBytes: 8388608,
+        }),
+        new CopyPlugin({
+            patterns: [
+                { from: path.resolve(appDirectory, 'public/assets/icons'), to: path.resolve(appDirectory, 'dist/assets/icons') },
+                { from: path.resolve(appDirectory, 'public/manifest.json'), to: path.resolve(appDirectory, 'dist/manifest.webmanifest') }
+            ]
         })
     ]
 };

@@ -198,11 +198,11 @@ const encounterZones = {
 const gameData = {
     planetaryInfo: planetData,
     asteroidBeltOptions: {
-        density: 190,
+        density: 390,
         maxScale: new Vector3(10.25, 10.25, 10.25),
         number: 20000,
-        innerBeltRadius: 1000 * distanceMultiplier,
-        outerBeltRadius: 1700 * distanceMultiplier,
+        innerBeltRadius: 900 * distanceMultiplier,
+        outerBeltRadius: 1800 * distanceMultiplier,
         posRadians: 0,
         posRadius: 1
     },

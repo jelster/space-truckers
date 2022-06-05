@@ -3,6 +3,7 @@ import { TextBlock } from "@babylonjs/gui/2D/controls/textBlock";
 import { Control } from "@babylonjs/gui/2D/controls/control";
 import { Scalar } from "@babylonjs/core/Maths/math.scalar";
 import DialogBox from "../guis/guiDialog";
+import HighScoreScreen from "../spaceTruckerHighScores";
 
 const GUI_MASK = 0x2;
 const sampleScore = {
@@ -42,7 +43,7 @@ function createScoringDialog(scoreData, drivingScreen) {
         bodyText: 'Time to earn payday!',
         titleText: 'The Drayage Report',
         displayOnLoad: true,
-        acceptText: 'Main Menu',
+        acceptText: 'Next',
         cancelText: 'Retry'
     };
     const { scene, soundManager } = drivingScreen;
@@ -51,8 +52,17 @@ function createScoringDialog(scoreData, drivingScreen) {
     scoreDialog.advancedTexture.layer.layerMask = GUI_MASK;
     scoreDialog.userActionSkip = false;
     scoreDialog.dialogContainer.height = "98%";
+    scoreDialog.onAcceptedObservable.add(async () => {
+        let score = scoreData.finalScores['Final Total'];
+        await scoreDialog.hide();
+        let scoreScreen = HighScoreScreen(scene, score);
+        scoreScreen.onCancelledObservable.add(async () => {
+            await scoreDialog.show();
+        });
+    });
     let scoringCo = scoringAnimationCo();
     scoreDialog.scoreCoInvoke = scene.onBeforeRenderObservable.runCoroutineAsync(scoringCo);
+    
     return scoreDialog;
 
     function* scoringAnimationCo() {

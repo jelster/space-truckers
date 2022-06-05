@@ -16,6 +16,7 @@ import menuBackground from "../assets/menuBackground.png";
 
 import selectionIcon from "../assets/ui-selection-icon.PNG";
 import SpaceTruckerSoundManager from "./spaceTruckerSoundManager";
+import HighScoreScreen from "./spaceTruckerHighScores";
 
 const menuSoundKey = "menu-slide";
 const menuClickSoundKey = "click";
@@ -38,6 +39,9 @@ class MainMenuScene {
     lastActionState = null;
     onPlayActionObservable = new Observable();
     onExitActionObservable = new Observable();
+    onHighScoreActionObservable = new Observable();
+    highScoreDialog;
+    isTopMost = true;
 
     get scene() {
         return this._scene;
@@ -86,11 +90,21 @@ class MainMenuScene {
 
         this.actionProcessor = new SpaceTruckerInputProcessor(this, inputManager, menuActionList);
         this.soundManager = new SpaceTruckerSoundManager(this.scene, menuClickSoundKey, menuWhooshSoundKey, menuSoundKey);
+        this.onHighScoreActionObservable.add(async () => {
+            this.isTopMost = false;
+            let scoreDialog = HighScoreScreen(this.scene);
+            scoreDialog.onCancelledObservable.add(() => {
+                this._onMenuEnter(1000);
+                this.isTopMost = true;
+            });
+        });
     }
 
     update() {
         // update and reset state variables to prepare for the update cycle
-        this.actionProcessor?.update();
+        if (this.isTopMost) {
+            this.actionProcessor?.update();
+        }
     }
 
 
@@ -103,7 +117,6 @@ class MainMenuScene {
             this.selectedItemIndex = newIdx;
         }
         return true;
-
     }
 
     MOVE_DOWN(state) {
@@ -115,7 +128,6 @@ class MainMenuScene {
             this.selectedItemIndex = newIdx;
         }
         return true;
-
     }
 
     ACTIVATE(state, input) {
@@ -171,6 +183,9 @@ class MainMenuScene {
         menuGrid.addColumnDefinition(0.33);
         menuGrid.addColumnDefinition(0.33);
         menuGrid.addColumnDefinition(0.33);
+        
+        // TODO: grid rows should be dynamically generated based on the number of menu items
+        menuGrid.addRowDefinition(0.5);
         menuGrid.addRowDefinition(0.5);
         menuGrid.addRowDefinition(0.5);
         menuContainer.addControl(menuGrid);
@@ -224,6 +239,19 @@ class MainMenuScene {
         const playButton = createMenuItem(pbOpts);
         this._menuGrid.addControl(playButton, this._menuGrid.children.length, 1);
 
+        const highScoreOpts = {
+            name: "btHighScores",
+            title: "High Scores",
+            background: "green",
+            color: "black",
+            onInvoked: () => {
+                logger.logInfo("High Scores button clicked");
+                this._onMenuLeave(1000, () => this.onHighScoreActionObservable.notifyObservers());
+            }
+        }
+        const highScoreButton = createMenuItem(highScoreOpts);
+        this._menuGrid.addControl(highScoreButton, this._menuGrid.children.length, 1);
+
         const ebOpts = {
             name: "btExit",
             title: "Exit",
@@ -265,17 +293,18 @@ class MainMenuScene {
     _onMenuEnter(duration) {
         let fadeIn = 0;
         const fadeTime = duration || 1500;
+        this._menuContainer.isVisible = true;
+        this._menuContainer.alpha = 0;
         const timer = setAndStartTimer({
             timeout: fadeTime,
             contextObservable: this._scene.onBeforeRenderObservable,
-            onTick: () => {
-                const dT = this._scene.getEngine().getDeltaTime();
-                fadeIn += dT;
-                const currAmt = Scalar.SmoothStep(0, 1, fadeIn / fadeTime);
+            onTick: (d) => {                
+                const currAmt = Scalar.SmoothStep(0, 1, d.completeRate);
                 this._menuContainer.alpha = currAmt;
             },
             onEnded: () => {
                 this.selectedItemIndex = 0;
+                this._menuContainer.alpha = 1.0;
             }
         });
         return timer;
@@ -285,7 +314,7 @@ class MainMenuScene {
         let fadeOut = 0;
         const fadeTime = duration || 1500;
 
-        this._menuContainer.isVisible = false;
+        this._menuContainer.isVisible = true;
 
         const timer = setAndStartTimer({
             timeout: fadeTime,
@@ -298,6 +327,8 @@ class MainMenuScene {
 
             },
             onEnded: () => {
+                this._menuContainer.alpha = 0;
+                this._menuContainer.isVisible = false;
                 if (onEndedAction && typeof onEndedAction === 'function') {
                     onEndedAction();
                 }
