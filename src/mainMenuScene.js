@@ -193,7 +193,7 @@ class MainMenuScene {
 
         const titleText = new TextBlock("title", "Space-Truckers: The Main Menu");
         titleText.resizeToFit = true;
-        titleText.textWrapping = TextWrapping.WordWrap;
+        titleText.textWrapping = TextWrapping.Ellipsis;
         titleText.fontSize = "96pt";
         titleText.color = "white";
         titleText.width = 0.9;
