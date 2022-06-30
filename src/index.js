@@ -12,6 +12,7 @@ const CanvasName = "index-canvas";
 const launchButton = document.getElementById("btnLaunch");
 const pageLandingContent = document.getElementById("pageContainer");
 
+
 const canvas = document.createElement("canvas");
 canvas.id = CanvasName;
 canvas.classList.add("background-canvas");
@@ -58,4 +59,12 @@ window.addEventListener("keydown", (ev) => {
         }
         return false; 
     }
+});
+
+const howToPlayButton = document.getElementById("btnHowToPlay");
+howToPlayButton.addEventListener("click", (e) => { 
+    const container = document.getElementById("howToPlay");
+    container.classList.toggle("hidden");
+    console.log('toggle how to play');
+    e.preventDefault();
 });

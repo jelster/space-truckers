@@ -11,11 +11,11 @@
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('service-worker.js')
-        .then(registration => {
-          console.log('SW registered: ', registration);
-        }).catch(registrationError => {
-          console.log('SW registration failed: ', registrationError);
-        });
+          .then(registration => {
+            console.log('SW registered: ', registration);
+          }).catch(registrationError => {
+            console.log('SW registration failed: ', registrationError);
+          });
       });
     }
   </script>
@@ -29,11 +29,145 @@
       </div>
       <div id="ctaRow">
         <button id="btnLaunch">Launch</button>
+        
       </div>
       <div id="footer">
+        <div><button id="btnHowToPlay">How to Play</button></div>
         Copyright Notice: See <a href="https://github.com/jelster/space-truckers/">here</a> for contributor, license and
         copyright
         info.
+      </div>
+    </div>
+    <div id="howToPlayContainer">
+      <div id="howToPlay" class="hidden">
+        <h1>How to Play</h1>
+        <h3>Menus</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Key(s)</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><kbd>↑,W</kbd></td>
+              <td>Move selection up</td>
+            </tr>
+            <tr>
+              <td><kbd>↓,S</kbd></td>
+              <td>Move selection down</td>
+            </tr>
+            <tr>
+              <td><kbd>Enter</kbd>/<kbd>Return</kbd></td>
+              <td>Confirm/Invoke selection</td>
+            </tr>
+            <tr>
+              <td><kbd>Backspace</kbd>/<kbd>Delete</kbd></td>
+              <td>Cancel/Go back</td>
+            </tr>
+            <tr>
+              <td><kbd>Spacebar</kbd></td>
+              <td>Skip cut scene (where applicable)</td>
+            </tr>
+          </tbody>
+        </table>
+        <h3 dir="auto">
+          Route Planning</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Key(s)</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></td>
+              <td>Aim</td>
+            </tr>
+            <tr>
+              <td><kbd>↑</kbd><kbd>↓</kbd><kbd>→</kbd><kbd>←</kbd></td>
+              <td>Move camera</td>
+            </tr>
+            <tr>
+              <td><kbd>Spacebar</kbd>, <kbd>Enter</kbd></td>
+              <td>Launch</td>
+            </tr>
+            <tr>
+              <td><kbd>Shift</kbd></td>
+              <td>Increase launch velocity</td>
+            </tr>
+            <tr>
+              <td><kbd>Ctrl</kbd></td>
+              <td>Decrease launch velocity</td>
+            </tr>
+            <tr>
+              <td><kbd>Spacebar</kbd>, <kbd>Enter</kbd></td>
+              <td>Confirm route</td>
+            </tr>
+            <tr>
+              <td><kbd>Backspace</kbd>, <kbd>Delete</kbd></td>
+              <td>Retry</td>
+            </tr>
+            <tr>
+              <td><kbd>P</kbd></td>
+              <td>Pause</td>
+            </tr>
+          </tbody>
+        </table>
+        <h3 dir="auto">
+          Driving</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Key(s)</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><kbd>W</kbd></td>
+              <td>Apply forward accelleration (speed up)</td>
+            </tr>
+            <tr>
+              <td><kbd>S</kbd></td>
+              <td>Decelerate along forward axis (slow down)</td>
+            </tr>
+            <tr>
+              <td><kbd>A</kbd></td>
+              <td>Left Translate</td>
+            </tr>
+            <tr>
+              <td><kbd>D</kbd></td>
+              <td>Right Translate</td>
+            </tr>
+            <tr>
+              <td><kbd>←</kbd></td>
+              <td>Rotate Left</td>
+            </tr>
+            <tr>
+              <td><kbd>→</kbd></td>
+              <td>Rotate Right</td>
+            </tr>
+            <tr>
+              <td><kbd>↑</kbd></td>
+              <td>Translate Up</td>
+            </tr>
+            <tr>
+              <td><kbd>↓</kbd></td>
+              <td>Translate Down</td>
+            </tr>
+            <tr>
+              <td><kbd>P</kbd></td>
+              <td>Pause</td>
+            </tr>
+            <tr>
+              <td><kbd>Del</kbd></td>
+              <td>Reset</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
