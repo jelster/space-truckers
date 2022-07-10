@@ -6,6 +6,7 @@ import SpaceTruckerLoadingScreen from "./spaceTruckerLoadingScreen";
 import logger from "./logger";
 import "../public/assets/index.css";
 import "../public/assets/space-truckers-landing-logo.jpg";
+import { HandConstraintBehavior } from "@babylonjs/core";
 
 
 const CanvasName = "index-canvas";
@@ -62,9 +63,10 @@ window.addEventListener("keydown", (ev) => {
 });
 
 const howToPlayButton = document.getElementById("btnHowToPlay");
-howToPlayButton.addEventListener("click", (e) => { 
-    const container = document.getElementById("howToPlay");
+const container = document.getElementById("howToPlay");
+howToPlayButton.addEventListener("click", toggleHowToPlay);
+container.addEventListener("click", toggleHowToPlay);
+function toggleHowToPlay() {
     container.classList.toggle("hidden");
     console.log('toggle how to play');
-    e.preventDefault();
-});
+}
