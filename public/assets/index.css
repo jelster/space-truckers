@@ -1,5 +1,10 @@
 * {
-  font-family: sans-serif;
+  font-family: 'RussoOne';
+}
+
+@font-face {
+  font-family: 'RussoOne';
+  src: url('./fonts/RussoOne-Regular.ttf');
 }
 
 html,
@@ -31,6 +36,7 @@ canvas {
 #landingPageContainer {
   width: 100%;
   height: 100%;
+
 }
 
 #hero {
