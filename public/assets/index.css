@@ -1,10 +1,5 @@
 * {
-  font-family: 'RussoOne';
-}
-
-@font-face {
-  font-family: 'RussoOne';
-  src: url('./fonts/RussoOne-Regular.ttf');
+  font-family: 'RussoOne', sans-serif;
 }
 
 html,
