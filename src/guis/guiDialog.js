@@ -31,6 +31,7 @@ const defaultOptions = {
 class DialogBox {
     advancedTexture;
     scene;
+    style;
     onAcceptedObservable = new Observable();
     #acceptPointerObserver = null;
     onCancelledObservable = new Observable();
@@ -105,10 +106,14 @@ class DialogBox {
         } = options;
 
         this.advancedTexture = AdvancedDynamicTexture.CreateFullscreenUI("dialog", false, scene, Texture.NEAREST_NEAREST, true);
+        this.style = this.advancedTexture.createStyle();
+        this.style.fontFamily = "Russo One";        
+
         this.advancedTexture.layer.layerMask = SCENE_MASK;
         this.advancedTexture.parseContent(stackedDialog, false);
         this.scene = scene;
         this.dialogContainer.isVisible = false;
+         
         if (bodyText) {
             this.bodyText = bodyText;
         }
@@ -127,6 +132,10 @@ class DialogBox {
             });
 
         this.scene.executeWhenReady(() => {
+            this.advancedTexture.getControlByName(CONTROL_NAMES.titleText).fontFamily = this.style.fontFamily; // temporary workaround
+            this.advancedTexture.getControlByName(CONTROL_NAMES.bodyText).fontFamily = this.style.fontFamily; // temporary workaround
+            this.advancedTexture.getControlByName(CONTROL_NAMES.acceptText).fontFamily = this.style.fontFamily; // temporary workaround
+            this.advancedTexture.getControlByName(CONTROL_NAMES.cancelText).fontFamily = this.style.fontFamily; // temporary workaround
             if (displayOnLoad) {
                 this.show();
             }
@@ -135,6 +144,7 @@ class DialogBox {
         this.scene.onDisposeObservable.add(() => {
             this.dispose();
         });
+
     }
 
     async show() {

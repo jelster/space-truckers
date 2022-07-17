@@ -204,7 +204,7 @@ class MainMenuScene {
         titleText.shadowBlur = 2;
 
         //TODO: extract and use Style to apply font styles
-        titleText.fontFamily = "RussoOne";
+        titleText.fontFamily = "Russo One";
 
         menuContainer.addControl(titleText);
         menuContainer.alpha = 0;
@@ -224,7 +224,7 @@ class MainMenuScene {
             btn.fontSize = "36pt";
 
             // TODO: extract and use Style to apply font styles
-            btn.fontFamily = "RussoOne";
+            btn.fontFamily = "Russo One";
 
             if (opts.onInvoked) {
                 btn.onPointerClickObservable.add((ed, es) => opts.onInvoked(ed, es));

@@ -70,12 +70,17 @@ const initializeGui = async (screen) => {
     var gl = new GlowLayer("gl", scene, { blurKernelSize: 4, camera: guiCamera });
 
     let fsGui = AdvancedDynamicTexture.CreateFullscreenUI("fsGui", true, scene, Texture.NEAREST_NEAREST);
+    let style = fsGui.createStyle();
+    style.fontFamily = "Russo One";
+
     fsGui.parseContent(fsGuiDef, true);
     fsGui.layer.layerMask = GUI_MASK;
 
     fsGui.healthSlider = fsGui.getControlByName("healthSlider");
     fsGui.timeText = fsGui.getControlByName("elapsedTimeText");
+    fsGui.timeText.fontFamily = style.fontFamily;
     fsGui.centerText = fsGui.getControlByName("centerText");
+    fsGui.centerText.fontFamily = style.fontFamily;
 
     return { radarGui, radarMesh, radarMaterial, radarTexture, guiCamera, fsGui };
 };

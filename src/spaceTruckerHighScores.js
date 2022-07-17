@@ -19,11 +19,13 @@ const dialogOptions = {
 let ScoreBoard = function (scene) {
 
     const dialog = new DialogBox(dialogOptions, scene);
+    const style = dialog.style;
     
     const databaseManager = SpaceTruckersDb();
     let sp = new StackPanel("hs-stack");
     sp.paddingTop = "70px";
     sp.fontFamily = "Courier, Mono";
+    sp.fontSize = "4%";
     dialog.bodyContainer.addControl(sp);
     dialog.dialogContainer.height = "99%";
     dialog.dialogContainer.width = "75%";
