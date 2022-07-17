@@ -34,7 +34,7 @@ module.exports = {
                 enforce: "pre",
             },
             {
-                test: /\.(png|jpg|gif|env|glb|gltf|env|stl|m4a|mp3|css|dds|wav)$/i,
+                test: /\.(png|jpg|gif|env|glb|gltf|env|stl|m4a|mp3|css|dds|wav|ttf|woff|woff2|svg)$/i,
                 type: "asset/resource"
             },
         ],
