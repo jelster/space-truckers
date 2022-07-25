@@ -1,6 +1,7 @@
 import { PBRMaterial, TrailMesh, TransformNode } from "@babylonjs/core";
 import { Quaternion, Vector3 } from "@babylonjs/core/Maths/math.vector";
 import { CreateBox } from "@babylonjs/core/Meshes/Builders/boxBuilder";
+import { Color3 } from "@babylonjs/core/Maths/math.color";
 
 import OrbitingGameObject from "../orbitingGameObject";
 import SpaceTruckerEncounterManager from "./spaceTruckerEncounterManager";
@@ -41,6 +42,7 @@ class CargoUnit extends OrbitingGameObject {
         this.encounterManager = new SpaceTruckerEncounterManager(this, scene);
         this.trailMeshMaterial = new PBRMaterial("cargoTrailMaterial", this.scene);
         this.mesh.material = this.trailMeshMaterial;
+        this.trailMeshMaterial.emissiveColor = new Color3(0.91, 0.91, 0.20);
 
     }
 
