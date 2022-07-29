@@ -1,15 +1,15 @@
 import { Rectangle } from "@babylonjs/gui/2D/controls/rectangle";
-import { Animation } from "@babylonjs/core/Animations/animation";
 import { AdvancedDynamicTexture } from "@babylonjs/gui/2D/advancedDynamicTexture";
 import { TextBlock } from "@babylonjs/gui/2D/controls/textBlock";
 import { Control } from "@babylonjs/gui/2D/controls/control";
-import { PLAN_STATE_KEYS, PLANNING_STATE } from "./spaceTruckerPlanningScreen";
-import { Grid, Image, Slider, StackPanel } from "@babylonjs/gui";
+import {  PLANNING_STATE } from "./spaceTruckerPlanningScreen";
+import { StackPanel } from "@babylonjs/gui";
 import { Scalar } from "@babylonjs/core/Maths/math.scalar";
-import { Tools } from "@babylonjs/core/Misc/tools";
 import guiScreen from "../guis/route-planning-gui.json";
 import { ArcRotateCamera } from "@babylonjs/core/Cameras/arcRotateCamera";
-import { Vector3 } from "@babylonjs/core";
+import { Vector3 } from "@babylonjs/core/Maths/math.vector";
+import { UtilityLayerRenderer } from "@babylonjs/core/Rendering/utilityLayerRenderer";
+import { RotationGizmo } from "@babylonjs/core/Gizmos/rotationGizmo";
 
 const GUI_LAYER_MASK = 2;
 class PlanningScreenGui {
@@ -23,6 +23,9 @@ class PlanningScreenGui {
     guiCamera;
 
     #launchSlider;
+    #cargoRotationGizmo;
+    #utilityLayer;
+
     get launchForce() {
         return this.#launchSlider.value;
     }
@@ -101,15 +104,12 @@ class PlanningScreenGui {
         this.#launchResetButton = gui.getControlByName("launchResetButton");
         this.#routeSimulationText = gui.getControlByName("routeSimulationText");
 
-        this.guiCamera = new ArcRotateCamera("guiCamera", 0, 0.8, 100, Vector3.Zero(), this.scene);
-        this.guiCamera.position = this.planningScreen.camera.position;
-        this.guiCamera.rotation = this.planningScreen.camera.rotation;
-        this.guiCamera.parent = this.planningScreen.camera;
-        
+        this.guiCamera = new ArcRotateCamera("guiCamera", 0, 1.35, 3000, Vector3.Zero(), this.scene);
+       
         this.guiCamera.layerMask = GUI_LAYER_MASK;
-        this.guiCamera.maxZ = 10;
+        this.guiCamera.maxZ = 1000000;
         this.scene.activeCameras.push(this.guiCamera);
-         
+        this.guiCamera.attachControl(this.scene);
     }
 
 
@@ -121,6 +121,8 @@ class PlanningScreenGui {
         if (!this.gui) {
             return;
         }
+     //   this.guiCamera.position.copyFrom(this.planningScreen.camera.position);
+     //   this.guiCamera.rotation.copyFrom(this.planningScreen.camera.rotation);
         const transitTime = this.planningScreen.cargo.timeInTransit,
             transitDistance = this.planningScreen.cargo.distanceTraveled,
             launchF = this.planningScreen.launchForce,
@@ -141,14 +143,21 @@ class PlanningScreenGui {
             case PLANNING_STATE.ReadyToLaunch:
                 this.centerText = "";
                 this.launchResetButton.text = "LAUNCH";
+                this.#cargoRotationGizmo.attachedMesh = this.planningScreen.cargo.mesh;
                 break;
             case PLANNING_STATE.InFlight:
                 this.centerText = "";
                 this.launchResetButton.text = "RESET";
+                this.#cargoRotationGizmo.attachedMesh = null;
                 break;
             case PLANNING_STATE.CargoDestroyed:
                 this.centerText = "Invalid Route - Cargo Destroyed";
                 this.launchResetButton.text = "RESET";
+                break;
+            case PLANNING_STATE.Paused:
+                this.centerText = "Paused";
+                this.launchResetButton.text = "RESET";
+                this.#cargoRotationGizmo.attachedMesh = null;
                 break;
             default:
                 break;
@@ -158,7 +167,7 @@ class PlanningScreenGui {
     *routeSimulationTextCoroutine() {
         const routeSimulationCornerText = this.#routeSimulationText;
         let frameCount = 0;
-        const totalFrames = 30;
+        const totalFrames = 90;
         let direction = 1;
         while (true) {
             let { gameState } = this.planningScreen;
@@ -212,7 +221,16 @@ class PlanningScreenGui {
             }
 
         });
-
+        this.#launchResetButton.isHitTestVisible = true;
+        this.#launchResetButton.onPointerClickObservable.add(() => {
+            if (this.planningScreen.gameState === PLANNING_STATE.ReadyToLaunch) {
+                this.planningScreen.ACTIVATE();
+            }
+            else {
+                this.planningScreen.GO_BACK();
+            }
+        });
+        this.#launchSlider.isHitTestVisible = true;
         this.#launchSlider.maximum = this.planningScreen.launchForceMax;
         this.#launchSlider.minimum = 10;
         this.#launchSlider.displayValueBar = true;
@@ -231,6 +249,19 @@ class PlanningScreenGui {
             this.update();
         });
         this.scene.onBeforeRenderObservable.runCoroutineAsync(this.routeSimulationTextCoroutine());
+
+        this.#utilityLayer = UtilityLayerRenderer.DefaultUtilityLayer;
+        UtilityLayerRenderer.DefaultUtilityLayer.shouldRender = true;
+        UtilityLayerRenderer.DefaultUtilityLayer.setRenderCamera(this.guiCamera);
+        this.#cargoRotationGizmo = new RotationGizmo(this.#utilityLayer, null, null, 1.2);
+        this.#cargoRotationGizmo.scaleRatio = 1.15;
+        this.#cargoRotationGizmo.attachedMesh = cargo.mesh;
+
+        this.#cargoRotationGizmo.updateGizmoPositionToMatchAttachedMesh = true;
+        this.#cargoRotationGizmo.updateGizmoRotationToMatchAttachedMesh = true;
+        this.#cargoRotationGizmo.updateScale = true;
+
+
 
     }
 

@@ -276,7 +276,7 @@ class SpaceTruckerPlanningScreen {
     }
 
     ACTIVATE(state, args) {
-        if (args.pointerType || this.gameState !== PLANNING_STATE.ReadyToLaunch) {
+        if (args?.pointerType || this.gameState !== PLANNING_STATE.ReadyToLaunch) {
             return;
         }
         console.log(state, args);
