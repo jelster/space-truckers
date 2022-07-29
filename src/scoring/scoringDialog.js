@@ -56,7 +56,7 @@ function createScoringDialog(scoreData, drivingScreen) {
         let score = scoreData.finalScores['Final Total'];
         await scoreDialog.hide();
         let scoreScreen = HighScoreScreen(scene, score);
-        scoreScreen.onCancelledObservable.add(async () => {
+        scoreScreen.onAcceptedObservable.add(async () => {
             await scoreDialog.show();
         });
     });
