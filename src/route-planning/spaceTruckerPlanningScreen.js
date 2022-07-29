@@ -115,6 +115,7 @@ class SpaceTruckerPlanningScreen {
 
         this.scene = new Scene(engine);
         this.scene.onNewMeshAddedObservable.add(mesh => mesh.layerMask = PLANNING_SCREEN_LAYER_MASK);
+        
 
         this.config = config;
         const { blurParameter, environmentTexture, IBLIntensity, lightIntensity, skyboxScale } = config.environment;
@@ -203,6 +204,7 @@ class SpaceTruckerPlanningScreen {
 
         this.scene.onReadyObservable.addOnce(() => {
             this.ui = new PlanningScreenGui(this);
+            this.scene.particleSystems.forEach(ps => ps.layerMask = PLANNING_SCREEN_LAYER_MASK);
             this.ui.bindToScreen();
             this.gameState = PLANNING_STATE.Initialized;
 
@@ -274,7 +276,7 @@ class SpaceTruckerPlanningScreen {
     }
 
     ACTIVATE(state, args) {
-        if (args.pointerType || this.gameState !== PLANNING_STATE.ReadyToLaunch) {
+        if (args?.pointerType || this.gameState !== PLANNING_STATE.ReadyToLaunch) {
             return;
         }
         console.log(state, args);
