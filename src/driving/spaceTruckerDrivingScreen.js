@@ -17,7 +17,6 @@ import { ActionManager } from "@babylonjs/core/Actions/actionManager";
 import { ExecuteCodeAction } from "@babylonjs/core/Actions/directActions";
 import { PhysicsImpostor } from "@babylonjs/core/Physics/physicsImpostor";
 import { AmmoJSPlugin } from "@babylonjs/core/Physics/Plugins/ammoJSPlugin";
-import { NodeMaterial } from "@babylonjs/core/Materials/Node/nodeMaterial";
 import "@babylonjs/core/Physics/physicsEngineComponent";
 import "@babylonjs/core/Meshes/Builders/ribbonBuilder";
 import "@babylonjs/core/Meshes/Builders/linesBuilder";
@@ -35,7 +34,6 @@ import SpaceTruckerSoundManager from "../spaceTruckerSoundManager";
 import computeScores from "../scoring/spaceTruckerScoreManager";
 import truckExploderSPS from "./truckExploderSPS";
 import postProcesses from "../post-processes";
-import gridNodeMaterial from "../nme/materials/gridNodeMaterial.json";
 
 const { GUI_MASK, SCENE_MASK } = screenConfig;
 const { followCamSetup } = screenConfig;
@@ -146,7 +144,7 @@ class SpaceTruckerDrivingScreen {
         this.truck = await tP;
         this.cameraDolly.parent = this.truck.mesh;
         this.followCamera.parent = this.cameraDolly;
-        var groundMat = this.groundMaterial = NodeMaterial.Parse(gridNodeMaterial, this.scene, "gridNodeMaterial");
+        var groundMat = this.groundMaterial = new GridMaterial("roadMat", this.scene);
         this.ground = MeshBuilder.CreateRibbon("road", {
             pathArray: route.paths,
             sideOrientation: Mesh.DOUBLESIDE,
