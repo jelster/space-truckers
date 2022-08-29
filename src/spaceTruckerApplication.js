@@ -7,6 +7,7 @@ import SpaceTruckerInputManager from "./spaceTruckerInput";
 
 import appData from "./route-planning/gameData";
 import SpaceTruckerPlanningScreen, { PLANNING_STATE } from "./route-planning/spaceTruckerPlanningScreen";
+import setBaseAssetUrl from "./systems/setBaseAssetUrl";
 import SpaceTruckerDrivingScreen from "./driving/spaceTruckerDrivingScreen";
 
 // TODO: conditionally include sample data in the build
@@ -17,6 +18,7 @@ import sampleRoute4 from "./driving/sample-route4.json";
 import sampleRoute5 from "./driving/sample-route5.json";
 import sampleRoute6 from "./driving/sample-route6.json";
 
+setBaseAssetUrl();
 const sampleRoutes = {
     "sample-route": sampleRoute,
     "sample-route2": sampleRoute2,

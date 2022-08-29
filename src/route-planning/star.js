@@ -11,12 +11,7 @@ import T_SunSurface from "../../assets/textures/T_SunSurface.png";
 import T_sun from "../../assets/textures/2k_sun.jpg";
 import { VolumetricLightScatteringPostProcess } from "@babylonjs/core/PostProcesses/volumetricLightScatteringPostProcess";
 
-// HACK: The ParticleSystemSet doesn't always handle URL paths correctly, adding slashes
-const baseAppUri = document.baseURI.substr(0, document.baseURI.lastIndexOf("/"));
-// TODO: issue #78
-ParticleSystemSet.BaseAssetsUrl = baseAppUri;
-
-class Star extends OrbitingGameObject {
+ class Star extends OrbitingGameObject {
 
     starParticleSystem;
     constructor(scene, options) {
