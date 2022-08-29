@@ -1,51 +1,30 @@
-
+import {  Logger} from "@babylonjs/core/Misc/logger"
 class ConsoleProxy {
 
-    constructor(console) {
-        this._console = console;
-        this._consoleIsPresent = this._console;
-        this._messageBuffer = [];
+    constructor() {
+         
     }
 
     logInfo(message) {
-        const logObj = { type: "INFO", message: message};
-        if (this._consoleIsPresent) { 
-            this._console.log(logObj);
-            return;
-        }
-        this._messageBuffer.push();
+       Logger.Log(message);
     }
 
     logWarning(message) {
-        const logObj = { type: "WARN", message: message};
-        if (this._consoleIsPresent) { 
-            this._console.log(logObj);
-            return;
-        }
-        this._messageBuffer.push();
+        Logger.Warn(message);
     }
 
     logError(message) {
-        const logObj = { type: "ERROR", message: message};
-        if (this._consoleIsPresent) { 
-            this._console.log(logObj);
-            return;
-        }
-        this._messageBuffer.push();
+        Logger.Error(message);
     }
 
     logFatal(message) {
-        const logObj = { type: "FATAL", message: message};
-        if (this._consoleIsPresent) { 
-            this._console.log(logObj);
-            return;
-        }
-        this._messageBuffer.push();
+        Logger.Error("FATAL: " + message);
     }
 
     flushBuffer() {
-        this._messageBuffer.splice(0, this._messageBuffer.length);
+        Logger.ClearLogCache();
     }
 }
-const theProxy = new ConsoleProxy(console);
+const theProxy = new ConsoleProxy(Logger);
+
 export default theProxy;
