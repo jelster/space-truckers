@@ -137,7 +137,7 @@ class MainMenuScene {
             console.log("ACIVATE - " + this.selectedItemIndex);
             const selectedItem = this.selectedItem;
             if (selectedItem) {
-                this.soundManager.sound(menuWhooshSoundKey).play();
+                
                 selectedItem.onPointerClickObservable.notifyObservers();
             }
 
@@ -240,6 +240,7 @@ class MainMenuScene {
             color: "white",
             onInvoked: () => {
                 logger.logInfo("Play button clicked");
+                this.soundManager.sound(menuWhooshSoundKey).play();
                 this._onMenuLeave(1000, () => this.onPlayActionObservable.notifyObservers())
             }
         };
@@ -253,6 +254,7 @@ class MainMenuScene {
             color: "black",
             onInvoked: () => {
                 logger.logInfo("High Scores button clicked");
+                this.soundManager.sound(menuWhooshSoundKey).play();
                 this._onMenuLeave(1000, () => this.onHighScoreActionObservable.notifyObservers());
             }
         }
@@ -266,6 +268,7 @@ class MainMenuScene {
             color: "black",
             onInvoked: () => {
                 logger.logInfo("Exit button clicked");
+                this.soundManager.sound(menuWhooshSoundKey).play();
                 this._onMenuLeave(1000,() => this.onExitActionObservable.notifyObservers());
                 
             }
