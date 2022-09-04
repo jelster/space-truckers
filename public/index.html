@@ -3,87 +3,172 @@
 
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Space-Truckers: The Video Game!</title>
-  <style>
-    * {
-      font-family: sans-serif;
+  <link href="https://fonts.googleapis.com/css?family=Russo+One" rel="stylesheet">
+  <link rel="stylesheet" href="./assets/index.css" type="text/css" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js')
+          .then(registration => {
+            console.log('SW registered: ', registration);
+          }).catch(registrationError => {
+            console.log('SW registration failed: ', registrationError);
+          });
+      });
     }
-    html,
-    body {
-      overflow: hidden;
-      width: 100%;
-      height: 100%;
-      margin: 0;
-      padding: 0;
-    }
-
-    canvas {
-      width: 100%;
-      height: 100%;
-      touch-action: none;
-    }
-
-    #pageContainer {      
-      position: relative;       
-      background-color: transparent;
-      margin: 10px;
-      padding: 17px;
-      border: solid white;
-      border-radius: 7px;
-      color: brown;
-      text-align: center;
-
-    }
-
-    #landingPageContainer {     
-      width: 100%;
-      height: 100%;
-    }
-
-    #hero {
-      height: 600px;
-      background: url('space-truckers-landing-logo.jpg') center center transparent no-repeat;
-      background-size: cover;
-      opacity: 0.68;
-    }
-
-    #ctaRow,
-    #footer {
-      margin-top: 10px;
-      padding-bottom:7px;
-    }
-
-    #ctaRow button {
-      font-size: 36pt;
-      padding: 7px 9px;
-      margin: 5px 7px;
-      background: brown;
-      border-radius: 11px;
-      color: white;
-      cursor: pointer;
-    }
-
-    .background-canvas {
-      position: absolute;
-      top: 0;
-      left: auto;
-      z-index: -10;
-    }
-  </style>
+  </script>
 </head>
 
-<body>
+<body class="disable-selection">
   <div id="pageContainer">
     <h1>Space-Truckers: The Video Game</h1>
     <div id="landingPageContainer">
       <div id="hero">
       </div>
       <div id="ctaRow">
-        <button>Launch</button>
+        <button id="btnLaunch">Launch</button>
+
       </div>
       <div id="footer">
-        Copyright Notice: See <a href="//github.com/jelster/space-truckers/LICENSE">here</a> for license and copyright
+        <div><button id="btnHowToPlay">How to Play</button></div>
+        Copyright Notice: See <a href="https://github.com/jelster/space-truckers/">here</a> for contributor, license and
+        copyright
         info.
+      </div>
+    </div>
+    <div id="howToPlayContainer">
+      <div id="howToPlay" class="hidden">
+        <h1>How to Play</h1>
+        <h3>Menus</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Key(s)</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><kbd>↑,W</kbd></td>
+              <td>Move selection up</td>
+            </tr>
+            <tr>
+              <td><kbd>↓,S</kbd></td>
+              <td>Move selection down</td>
+            </tr>
+            <tr>
+              <td><kbd>Enter</kbd>/<kbd>Return</kbd></td>
+              <td>Confirm/Invoke selection</td>
+            </tr>
+            <tr>
+              <td><kbd>Backspace</kbd>/<kbd>Delete</kbd></td>
+              <td>Cancel/Go back</td>
+            </tr>
+            <tr>
+              <td><kbd>Spacebar</kbd></td>
+              <td>Skip cut scene (where applicable)</td>
+            </tr>
+          </tbody>
+        </table>
+        <h3 dir="auto">
+          Route Planning</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Key(s)</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></td>
+              <td>Aim</td>
+            </tr>
+            <tr>
+              <td><kbd>↑</kbd><kbd>↓</kbd><kbd>→</kbd><kbd>←</kbd></td>
+              <td>Move camera</td>
+            </tr>
+            <tr>
+              <td><kbd>Spacebar</kbd>, <kbd>Enter</kbd></td>
+              <td>Launch</td>
+            </tr>
+            <tr>
+              <td><kbd>Shift</kbd></td>
+              <td>Increase launch velocity</td>
+            </tr>
+            <tr>
+              <td><kbd>Ctrl</kbd></td>
+              <td>Decrease launch velocity</td>
+            </tr>
+            <tr>
+              <td><kbd>Spacebar</kbd>, <kbd>Enter</kbd></td>
+              <td>Confirm route</td>
+            </tr>
+            <tr>
+              <td><kbd>Backspace</kbd>, <kbd>Delete</kbd></td>
+              <td>Retry</td>
+            </tr>
+            <tr>
+              <td><kbd>P</kbd></td>
+              <td>Pause</td>
+            </tr>
+          </tbody>
+        </table>
+        <h3 dir="auto">
+          Driving</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Key(s)</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><kbd>W</kbd></td>
+              <td>Apply forward accelleration (speed up)</td>
+            </tr>
+            <tr>
+              <td><kbd>S</kbd></td>
+              <td>Decelerate along forward axis (slow down)</td>
+            </tr>
+            <tr>
+              <td><kbd>A</kbd></td>
+              <td>Left Translate</td>
+            </tr>
+            <tr>
+              <td><kbd>D</kbd></td>
+              <td>Right Translate</td>
+            </tr>
+            <tr>
+              <td><kbd>←</kbd></td>
+              <td>Rotate Left</td>
+            </tr>
+            <tr>
+              <td><kbd>→</kbd></td>
+              <td>Rotate Right</td>
+            </tr>
+            <tr>
+              <td><kbd>↑</kbd></td>
+              <td>Translate Up</td>
+            </tr>
+            <tr>
+              <td><kbd>↓</kbd></td>
+              <td>Translate Down</td>
+            </tr>
+            <tr>
+              <td><kbd>P</kbd></td>
+              <td>Pause</td>
+            </tr>
+            <tr>
+              <td><kbd>Del</kbd></td>
+              <td>Reset</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>

@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+    <title>Babylon.js sample code</title>
+
+    <!-- Babylon.js -->
+    <script src="https://code.jquery.com/pep/0.4.2/pep.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.6.2/dat.gui.min.js"></script>
+    <script src="https://preview.babylonjs.com/ammo.js"></script>
+    <script src="https://preview.babylonjs.com/cannon.js"></script>
+    <script src="https://preview.babylonjs.com/Oimo.js"></script>
+    <script src="https://preview.babylonjs.com/earcut.min.js"></script>
+    <script src="https://preview.babylonjs.com/babylon.js"></script>
+    <script src="https://preview.babylonjs.com/materialsLibrary/babylonjs.materials.min.js"></script>
+    <script src="https://preview.babylonjs.com/proceduralTexturesLibrary/babylonjs.proceduralTextures.min.js"></script>
+    <script src="https://preview.babylonjs.com/postProcessesLibrary/babylonjs.postProcess.min.js"></script>
+    <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.js"></script>
+    <script src="https://preview.babylonjs.com/serializers/babylonjs.serializers.min.js"></script>
+    <script src="https://preview.babylonjs.com/gui/babylon.gui.min.js"></script>
+    <script src="https://preview.babylonjs.com/inspector/babylon.inspector.bundle.js"></script>
+
+    <style>
+        html,
+        body {
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #renderCanvas {
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="renderCanvas"></canvas>
+    <script>
+        var canvas = document.getElementById("renderCanvas");
+
+        var engine = null;
+        var scene = null;
+        var sceneToRender = null;
+        var createDefaultEngine = function () { return new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true, disableWebGL2Support: false }); };
+        let createScene = async function () {
+
+            let scene,
+                spaceScene;
+
+
+            scene = new BABYLON.Scene(engine);
+            //let gl = new BABYLON.GlowLayer("glowLayer", scene);
+            //scene.createDefaultLight();
+            //gl.intensity = 2.5;
+            let skyTexture = createEnvironment(scene);
+            let light = new BABYLON.PointLight("sunLight", BABYLON.Vector3.Zero(), scene);
+            light.intensity = 20;
+
+
+            spaceScene = new SpaceScene(scene);
+            spaceScene._camera = new BABYLON.ArcRotateCamera("Camera", -Math.PI / 2, Math.PI / 4, 650, BABYLON.Vector3.Zero(), scene);
+            scene.activeCameras.push(spaceScene._camera);
+            scene.activeCamera.attachControl(canvas, true);
+            spaceScene.run();
+
+            return scene;
+
+            function createEnvironment(scene) {                
+                let texA = "environment/milkyway-pbr-hdr.env";
+                let skyTexture = new BABYLON.CubeTexture(texA, scene);
+                skyTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+
+                let sb = scene.createDefaultSkybox(skyTexture, true, 4096, 0.065, true);
+                sb.ignoreCameraMaxZ = false;
+                return skyTexture;
+            };
+        };
+
+        SpaceScene = function (scene, conMeshes) {
+            this._scene = scene;
+            this.readyToLaunch = true;
+            this.cargoArrived = false;
+            this.launchForce = 5.0;
+            this.innerOrbRadius = 150;
+            this.outerOrbRadius = 400;
+            this.gravConstant = 6.67259e-11;
+            this.initialPosition = new BABYLON.Vector3(this.innerOrbRadius * 0.75, 0, 0);
+
+            this.onCargoArrivedObservable = new BABYLON.Observable();
+            this.onCargoArrivedObserver = this.onCargoArrivedObservable.add((ed, es) => this.onCargoArrivedHandler(ed));
+
+            let stdMat = new BABYLON.StandardMaterial("stdMat", this._scene);
+            stdMat.disableLighting = true;
+            this._stdMat = stdMat;
+            this._stdMat.emissiveColor = new BABYLON.Color3(0.082, 0.196, 0.302);
+            this._stdMat.specularColor = BABYLON.Color3.Black();
+
+            this._trailMat = new BABYLON.StandardMaterial("trailMat", this._scene);
+            this._trailMat.emissiveColor = this._trailMat.diffuseColor = BABYLON.Color3.White();
+            this._trailMat.specularColor = BABYLON.Color3.White();
+
+            //this.testBox = conMeshes;
+
+            this.testBox = BABYLON.MeshBuilder.CreateBox("testBox", { size: 1 }, this._scene);
+            this.testBox.material = this._stdMat;
+
+            this.star = BABYLON.MeshBuilder.CreateSphere("star", { diameter: 24 }, this._scene);
+            this.starMat = new BABYLON.StandardMaterial("starMat", this._scene);
+            this.starMat.emissiveTexture = new BABYLON.Texture("textures/2k_sun.jpg", this._scene);
+            this.starMat.diffuseTexture = this.starMat.emissiveTexture;
+            this.star.material = this.starMat;
+            this.innerPlanet = BABYLON.MeshBuilder.CreateSphere("innerPlanet", { diameter: 4 }, this._scene);
+            this.outerPlanet = BABYLON.MeshBuilder.CreateSphere("outerPlanet", { diameter: 8 }, this._scene);
+            this.jupiMat = new BABYLON.StandardMaterial("jupMat", this._scene);
+            this.jupiMat.specularColor = BABYLON.Color3.Black();
+            this.jupiText = new BABYLON.Texture("textures/jupiter-globalmap.jpg", this._scene);
+            this.jupiMat.diffuseTexture = this.jupiText;
+            this.outerPlanet.material = this.jupiMat;
+
+            const arrowLines = [
+                new BABYLON.Vector3(-1, 0, 0),
+                new BABYLON.Vector3(-1, 0, -3),
+                new BABYLON.Vector3(-2, 0, -3),
+                new BABYLON.Vector3(0, 0, -5),
+                new BABYLON.Vector3(2, 0, -3),
+                new BABYLON.Vector3(1, 0, -3),
+                new BABYLON.Vector3(1, 0, 0)
+
+            ];
+            this.launchArrow = BABYLON.MeshBuilder.CreatePolygon("launchArrow", { shape: arrowLines });
+            this.launchArrow.scaling.scaleInPlace(2.15);
+            this.launchArrow.material = this._stdMat;
+
+            this._gizmoLayer = new BABYLON.UtilityLayerRenderer(this._scene);
+            this._launchGizmo = new BABYLON.RotationGizmo(this._gizmoLayer, 100, false, 3);
+            this._launchGizmo.zGizmo.isEnabled = false;
+
+
+            this.destinationMesh = BABYLON.MeshBuilder.CreateSphere("destStopNet", { diameter: 96 }, this._scene);
+            this.destinationMesh.visibility = 0.28;
+
+
+            this.destinationMesh.parent = this.outerPlanet;
+
+            this.destinationMesh.actionManager = new BABYLON.ActionManager(this._scene);
+            this.destinationMesh.actionManager.registerAction(
+                new BABYLON.ExecuteCodeAction(
+                    {
+                        trigger: BABYLON.ActionManager.OnIntersectionEnterTrigger,
+                        parameter: this.testBox
+                    },
+                    (ev) => {
+                        this.onCargoArrivedObservable.notifyObservers(true);
+                    }
+                ));
+
+
+            this.run = function run() {
+                //this._camera.inputs.removeByType("FreeCameraMouseInput");
+                //this._camera.inputs.add(new FreeSearchCameraInput(false));
+
+                this.createGui();
+                this.createAsteroids();
+                this._scene.executeOnceBeforeRender(() => this.setInitialState());
+                this._scene.registerBeforeRender(() => {
+                    const timeSinceLastUpdate = this._scene.getEngine().getDeltaTime() / 1000;
+
+                    this.onUpdateStep(timeSinceLastUpdate);
+
+                    if (this.readyToLaunch === false && !this.cargoArrived) {
+                        this.trailPath.push(this.testBox.position.clone());
+                        this.testBox.rotation = BABYLON.Vector3.Cross(this.testBox.up, this.testBox.physicsImpostor.getLinearVelocity().normalize());
+                        let f = this.applyGravityImpulseToBox(this.star);
+                        f.addInPlace(this.applyGravityImpulseToBox(this.outerPlanet));
+                        f.addInPlace(this.applyGravityImpulseToBox(this.innerPlanet));
+
+                        //f.scaleInPlace(timeSinceLastUpdate);
+                        this.testBox.physicsImpostor.applyImpulse(f, this.testBox.absolutePosition);
+                    }
+
+                });
+                //BABYLON.NodeMaterial.ParseFromSnippetAsync("#2THYAT#2", scene).then(nm => nm.createPostProcess(this._scene.activeCamera));
+
+            };
+
+            this.setInitialState = function () {
+                this.trailPath = [];
+                if (this.routeMesh) {
+                    this.routeMesh.dispose();
+                }
+                this.cargoArrived = false;
+
+                // set up the trail mesh
+                if (this.trailMesh) {
+                    this.trailMesh.dispose();
+                    this.trailMesh = null;
+                }
+                this._trailMat.emissiveColor = this._trailMat.diffuseColor = BABYLON.Color3.White();
+                this._trailMat.specularColor = BABYLON.Color3.White();
+                //
+
+                this.launchArrow.visibility = .45;
+                this.launchArrow.rotation.y = Math.PI;
+
+                this.innerPlanet.position = new BABYLON.Vector3(this.innerOrbRadius, 0, 0);
+                this.outerPlanet.position = new BABYLON.Vector3(this.outerOrbRadius, 0, 0);
+
+                // position the pod at the launch site. World matrix computation is necessary to give correct positioning to children e.g., trail mesh
+                this.testBox.position = this.initialPosition.clone();
+                this.testBox.computeWorldMatrix(true);
+                this.testBox.rotation = BABYLON.Vector3.Zero();
+
+                this._currThetaOuter = -1.0;
+                this._currThetaInner = 0.0;
+
+                if (this._scene.isPhysicsEnabled()) {
+                    this._scene.getPhysicsEngine().getImpostors()
+                        .forEach(i => { i.dispose(); });
+                    this._scene.disablePhysicsEngine();
+                }
+                this._scene.enablePhysics(new BABYLON.Vector3(0, 0, 0));
+                this._physicsHelper = new BABYLON.PhysicsHelper(this._scene);
+
+                this.star.physicsImpostor = new BABYLON.PhysicsImpostor(this.star, BABYLON.PhysicsImpostor.SphereImpostor, { mass: 1e14, restitution: 0.1 });
+                this.outerPlanet.physicsImpostor = new BABYLON.PhysicsImpostor(this.outerPlanet, BABYLON.PhysicsImpostor.SphereImpostor, { mass: 3e13, restitution: 0.25 });
+                this.innerPlanet.physicsImpostor = new BABYLON.PhysicsImpostor(this.innerPlanet, BABYLON.PhysicsImpostor.SphereImpostor, { mass: 2e13, restitution: 0.25 });
+
+                this.testBox.physicsImpostor = new BABYLON.PhysicsImpostor(this.testBox, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 1, restitution: 0.5 });
+                this.testBox.physicsImpostor.registerOnPhysicsCollide(
+                    [this.star.physicsImpostor, this.innerPlanet.physicsImpostor, this.outerPlanet.physicsImpostor],
+                    (collided, es) => {
+                        this._trailMat.emissiveColor = this._trailMat.diffuseColor = BABYLON.Color3.Red();
+                        this._trailMat.specularColor = BABYLON.Color3.White();
+                        //this.setInitialState();
+                    });
+
+                let innerOrb = this.calculateOrbitalSpeed(this.innerOrbRadius, this.star.physicsImpostor.mass),
+                    outerOrb = this.calculateOrbitalSpeed(this.outerOrbRadius, this.star.physicsImpostor.mass);
+
+                this._launchSite = this.calculateOrbitalSpeed(this.initialPosition.x, this.star.physicsImpostor.mass);
+
+                this._innerAngVel = innerOrb.angularSpeed;
+                this._outerAngVel = outerOrb.angularSpeed;
+
+                this.readyToLaunch = true;
+
+                this._advancedTexture.getDescendants(false, c => c.name === 'btLaunch')[0].isEnabled = true;
+                this._launchGizmo.attachedMesh = this.testBox;
+                this._launchGizmo.updateGizmoRotationToMatchAttachedMesh = true;
+
+                this.launchArrow.parent = this.testBox;
+
+
+                //this._camera.radius = 50;
+                this._camera.lockedTarget = this.testBox;
+                // this.trailMesh.start();
+            };
+
+            this.onUpdateStep = function (deltaT) {
+
+                if (this.readyToLaunch === true) {
+                    this.moveBoxDuringPlanning(deltaT);
+                }
+                if (!this.cargoArrived) {
+                    let innerdT = deltaT * this._innerAngVel,
+                        outerdT = deltaT * this._outerAngVel;
+
+                    let
+                        innerAngPos = BABYLON.Scalar.Repeat(this._currThetaInner + innerdT, BABYLON.Scalar.TwoPi),
+                        outerAngPos = BABYLON.Scalar.Repeat(this._currThetaOuter + outerdT, BABYLON.Scalar.TwoPi);
+
+                    this.innerPlanet.position.set(this.innerOrbRadius * Math.sin(innerAngPos), this.innerPlanet.position.y, this.innerOrbRadius * Math.cos(innerAngPos));
+                    this.outerPlanet.position.set(this.outerOrbRadius * Math.sin(outerAngPos), this.outerPlanet.position.y, this.outerOrbRadius * Math.cos(outerAngPos));
+
+                    this._currThetaOuter = outerAngPos;
+                    this._currThetaInner = innerAngPos;
+                }
+            };
+
+            this.onCargoArrivedHandler = function (cargoArrived) {
+                /** @type {BABYLON.TrailMesh} */
+                let tm = this.trailMesh;
+
+                this._trailMat.emissiveColor = this._trailMat.diffuseColor = BABYLON.Color3.Green();
+                this.cargoArrived = cargoArrived === false || true;
+                this.testBox.physicsImpostor.dispose();
+                tm.stop();
+                this.routeMesh = BABYLON.MeshBuilder.CreateTube("routeMesh", {
+                    path: this.trailPath,
+                    radius: 16,
+                    cap: BABYLON.Mesh.CAP_END,
+                    sideOrientation: BABYLON.Mesh.DOUBLESIDE
+                });
+                this.routeMesh.visibility = 0.68;
+                this.routeMesh.material = this._stdMat;
+            };
+
+            this.createAsteroids = function () {
+                this._rockTexture = new BABYLON.Texture("textures/rock.png", this._scene);
+                this._rockNormals = new BABYLON.Texture("textures/rockn.png", this._scene);
+                this._rockMat = new BABYLON.PBRMaterial("rockMat", this._scene);
+                this._rockMat.metallic = 0.1;
+                this._rockMat.roughness = 0.88;
+                this._rockMat.albedoTexture = this._rockTexture;
+                this._rockMat.bumpTexture = this._rockNormals;
+                this._rockMat.usePhysicalLightFalloff = false;
+
+                this._rockSps = new BABYLON.SolidParticleSystem("asteroidSps", this._scene);
+                let aSphere = BABYLON.MeshBuilder.CreateSphere("aSphere", { diameter: 3 });
+
+                const density = 75,
+                    numAsteroids = 200,
+                    beltRadius = 250;
+                this._rockSps.addShape(aSphere, numAsteroids, {
+                    vertexFunction: (vertex) => {
+                        vertex.x *= (Math.random() + 1);
+                        vertex.y *= (Math.random() + 1);
+                        vertex.z *= (Math.random() + 1);
+                    },
+                    positionFunction: (part, i, s) => {
+                        part.scaling.set(Math.random() * 2, Math.random() + 1, Math.random() * 2 + 0.8);
+
+                        let theta = Math.random() * 2 * Math.PI;
+                        let rTheta = BABYLON.Scalar.RandomRange(beltRadius + density * 0.5, beltRadius - density * 0.5);
+                        part.position.x = Math.sin(theta) * rTheta;
+                        part.position.y = (Math.random() - 0.5) * density;
+                        part.position.z = Math.cos(theta) * rTheta;
+
+                        part.rotation.x = Math.random() * 3.5;
+                        part.rotation.y = Math.random() * 3.5;
+                        part.rotation.z = Math.random() * 3.5;
+
+                    }
+                });
+
+                this._rockMesh = this._rockSps.buildMesh();
+                aSphere.dispose();
+                this._rockMesh.material = this._rockMat;
+            };
+
+            this.createGui = function () {
+                let advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("ui", true, this._scene);
+                this._advancedTexture = advancedTexture;
+                let buttonStack = new BABYLON.GUI.StackPanel("buttonStack");
+                // buttonStack.adaptWidthToChildren = true;
+                buttonStack.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+                buttonStack.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+                buttonStack.isVertical = false;
+                advancedTexture.addControl(buttonStack);
+
+                let launchButton = BABYLON.GUI.Button.CreateSimpleButton("btLaunch", "Launch");
+                launchButton.width = "80px";
+                launchButton.height = "80px";
+                launchButton.cornerRadius = 40;
+                launchButton.paddingBottom = launchButton.paddingLeft = launchButton.paddingRight = launchButton.paddingTop = 5;
+                launchButton.background = "red";
+                launchButton.color = "white";
+                launchButton.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+                launchButton.onPointerClickObservable.add((e, ev) => {
+                    this.launchBox(this.testBox.forward.scale(this.launchForce));
+                });
+
+                let launchLabel = new BABYLON.GUI.TextBlock("launchText", "Launch Speed: " + this.launchForce.toFixed(3) + " m/s");
+                launchLabel.width = "600px";
+                launchLabel.height = "85px";
+                launchLabel.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+                launchLabel.paddingBottomInPixels = 100;
+                advancedTexture.addControl(launchLabel);
+
+                let resetButton = BABYLON.GUI.Button.CreateSimpleButton("btReset", "Reset");
+                resetButton.width = "85px";
+                resetButton.height = "60px";
+                resetButton.color = "white";
+                resetButton.onPointerClickObservable.add((e, ev) => {
+                    this.setInitialState();
+                });
+                resetButton.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+                advancedTexture.addControl(resetButton);
+
+                let launchSlider = new BABYLON.GUI.Slider("launchSlider");
+                launchSlider.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+                launchSlider.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+                launchSlider.height = "200px";
+                launchSlider.width = "45px";
+                launchSlider.isThumbClamped = true;
+                launchSlider.isVertical = true;
+                launchSlider.thumbColor = "black";
+                launchSlider.color = "white";
+                launchSlider.maximum = 100;
+                launchSlider.minimum = 1;
+                launchSlider.value = this.launchForce;
+
+
+
+                launchSlider.onValueChangedObservable.add((ev, es) => {
+
+                    this.launchForce = ev;
+                    this.launchArrow.scaling.setAll(ev * 0.25);
+                    launchLabel.text = "Launch Speed: " + this.launchForce.toFixed(3) + " m/s";
+
+                });
+
+                buttonStack.addControl(launchSlider); // Add this first so it's against left edge
+                buttonStack.addControl(launchButton);
+
+            };
+
+            this.applyGravityImpulseToBox = function (massiveBody) {
+                let direction = massiveBody.position.subtract(this.testBox.position);
+                let distanceSq = direction.lengthSquared();
+                if (!distanceSq || distanceSq <= 0) {
+                    return;
+                }
+                let magnitude = direction.normalize().scaleInPlace(this.gravConstant * (massiveBody.physicsImpostor?.mass * (1 / distanceSq)));
+                return magnitude;
+            };
+
+            this.calculateOrbitalSpeed = function (orbitalRadius, bodyMass) {
+                let g = this.gravConstant,
+                    r = orbitalRadius,
+                    rCubed = Math.pow(r, 3),
+                    m = bodyMass,
+                    gM = g * m;
+                const orbitalSpeed = Math.sqrt((gM) / r);
+                const orbitalPeriod = BABYLON.Scalar.TwoPi * Math.sqrt(rCubed / gM);
+                const angularSpeed = orbitalSpeed / orbitalPeriod;
+
+                return { orbitalSpeed, orbitalPeriod, angularSpeed, currTheta: 0.0, orbitalRadius: orbitalRadius };
+            };
+
+            this.launchBox = function (impulse) {
+                if (this.readyToLaunch === true) {
+                    this._launchGizmo.attachedMesh = null;
+                    this.launchArrow.parent = null;
+                    this.testBox.computeWorldMatrix(true);
+
+                    this.trailMesh = new BABYLON.TrailMesh("trailMesh", this.testBox, this._scene, 0.75, 1800, false);
+                    this.trailMesh.material = this._trailMat;
+                    this.trailMesh.start();
+
+                    this.testBox.physicsImpostor.applyImpulse(impulse, this.testBox.absolutePosition);
+                    this.readyToLaunch = false;
+                    this.launchArrow.visibility = 0;
+                }
+            };
+
+            this.moveBoxDuringPlanning = function (deltaT) {
+                let launchdT = deltaT * this._launchSite.angularSpeed;
+                let launchAngPos = BABYLON.Scalar.Repeat(this._launchSite.currTheta + launchdT, BABYLON.Scalar.TwoPi);
+                this._launchSite.currTheta = launchAngPos;
+                this.testBox.position.set(this._launchSite.orbitalRadius * Math.sin(launchAngPos), 0, this._launchSite.orbitalRadius * Math.cos(launchAngPos));
+
+            };
+
+
+
+            return this;
+        };
+
+
+        var engine;
+        var scene;
+        initFunction = async function () {
+            var asyncEngineCreation = async function () {
+                try {
+                    return createDefaultEngine();
+                } catch (e) {
+                    console.log("the available createEngine function failed. Creating the default engine instead");
+                    return createDefaultEngine();
+                }
+            }
+
+            engine = await asyncEngineCreation();
+            if (!engine) throw 'engine should not be null.';
+            scene = createScene();
+        };
+        initFunction().then(() => {
+            scene.then(returnedScene => { sceneToRender = returnedScene; });
+
+            engine.runRenderLoop(function () {
+                if (sceneToRender && sceneToRender.activeCamera) {
+                    sceneToRender.render();
+                }
+            });
+        });
+
+        // Resize
+        window.addEventListener("resize", function () {
+            engine.resize();
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json.schemastore.org/web-manifest-combined.json",
+  "name": "Space-Truckers: The Video Game!",
+  "short_name": "Space-Truckers",
+  "start_url": ".",
+  "display": "standalone",
+  "orientation": "landscape",
+  "scope": "/",
+  "background_color": "#fff",
+  "description": "Reference game architecture for BabylonJS v5+. Companion app to the book Going the Distance with BabylonJS.",
+  "related_applications": [],
+  "icons": [
+    {
+      "src": "./assets/icons/96x96-icon.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "./assets/icons/192x192-icon.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "./assets/icons/256x256-icon.png",
+      "type": "image/png",
+      "sizes": "256x256"
+    },
+    {
+      "src": "./assets/icons/384x384-icon.png",
+      "type": "image/png",
+      "sizes": "384x384"
+    },
+    {
+      "src": "./assets/icons/512x512-icon.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    },
+    {
+      "src": "./assets/icons/1024x1024-icon.png",
+      "type": "image/png",
+      "sizes": "1024x1024"
+    }
+  ]
+}
