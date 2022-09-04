@@ -1,14 +1,12 @@
-name: Azure Static Web Apps CI/CD
+name: Space-Truckers develop CI/CD to Azure Static WA
 
 on:
   push:
     branches:
-      - main
       - develop
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
-      - main
       - develop
 
 jobs:
