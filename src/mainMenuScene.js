@@ -1,4 +1,5 @@
 import { CylinderBuilder } from "@babylonjs/core/Meshes/Builders/cylinderBuilder";
+import { setAndStartTimer } from "@babylonjs/core/Misc/timer";
 import { ArcRotateCamera } from "@babylonjs/core/Cameras/arcRotateCamera";
 import { Color4 } from "@babylonjs/core/Maths/math";
 import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial";
@@ -28,9 +29,9 @@ class MainMenuScene {
         this._selectedItemChanged.notifyObservers(newIdx);
     }
     constructor(engine) {
+        let scene = this._scene = new Scene(engine);
         this._music = new Sound("titleMusic", titleMusic, scene, () => logger.logInfo("loaded title music"), { autoplay: true, loop: true, volume: 0.5 });
         this._engine = engine;
-        let scene = this._scene = new Scene(engine);
         scene.clearColor = new Color4(0, 0, 0, 1);
 
         const camera = new ArcRotateCamera("menuCam", 0, 0, -30, Vector3.Zero(), scene, true);
@@ -175,7 +176,7 @@ class MainMenuScene {
     _onMenuEnter(duration) {
         let fadeIn = 0;
         const fadeTime = duration || 1500;
-        const timer = BABYLON.setAndStartTimer({
+        const timer = setAndStartTimer({
             timeout: fadeTime,
             contextObservable: this._scene.onBeforeRenderObservable,
             onTick: () => {
@@ -197,7 +198,7 @@ class MainMenuScene {
 
         this._menuContainer.isVisible = false;
 
-        const timer = BABYLON.setAndStartTimer({
+        const timer = setAndStartTimer({
             timeout: fadeTime,
             contextObservable: this._scene.onBeforeRenderObservable,
             onTick: () => {
