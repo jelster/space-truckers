@@ -20,20 +20,22 @@ function bounce(funcToBounce, bounceInMilliseconds, inputProcessor) {
 }
 
 class SpaceTruckerInputProcessor {
-    onCommandObservable = new Observable();
-    actionState = {};
-    actionMap = {};
-    actionList = [];
-    lastActionState = null;
-    controlsAttached = false;
-    inputManager;
-    screen;
-    scene;
+
 
     get inputQueue() {
         return this._inputQueue;
     }
     constructor(screen, inputManager, actionList) {
+        this.onCommandObservable = new Observable();
+        this.actionState = {};
+        this.actionMap = {};
+        this.actionList = [];
+        this.lastActionState = null;
+        this.controlsAttached = false;
+        this.inputManager;
+        this.screen;
+        this.scene;
+
         this.scene = screen.scene;
         this.screen = screen;
         this.inputManager = inputManager;

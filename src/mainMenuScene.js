@@ -26,13 +26,7 @@ const menuActionList = [
 ];
 
 class MainMenuScene {
-    inputManager;
-    camera;
-    selectedItemChanged = new Observable();
-    actionState = {};
-    lastActionState = null;
-    onPlayActionObservable = new Observable();
-    onExitActionObservable = new Observable();
+
 
     get scene() {
         return this._scene;
@@ -57,6 +51,14 @@ class MainMenuScene {
         this.selectedItemChanged.notifyObservers(newIdx);
     }
     constructor(engine, inputManager) {
+        this.inputManager;
+        this.camera;
+        this.selectedItemChanged = new Observable();
+        this.actionState = {};
+        this.lastActionState = null;
+        this.onPlayActionObservable = new Observable();
+        this.onExitActionObservable = new Observable();
+
         this._engine = engine;
         this._selectedItemIndex = -1;
         let scene = this._scene = new Scene(engine);
