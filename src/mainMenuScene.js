@@ -52,7 +52,10 @@ class MainMenuScene {
             menuGrid.addControl(this._selectorIcon, idx);
         });
 
-        scene.whenReadyAsync().then(() => this.selectedItemIndex = 0);
+        scene.whenReadyAsync().then(() => {
+            this._onMenuEnter(1000);
+            this.selectedItemIndex = 0;
+        });
     }
 
     _setupBackgroundEnvironment() {
@@ -79,6 +82,7 @@ class MainMenuScene {
 
         this._guiMenu.addControl(menuContainer);
         this._menuContainer = menuContainer;
+        this._menuContainer.isVisible = false;
 
         const menuBg = new Image("menuBg", menuBackground);
         menuContainer.addControl(menuBg);
@@ -126,6 +130,8 @@ class MainMenuScene {
             return btn;
         }
 
+        this.buttons = [];
+
         const pbOpts = {
             name: "btPlay",
             title: "Play",
@@ -133,8 +139,9 @@ class MainMenuScene {
             color: "white",
             onInvoked: () => logger.logInfo("Play button clicked")
         };
-        const playButton = createMenuItem(pbOpts);
-        this._menuGrid.addControl(playButton, this._menuGrid.children.length, 1);
+        this.playButton = createMenuItem(pbOpts);
+        this._menuGrid.addControl(this.playButton, this._menuGrid.children.length, 1);
+        this.buttons.push(this.playButton);
 
         const ebOpts = {
             name: "btExit",
@@ -146,9 +153,9 @@ class MainMenuScene {
                 this._onMenuLeave(1000);
             }
         }
-        const exitButton = createMenuItem(ebOpts);
-        this._menuGrid.addControl(exitButton, this._menuGrid.children.length, 1);
-
+        this.exitButton = createMenuItem(ebOpts);
+        this._menuGrid.addControl(this.exitButton, this._menuGrid.children.length, 1);
+        this.buttons.push(this.exitButton);
     }
 
     _createSelectorIcon() {
@@ -176,6 +183,15 @@ class MainMenuScene {
     _onMenuEnter(duration) {
         let fadeIn = 0;
         const fadeTime = duration || 1500;
+
+        this._menuContainer.alpha = 0;
+        this._menuContainer.isVisible = true;
+
+        this.buttons.forEach((btn) => {
+            btn.isEnabled = false;
+            btn.alpha = 0;
+        });
+
         const timer = setAndStartTimer({
             timeout: fadeTime,
             contextObservable: this._scene.onBeforeRenderObservable,
@@ -184,8 +200,13 @@ class MainMenuScene {
                 fadeIn += dT;
                 const currAmt = Scalar.SmoothStep(0, 1, fadeIn / fadeTime);
                 this._menuContainer.alpha = currAmt;
+                this.buttons.forEach((btn) => btn.alpha = currAmt);
             },
             onEnded: () => {
+                // We need to be specific here, because sometimes we may want to keep some buttons disabled.
+                this.playButton.isEnabled = true;
+                this.exitButton.isEnabled = true;
+                // The button can be selected only after it is enabled.
                 this.selectedItemIndex = 0;
             }
         });
@@ -196,7 +217,7 @@ class MainMenuScene {
         let fadeOut = 0;
         const fadeTime = duration || 1500;
 
-        this._menuContainer.isVisible = false;
+        this.buttons.forEach((btn) => btn.isEnabled = false);
 
         const timer = setAndStartTimer({
             timeout: fadeTime,
@@ -206,10 +227,12 @@ class MainMenuScene {
                 fadeOut += dT;
                 const currAmt = Scalar.SmoothStep(1, 0, fadeOut / fadeTime);
                 this._menuContainer.alpha = currAmt;
+                this.buttons.forEach((btn) => btn.alpha = currAmt);
 
             },
             onEnded: () => {
                 this._music.stop();
+                this._menuContainer.isVisible = false;
 
             }
         });
