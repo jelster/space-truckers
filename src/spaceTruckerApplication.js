@@ -16,7 +16,7 @@ class SpaceTruckerApplication {
         }
 
         while (true) {
-            let nextState = yield;
+            let nextState = yield currentState;
             if (nextState !== null && nextState !== undefined) {
                 setState(nextState);
                 if (nextState === AppStates.EXITING) {
@@ -27,7 +27,7 @@ class SpaceTruckerApplication {
     }
 
     get currentState() {
-        return this._stateMachine.next();
+        return this._stateMachine.next().value;
     }
 
     get activeScene() {
