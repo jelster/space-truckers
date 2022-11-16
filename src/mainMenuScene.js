@@ -137,7 +137,7 @@ class MainMenuScene {
             // this is the first time through this action handler for this button press sequence
             console.log("ACIVATE - " + this.selectedItemIndex);
             const selectedItem = this.selectedItem;
-            if (selectedItem) {
+            if (selectedItem && selectedItem.isEnabled) {
                 
                 selectedItem.onPointerClickObservable.notifyObservers();
             }
