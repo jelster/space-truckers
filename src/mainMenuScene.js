@@ -42,6 +42,7 @@ class MainMenuScene {
     onHighScoreActionObservable = new Observable();
     highScoreDialog;
     isTopMost = true;
+    buttons = [];
 
     get scene() {
         return this._scene;
@@ -246,6 +247,7 @@ class MainMenuScene {
         };
         const playButton = createMenuItem(pbOpts);
         this._menuGrid.addControl(playButton, this._menuGrid.children.length, 1);
+        this.buttons.push(playButton);
 
         const highScoreOpts = {
             name: "btHighScores",
@@ -260,6 +262,7 @@ class MainMenuScene {
         }
         const highScoreButton = createMenuItem(highScoreOpts);
         this._menuGrid.addControl(highScoreButton, this._menuGrid.children.length, 1);
+        this.buttons.push(highScoreButton);
 
         const ebOpts = {
             name: "btExit",
@@ -275,7 +278,7 @@ class MainMenuScene {
         }
         const exitButton = createMenuItem(ebOpts);
         this._menuGrid.addControl(exitButton, this._menuGrid.children.length, 1);
-
+        this.buttons.push(exitButton);
     }
 
     _createSelectorIcon() {
@@ -301,20 +304,28 @@ class MainMenuScene {
     }
 
     _onMenuEnter(duration) {
-        let fadeIn = 0;
         const fadeTime = duration || 1500;
         this._menuContainer.isVisible = true;
         this._menuContainer.alpha = 0;
+
+        // To prevent clicking on buttons during transition.
+        this.buttons.forEach((btn) => {
+            btn.isEnabled = false;
+            btn.alpha = 0;
+        });
+
         const timer = setAndStartTimer({
             timeout: fadeTime,
             contextObservable: this._scene.onBeforeRenderObservable,
             onTick: (d) => {                
                 const currAmt = Scalar.SmoothStep(0, 1, d.completeRate);
                 this._menuContainer.alpha = currAmt;
+                this.buttons.forEach((btn) => btn.alpha = currAmt);
             },
             onEnded: () => {
                 this.selectedItemIndex = 0;
                 this._menuContainer.alpha = 1.0;
+                this.buttons.forEach((btn) => btn.isEnabled = true);
             }
         });
         return timer;
@@ -324,7 +335,8 @@ class MainMenuScene {
         let fadeOut = 0;
         const fadeTime = duration || 1500;
 
-        this._menuContainer.isVisible = true;
+        // To prevent clicking on buttons during transition.
+        this.buttons.forEach((btn) => btn.isEnabled = false);
 
         const timer = setAndStartTimer({
             timeout: fadeTime,
@@ -334,7 +346,7 @@ class MainMenuScene {
                 fadeOut += dT;
                 const currAmt = Scalar.SmoothStep(1, 0, fadeOut / fadeTime);
                 this._menuContainer.alpha = currAmt;
-
+                this.buttons.forEach((btn) => btn.alpha = currAmt);
             },
             onEnded: () => {
                 this._menuContainer.alpha = 0;
