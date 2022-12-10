@@ -26,7 +26,7 @@
   "devDependencies": {
     "@babylonjs/core": "^5.1 < 6.0.0",
     "@babylonjs/gui": "^5.1 < 6.0.0",
-    "@babylonjs/gui-editor": "^5.14.1",
+    "@babylonjs/gui-editor": "^5.1 < 6.0.0",
     "@babylonjs/inspector": "^5.1 < 6.0.0",
     "@babylonjs/loaders": "^5.1 < 6.0.0",
     "@babylonjs/materials": "^5.1 < 6.0.0",
