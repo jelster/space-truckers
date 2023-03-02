@@ -47,7 +47,7 @@ class AstroFactory {
         planet.orbitOptions.period = period;
         planet.orbitOptions.orbitalVel = v;
         planet.orbitOptions.angularVel = w;
-        planet.orbitOptions.orbitalCircum = Math.pow(Math.PI * opts.posRadius, 2);
+        planet.orbitOptions.orbitalCircum = Scalar.TwoPi * opts.posRadius;
         planet.preRenderObsv = scene.onBeforeRenderObservable.add(() => {
             planet.position.x = opts.posRadius * Math.sin(angPos);
             planet.position.z = opts.posRadius * Math.cos(angPos);
