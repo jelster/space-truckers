@@ -226,7 +226,7 @@ class PlanningScreenGui {
         this.#launchSlider.maximum = this.planningScreen.launchForceMax;
         this.#launchSlider.minimum = 10;
         this.#launchSlider.displayValueBar = true;
-        this.#launchSlider.step = this.planningScreen.launchIncrement;
+        this.#launchSlider.step = this.planningScreen.launchForceIncrement;
         this.#launchSlider.value = this.planningScreen.launchForce;
         this.#launchSlider.onValueChangedObservable.add((ev, es) => {
             this.planningScreen.launchForce = ev;
