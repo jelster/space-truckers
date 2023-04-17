@@ -115,7 +115,7 @@ class SpaceTruckerPlanningScreen {
 
         this.scene = new Scene(engine);
         this.scene.onNewMeshAddedObservable.add(mesh => mesh.layerMask = PLANNING_SCREEN_LAYER_MASK);
-        
+
 
         this.config = config;
         const { blurParameter, environmentTexture, IBLIntensity, lightIntensity, skyboxScale } = config.environment;
@@ -308,25 +308,25 @@ class SpaceTruckerPlanningScreen {
 
     MOVE_LEFT(state) {
         if (this.gameState === PLANNING_STATE.ReadyToLaunch) {
-            this.cargo.mesh.rotate(Axis.Y, -this.launchRotationSpeed, Space.World);
+            this.cargo.mesh.rotate(Axis.Y, -this.launchRotationSpeed, Space.LOCAL);
         }
     }
 
     MOVE_RIGHT(state) {
         if (this.gameState === PLANNING_STATE.ReadyToLaunch) {
-            this.cargo.mesh.rotate(Axis.Y, this.launchRotationSpeed, Space.World);
+            this.cargo.mesh.rotate(Axis.Y, this.launchRotationSpeed, Space.LOCAL);
         }
     }
 
     MOVE_UP(state) {
         if (this.gameState === PLANNING_STATE.ReadyToLaunch) {
-            this.cargo.mesh.rotate(Axis.X, -this.launchRotationSpeed, Space.World);
+            this.cargo.mesh.rotate(Axis.X, -this.launchRotationSpeed, Space.LOCAL);
         }
     }
 
     MOVE_DOWN(state) {
         if (this.gameState === PLANNING_STATE.ReadyToLaunch) {
-            this.cargo.mesh.rotate(Axis.X, this.launchRotationSpeed, Space.World);
+            this.cargo.mesh.rotate(Axis.X, this.launchRotationSpeed, Space.LOCAL);
         }
     }
 
