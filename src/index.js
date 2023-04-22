@@ -6,8 +6,6 @@ import SpaceTruckerLoadingScreen from "./spaceTruckerLoadingScreen";
 import logger from "./logger";
 import "../public/assets/index.css";
 import "../public/assets/space-truckers-landing-logo.jpg";
-import { HandConstraintBehavior } from "@babylonjs/core";
-
 
 const CanvasName = "index-canvas";
 const launchButton = document.getElementById("btnLaunch");
