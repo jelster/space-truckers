@@ -48,7 +48,7 @@ module.exports = {
         new WorkboxPlugin.GenerateSW({
             clientsClaim: true,
             skipWaiting: true,
-            maximumFileSizeToCacheInBytes: 8388608,
+            maximumFileSizeToCacheInBytes: 18388608,
         }),
         new CopyPlugin({
             patterns: [
